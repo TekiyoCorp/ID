@@ -1,5 +1,24 @@
 import AVFoundation
 import UIKit
+import Combine
+
+// MARK: - Photo Capture Delegate
+private class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
+    let completion: (UIImage?) -> Void
+    
+    init(completion: @escaping (UIImage?) -> Void) {
+        self.completion = completion
+    }
+    
+    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
+        guard let imageData = photo.fileDataRepresentation(),
+              let image = UIImage(data: imageData) else {
+            completion(nil)
+            return
+        }
+        completion(image)
+    }
+}
 
 final class CameraManager: ObservableObject {
     @Published var previewLayer: AVCaptureVideoPreviewLayer?
@@ -49,19 +68,11 @@ final class CameraManager: ObservableObject {
     
     func capturePhoto(completion: @escaping (UIImage?) -> Void) {
         let settings = AVCapturePhotoSettings()
-        photoOutput.capturePhoto(with: settings) { [weak self] photoSampleBuffer, _ in
-            guard let photoSampleBuffer = photoSampleBuffer,
-                  let imageData = AVCapturePhotoOutput.jpegPhotoDataRepresentation(forJPEGSampleBuffer: photoSampleBuffer),
-                  let image = UIImage(data: imageData) else {
-                DispatchQueue.main.async {
-                    completion(nil)
-                }
-                return
-            }
-            
+        let delegate = PhotoCaptureDelegate { image in
             DispatchQueue.main.async {
                 completion(image)
             }
         }
+        photoOutput.capturePhoto(with: settings, delegate: delegate)
     }
 }
