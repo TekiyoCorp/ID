@@ -60,31 +60,24 @@ struct IdentitySetupView: View {
                 }
             }
 
-            VStack(spacing: 12) {
-                if viewModel.shouldShowProgress {
-                    ProgressBar(progress: viewModel.progress)
-                        .accessibilityLabel("Progression")
-                        .accessibilityValue("\(Int(viewModel.progress * 100)) pourcents")
-                }
-
-                if viewModel.isComplete {
-                    PrimaryButton(
-                        title: "Continuer",
-                        style: .blue,
-                        action: {
-                            // TODO: Next screen
-                        }
-                    )
-                }
+            if viewModel.isComplete {
+                PrimaryButton(
+                    title: "Continuer",
+                    style: .blue,
+                    action: viewModel.proceedToPhotoCapture
+                )
+                .padding(.horizontal, 48)
+                .padding(.bottom, 24)
             }
-            .padding(.horizontal, 48)
-            .padding(.bottom, 24)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(Color(.systemBackground))
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .onAppear { focusCurrentStep() }
         .onChange(of: viewModel.currentStep) { _, _ in focusCurrentStep() }
+        .navigationDestination(isPresented: $viewModel.shouldNavigateToPhotoCapture) {
+            PhotoCaptureView()
+        }
     }
 
     @ViewBuilder

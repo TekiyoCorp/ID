@@ -9,6 +9,7 @@ final class IdentityViewModel: ObservableObject {
     @Published var dateNaissance = Date()
     @Published var nationalite = ""
     @Published var showSuggestions = true
+    @Published var shouldNavigateToPhotoCapture = false
     
     private let countries: [String] = {
         let locale = Locale(identifier: "fr_FR")
@@ -33,9 +34,6 @@ final class IdentityViewModel: ObservableObject {
         currentStep == .nationalite && !nationalite.isEmpty
     }
     
-    var shouldShowProgress: Bool {
-        !isComplete
-    }
     
     var countrySuggestions: [String] {
         guard !nationalite.isEmpty else { return [] }
@@ -87,6 +85,10 @@ final class IdentityViewModel: ObservableObject {
             dateNaissance: dateNaissance,
             nationalite: nationalite
         )
+    }
+    
+    func proceedToPhotoCapture() {
+        shouldNavigateToPhotoCapture = true
     }
 }
 
