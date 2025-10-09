@@ -19,13 +19,14 @@ struct PhotoCaptureView: View {
             // Title
             LargeTitle("Prends toi en photo.", alignment: .center)
             
-            // Subtitle
-            Text("Cette image restera sur ton appareil, elle servira a prouvé ton identité")
+            // Subtitle - 6px gap from title, 2 lines
+            Text("Cette image restera sur ton appareil,\nelle servira a prouvé ton identité")
                 .font(.system(size: 18, weight: .medium))
                 .appTypography(fontSize: 18)
                 .foregroundStyle(.primary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 48)
+                .padding(.top, 6)
             
             Spacer()
             
@@ -36,11 +37,16 @@ struct PhotoCaptureView: View {
                     .stroke(Color(red: 0.0, green: 0.187, blue: 1.0), style: StrokeStyle(lineWidth: 2, dash: [8, 8]))
                     .frame(width: 253, height: 253)
                 
-                // Camera preview or placeholder
+                // Camera preview or captured image
                 if let image = viewModel.capturedImage {
                     Image(uiImage: image)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
+                        .frame(width: 253, height: 253)
+                        .clipShape(Circle())
+                } else if let previewLayer = viewModel.previewLayer {
+                    // Live camera preview
+                    CameraPreview(previewLayer: previewLayer)
                         .frame(width: 253, height: 253)
                         .clipShape(Circle())
                 } else {
@@ -56,9 +62,14 @@ struct PhotoCaptureView: View {
                         }
                 }
             }
+            .onTapGesture {
+                if viewModel.canAccessCamera() {
+                    viewModel.capturePhoto()
+                }
+            }
             
-            // Instructions
-            Text("Regarde droit devant. Pas de filtre. Bonne lumière.")
+            // Instructions - 2 lines
+            Text("Regarde droit devant.\nPas de filtre. Bonne lumière.")
                 .font(.system(size: 18, weight: .medium))
                 .appTypography(fontSize: 18)
                 .foregroundStyle(.primary)
@@ -66,15 +77,6 @@ struct PhotoCaptureView: View {
                 .multilineTextAlignment(.center)
             
             Spacer()
-            
-            // Import from gallery link
-            Button("Importer depuis la galerie") {
-                showImagePicker = true
-            }
-            .font(.system(size: 17, weight: .medium))
-            .appTypography(fontSize: 17)
-            .foregroundStyle(Color(red: 0.0, green: 0.187, blue: 1.0))
-            .padding(.bottom, 16)
             
             // Continue button
             PrimaryButton(
@@ -86,6 +88,15 @@ struct PhotoCaptureView: View {
                 }
             )
             .padding(.horizontal, 48)
+            
+            // Import from gallery link - 28px gap from button
+            Button("Importer depuis la galerie") {
+                showImagePicker = true
+            }
+            .font(.system(size: 17, weight: .medium))
+            .appTypography(fontSize: 17)
+            .foregroundStyle(Color(red: 0.0, green: 0.187, blue: 1.0))
+            .padding(.top, 28)
             .padding(.bottom, 24)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -93,11 +104,11 @@ struct PhotoCaptureView: View {
         .sheet(isPresented: $showImagePicker) {
             ImagePicker(image: $viewModel.capturedImage)
         }
-        .onTapGesture {
-            showCamera = true
-        }
         .onAppear {
             viewModel.requestCameraPermission()
+        }
+        .onDisappear {
+            viewModel.stopCamera()
         }
     }
 }
