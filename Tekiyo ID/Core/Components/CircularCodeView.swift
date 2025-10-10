@@ -30,23 +30,27 @@ struct CircularCodeView: View {
                         .stroke(Color.blue, lineWidth: 2)
                 )
             
-            // Dots pattern
-            ForEach(Array(dots.enumerated()), id: \.offset) { index, dot in
-                Circle()
-                    .fill(Color.blue)
-                    .frame(width: dotRadius * 2, height: dotRadius * 2)
-                    .position(
-                        x: size/2 + dot.x,
-                        y: size/2 + dot.y
+            // Dots pattern - using Canvas for better performance
+            Canvas { context, size in
+                let centerX = size.width / 2
+                let centerY = size.height / 2
+                
+                for dot in dots {
+                    let rect = CGRect(
+                        x: centerX + dot.x - dotRadius,
+                        y: centerY + dot.y - dotRadius,
+                        width: dotRadius * 2,
+                        height: dotRadius * 2
                     )
-                    .opacity(animationOpacity)
-                    .scaleEffect(animationScale)
-                    .animation(
-                        .easeOut(duration: 0.6)
-                        .delay(Double(index) * 0.002),
-                        value: animationOpacity
+                    context.fill(
+                        Path(ellipseIn: rect),
+                        with: .color(.blue)
                     )
+                }
             }
+            .frame(width: size, height: size)
+            .opacity(animationOpacity)
+            .scaleEffect(animationScale)
             
             // Center logo/placeholder
             ZStack {
@@ -60,11 +64,10 @@ struct CircularCodeView: View {
             }
             .opacity(animationOpacity)
             .scaleEffect(animationScale)
-            .animation(.easeOut(duration: 0.8).delay(0.3), value: animationOpacity)
         }
         .frame(width: size, height: size)
         .onAppear {
-            withAnimation {
+            withAnimation(.easeOut(duration: 0.8)) {
                 animationScale = 1.0
                 animationOpacity = 1.0
             }
@@ -85,35 +88,49 @@ private func generateDots(from url: String, size: CGFloat) -> [DotPosition] {
     let hash = SHA256.hash(data: data)
     let hashBytes = Array(hash)
     
-    let center = size / 2
-    let maxRadius = (size / 2) - 10 // Leave some margin for the border
-    let minRadius = 15 // Start from center area
+    let maxRadius = (size / 2) - 12 // Leave margin for border
+    let minRadius: CGFloat = 18 // Start from center area
     
     var dots: [DotPosition] = []
-    let targetDotCount = 100
+    let targetDotCount = 120 // Slightly more dots for better coverage
     
     // Use hash bytes to generate deterministic positions
     for i in 0..<targetDotCount {
         let byteIndex = i % hashBytes.count
         let hashByte = hashBytes[byteIndex]
+        let nextByte = hashBytes[(byteIndex + 1) % hashBytes.count]
         
         // Convert byte to angle (0 to 2π)
         let angle = Double(hashByte) / 255.0 * 2 * .pi
         
         // Create spiral pattern with increasing radius
         let progress = Double(i) / Double(targetDotCount - 1)
-        let radius = Double(minRadius) + (Double(maxRadius) - Double(minRadius)) * progress
+        let baseRadius = Double(minRadius) + (Double(maxRadius) - Double(minRadius)) * progress
         
-        // Add some variation using adjacent hash bytes
-        let variationByte = hashBytes[(byteIndex + 1) % hashBytes.count]
-        let variation = (Double(variationByte) / 255.0 - 0.5) * 2.0 // -1 to 1
-        let finalRadius = radius + variation * 2.0
+        // Add variation using next hash byte
+        let variation = (Double(nextByte) / 255.0 - 0.5) * 3.0 // -1.5 to 1.5
+        let finalRadius = max(Double(minRadius), min(Double(maxRadius), baseRadius + variation))
         
         // Calculate position
         let x = cos(angle) * finalRadius
         let y = sin(angle) * finalRadius
         
         // Only add dots that fit within the circle
+        let distance = sqrt(x*x + y*y)
+        if distance <= Double(maxRadius) && distance >= Double(minRadius - 2) {
+            dots.append(DotPosition(x: CGFloat(x), y: CGFloat(y)))
+        }
+    }
+    
+    // If we don't have enough dots, add some random ones based on hash
+    while dots.count < 80 {
+        let seed = hashBytes[dots.count % hashBytes.count]
+        let angle = Double(seed) / 255.0 * 2 * .pi
+        let radius = Double(minRadius + 5) + Double(dots.count % 20) * 2.0
+        
+        let x = cos(angle) * radius
+        let y = sin(angle) * radius
+        
         if sqrt(x*x + y*y) <= Double(maxRadius) {
             dots.append(DotPosition(x: CGFloat(x), y: CGFloat(y)))
         }
