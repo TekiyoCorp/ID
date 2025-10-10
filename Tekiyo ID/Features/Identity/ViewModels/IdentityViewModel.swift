@@ -12,6 +12,7 @@ final class IdentityViewModel: ObservableObject {
     @Published var ville = ""
     @Published var showSuggestions = true
     @Published var shouldNavigateToPhotoCapture = false
+    @Published var shouldOpenCitySearch = false
     
     private let metiers: [String] = [
         "Développeur", "Développeuse", "Ingénieur", "Ingénieure", "Designer", "Chef de projet", "Cheffe de projet",

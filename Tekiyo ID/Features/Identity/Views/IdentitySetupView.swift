@@ -92,6 +92,12 @@ struct IdentitySetupView: View {
         .navigationDestination(isPresented: $viewModel.shouldNavigateToPhotoCapture) {
             PhotoCaptureView(identityData: viewModel.buildIdentityData())
         }
+        .fullScreenCover(isPresented: $viewModel.shouldOpenCitySearch) {
+            CitySearchView(
+                selectedCity: $viewModel.ville,
+                isPresented: $viewModel.shouldOpenCitySearch
+            )
+        }
         .debugRenders("IdentitySetupView")
     }
 
@@ -207,29 +213,35 @@ struct IdentitySetupView: View {
             .clipped()
         case .ville:
             VStack(alignment: .leading, spacing: 12) {
-                TextField(step.placeholder, text: $viewModel.ville)
-                    .font(.system(size: 36, weight: .medium))
-                    .appTypography(fontSize: 36)
-                    .foregroundStyle(.primary)
-                    .focused($villeFocused)
-                    .submitLabel(.done)
-                    .onSubmit {
-                        withAnimation(.easeInOut(duration: 0.35)) {
-                            viewModel.advance()
+                HStack {
+                    TextField(step.placeholder, text: $viewModel.ville)
+                        .font(.system(size: 36, weight: .medium))
+                        .appTypography(fontSize: 36)
+                        .foregroundStyle(.primary)
+                        .focused($villeFocused)
+                        .disableAutocorrection(true)
+                        .textInputAutocapitalization(.words)
+                        .padding(.vertical, 8)
+                        .overlay(alignment: .bottomLeading) {
+                            Rectangle()
+                                .fill(Color.clear)
+                                .frame(height: 1)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    Button(action: {
+                        // Ouvrir MapKit pour sélection de ville
+                        viewModel.shouldOpenCitySearch = true
+                    }) {
+                        Image(systemName: "map")
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundColor(.blue)
+                            .padding(12)
+                            .background(Color.blue.opacity(0.1))
+                            .clipShape(Circle())
                     }
-                    .disableAutocorrection(true)
-                    .textInputAutocapitalization(.words)
-                    .padding(.vertical, 8)
-                    .overlay(alignment: .bottomLeading) {
-                        Rectangle()
-                            .fill(Color.clear)
-                            .frame(height: 1)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .onChange(of: viewModel.ville) { _, _ in
-                        viewModel.showSuggestions = true
-                    }
+                    .accessibilityLabel("Ouvrir la carte pour choisir une ville")
+                }
                 
                 if viewModel.showSuggestions && !viewModel.ville.isEmpty {
                     ForEach(viewModel.villeSuggestions, id: \.self) { suggestion in
