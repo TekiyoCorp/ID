@@ -63,6 +63,7 @@ struct PhotoCaptureView: View {
                 }
             }
             .onTapGesture {
+                print("Circle tapped - Camera available: \(viewModel.canAccessCamera())")
                 if viewModel.canAccessCamera() {
                     viewModel.capturePhoto()
                 }
@@ -75,6 +76,14 @@ struct PhotoCaptureView: View {
                 .foregroundStyle(.primary)
                 .opacity(0.7)
                 .multilineTextAlignment(.center)
+            
+            // Debug info
+            if !viewModel.canAccessCamera() {
+                Text("Caméra non disponible - Permission: \(viewModel.cameraPermissionStatus.rawValue)")
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .padding(.top, 8)
+            }
             
             Spacer()
             

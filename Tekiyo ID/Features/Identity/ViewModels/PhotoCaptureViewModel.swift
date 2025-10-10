@@ -42,7 +42,9 @@ final class PhotoCaptureViewModel: ObservableObject {
     }
     
     func capturePhoto() {
+        print("CapturePhoto called - Camera permission: \(cameraPermissionStatus)")
         cameraManager.capturePhoto { [weak self] image in
+            print("Photo captured: \(image != nil)")
             self?.capturedImage = image
         }
     }

@@ -29,8 +29,10 @@ final class CameraManager: ObservableObject {
     
     func setupCamera() {
         guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else {
+            print("CameraManager: No front camera available")
             return
         }
+        print("CameraManager: Setting up front camera")
         
         do {
             let input = try AVCaptureDeviceInput(device: device)
@@ -53,10 +55,12 @@ final class CameraManager: ObservableObject {
     }
     
     func startSession() {
+        print("CameraManager: Starting session")
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             self?.session.startRunning()
             DispatchQueue.main.async {
                 self?.isSessionRunning = true
+                print("CameraManager: Session started - \(self?.isSessionRunning ?? false)")
             }
         }
     }

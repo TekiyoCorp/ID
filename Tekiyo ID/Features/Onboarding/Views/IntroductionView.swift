@@ -28,10 +28,13 @@ struct IntroductionView: View {
             switch viewModel.currentStep {
             case 1:
                 stepOne
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.currentStep)
             case 2:
                 stepTwo
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.currentStep)
             case 3:
                 stepThree
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.currentStep)
             default:
                 EmptyView()
             }
