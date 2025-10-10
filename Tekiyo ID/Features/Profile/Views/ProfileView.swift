@@ -26,7 +26,7 @@ struct ProfileView: View {
                                 Circle()
                                     .stroke(
                                         LinearGradient(
-                                            colors: [Color.purple.opacity(0.3), Color.blue.opacity(0.3)],
+                                            colors: [Color(red: 0.61, green: 0.36, blue: 0.9), Color(red: 0.0, green: 0.73, blue: 1.0)], // #9b5de5, #00bbff
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         ),
@@ -46,13 +46,14 @@ struct ProfileView: View {
                     
                     // Name
                     Text("\(identityData.prenom) \(identityData.nom)")
-                        .font(.system(size: 28, weight: .bold))
+                        .font(.system(size: 22, weight: .medium))
+                        .kerning(-0.6)
                         .foregroundColor(.primary)
                         .multilineTextAlignment(.center)
                     
                     // Username
                     Text(username)
-                        .font(.system(size: 18, weight: .regular))
+                        .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.primary)
                         .multilineTextAlignment(.center)
                     
@@ -76,15 +77,15 @@ struct ProfileView: View {
                     }) {
                         HStack(spacing: 8) {
                             Text("Obtenir le badge vérifié")
-                                .font(.system(size: 16, weight: .medium))
+                                .font(.system(size: 14, weight: .regular))
                                 .foregroundColor(.white)
                             
                             Image(systemName: "checkmark")
-                                .font(.system(size: 14, weight: .medium))
+                                .font(.system(size: 12, weight: .medium))
                                 .foregroundColor(.white)
                         }
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 12)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
                         .background(Color.blue)
                         .clipShape(Capsule())
                     }
@@ -92,7 +93,7 @@ struct ProfileView: View {
                     // Trust score
                     VStack(spacing: 8) {
                         Text("Trust score")
-                            .font(.system(size: 20, weight: .bold))
+                            .font(.system(size: 17, weight: .medium))
                             .foregroundColor(.primary)
                         
                         // Score indicator
@@ -104,14 +105,14 @@ struct ProfileView: View {
                             }
                         }
                         
-                        Text("Dernière vérification: \(lastVerification)")
-                            .font(.system(size: 14, weight: .regular))
+                        Text("Dernière vérification : \(lastVerification)")
+                            .font(.system(size: 12, weight: .regular))
                             .foregroundColor(.primary)
                         
-                        Button("Comment augmenter mon score?") {
+                        Button("Comment augmenter mon score ?") {
                             // Handle score increase info
                         }
-                        .font(.system(size: 14, weight: .regular))
+                        .font(.system(size: 12, weight: .regular))
                         .foregroundColor(.blue)
                     }
                 }
@@ -120,14 +121,14 @@ struct ProfileView: View {
                 // Share ID section
                 VStack(spacing: 16) {
                     Text("Partager mon ID")
-                        .font(.system(size: 18, weight: .bold))
+                        .font(.system(size: 18, weight: .medium))
                         .foregroundColor(.blue)
                     
                     CircularCodeView(url: "https://tekiyo.fr/\(tekiyoID)")
                         .frame(width: 120, height: 120)
                     
                     Text("Ce code QR prouve ton humanité.")
-                        .font(.system(size: 14, weight: .regular))
+                        .font(.system(size: 16, weight: .regular))
                         .foregroundColor(.primary)
                         .opacity(0.7)
                         .multilineTextAlignment(.center)
@@ -137,7 +138,7 @@ struct ProfileView: View {
                 // Recent activities
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Activités récentes")
-                        .font(.system(size: 20, weight: .bold))
+                        .font(.system(size: 17, weight: .medium))
                         .foregroundColor(.primary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
@@ -178,7 +179,7 @@ struct ProfileView: View {
                 // Links section
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Liens")
-                        .font(.system(size: 20, weight: .bold))
+                        .font(.system(size: 18, weight: .medium))
                         .foregroundColor(.primary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
