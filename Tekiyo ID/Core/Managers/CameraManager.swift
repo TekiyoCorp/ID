@@ -130,9 +130,10 @@ final class CameraManager: ObservableObject {
         }
         
         print("🎥 CameraManager: Starting session...")
+        let sessionToStart = session
         Task.detached(priority: .userInitiated) { [weak self] in
-            self?.session.startRunning()
-            await MainActor.run {
+            sessionToStart.startRunning()
+            await MainActor.run { [weak self] in
                 self?.isSessionRunning = true
                 print("✅ CameraManager: Session started successfully")
             }
@@ -146,9 +147,10 @@ final class CameraManager: ObservableObject {
         }
         
         print("🎥 CameraManager: Stopping session...")
+        let sessionToStop = session
         Task.detached(priority: .userInitiated) { [weak self] in
-            self?.session.stopRunning()
-            await MainActor.run {
+            sessionToStop.stopRunning()
+            await MainActor.run { [weak self] in
                 self?.isSessionRunning = false
                 print("✅ CameraManager: Session stopped")
             }

@@ -194,11 +194,9 @@ final class PhotoCaptureViewModel: ObservableObject {
     
     deinit {
         // Cleanup synchrone pour éviter les captures de self
-        if faceDetector.isDetecting {
-            Task { [faceDetector] in
-                await MainActor.run {
-                    faceDetector.stopDetecting()
-                }
+        Task { [faceDetector] in
+            await MainActor.run {
+                faceDetector.stopDetecting()
             }
         }
     }
@@ -207,3 +205,4 @@ final class PhotoCaptureViewModel: ObservableObject {
         shouldNavigateToFingerprintCreation = true
     }
 }
+

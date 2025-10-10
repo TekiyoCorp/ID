@@ -22,8 +22,22 @@ final class RealtimeFaceDetector: NSObject, ObservableObject {
     private var captureSession: AVCaptureSession?
     private let videoDataOutput = AVCaptureVideoDataOutput()
     private let videoDataOutputQueue = DispatchQueue(label: "VideoDataOutputQueue")
-    private var lastDetectionTime = Date.distantPast
+    private let lastDetectionTimeLock = NSLock()
+    private var _lastDetectionTime = Date.distantPast
     private let detectionInterval: TimeInterval = 0.3
+    
+    nonisolated private var lastDetectionTime: Date {
+        get {
+            lastDetectionTimeLock.lock()
+            defer { lastDetectionTimeLock.unlock() }
+            return _lastDetectionTime
+        }
+        set {
+            lastDetectionTimeLock.lock()
+            defer { lastDetectionTimeLock.unlock() }
+            _lastDetectionTime = newValue
+        }
+    }
     
     func startDetecting(session: AVCaptureSession) {
         guard !isDetecting else { return }
@@ -69,6 +83,9 @@ extension RealtimeFaceDetector: AVCaptureVideoDataOutputSampleBufferDelegate {
         let interval = now.timeIntervalSince(lastDetectionTime)
         guard interval >= detectionInterval else { return }
         
+        // Mettre à jour le timestamp
+        lastDetectionTime = now
+        
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         
         let request = VNDetectFaceRectanglesRequest { [weak self] request, error in
@@ -81,7 +98,10 @@ extension RealtimeFaceDetector: AVCaptureVideoDataOutputSampleBufferDelegate {
             
             guard let observations = request.results as? [VNFaceObservation] else { return }
             
-            self.processDetection(observations)
+            // Traiter sur MainActor
+            Task { @MainActor [weak self] in
+                self?.processDetection(observations)
+            }
         }
         
         request.revision = VNDetectFaceRectanglesRequestRevision3
