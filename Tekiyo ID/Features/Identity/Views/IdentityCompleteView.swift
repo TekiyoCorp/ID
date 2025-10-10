@@ -91,21 +91,8 @@ struct IdentityCompleteView: View {
                 
                 // QR Code Section
                 VStack(spacing: 12) {
-                    if let qrImage = viewModel.qrCodeImage {
-                        Image(uiImage: qrImage)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 120, height: 120)
-                    } else {
-                        Circle()
-                            .fill(Color(.systemGray5))
-                            .frame(width: 120, height: 120)
-                            .overlay(
-                                Image(systemName: "qrcode")
-                                    .font(.system(size: 40))
-                                    .foregroundStyle(.secondary)
-                            )
-                    }
+                    CircularCodeView(url: "https://tekiyo.fr/\(viewModel.tekiyoID)")
+                        .frame(width: 120, height: 120)
                     
                     Text("Ce code QR prouve ton humanité.")
                         .font(.system(size: 16, weight: .regular))

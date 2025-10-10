@@ -6,11 +6,9 @@ import UIKit
 final class IdentityCompleteViewModel: ObservableObject {
     @Published var tekiyoID: String = ""
     @Published var username: String = ""
-    @Published var qrCodeImage: UIImage?
     
     private let identityData: IdentityData
     private let profileImage: UIImage?
-    private let qrGenerator = QRCodeGenerator.shared
     
     init(identityData: IdentityData, profileImage: UIImage?) {
         self.identityData = identityData
@@ -30,7 +28,6 @@ final class IdentityCompleteViewModel: ObservableObject {
     private func generateData() {
         tekiyoID = generateTekiyoID()
         username = generateUsername(from: identityData.prenom)
-        generateQRCode()
     }
     
     private func generateTekiyoID() -> String {
@@ -45,12 +42,4 @@ final class IdentityCompleteViewModel: ObservableObject {
         return "@\(firstName.lowercased())\(randomDigits)"
     }
     
-    private func generateQRCode() {
-        let url = "https://tekiyo.fr/\(tekiyoID)"
-        qrCodeImage = qrGenerator.generateCircularQRCode(
-            from: url,
-            size: 120,
-            color: UIColor(red: 0.0, green: 0.18, blue: 1.0, alpha: 1.0) // #002FFF
-        )
-    }
 }
