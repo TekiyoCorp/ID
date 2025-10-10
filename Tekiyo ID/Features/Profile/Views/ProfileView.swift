@@ -314,8 +314,7 @@ struct SocialLinkButton: View {
                 nom: "Dupont",
                 prenom: "Marie",
                 dateNaissance: Date(),
-                nationalite: "Française",
-                isValid: true
+                nationalite: "Française"
             ),
             profileImage: nil,
             tekiyoID: "3A1B-7E21",
