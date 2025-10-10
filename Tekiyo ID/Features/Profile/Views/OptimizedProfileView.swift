@@ -156,11 +156,6 @@ struct OptimizedProfileView: View {
                 }
             }
         }
-        // Fallback for NavigationView environments
-        NavigationLink(destination: RecentActivitiesView(), isActive: $state.shouldNavigateToActivities) {
-            EmptyView()
-        }
-        .hidden()
         .background(Color(.systemBackground))
         .navigationBarHidden(true)
         .navigationDestination(isPresented: $state.shouldNavigateToActivities) {
@@ -601,3 +596,4 @@ struct StaticGradient {
         )
     }
 }
+
