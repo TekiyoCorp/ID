@@ -59,21 +59,33 @@ struct PhotoCaptureView: View {
                         .frame(width: 253, height: 253)
                         .clipShape(Circle())
                 } else {
-                    CameraPreview(session: viewModel.captureSession)
-                        .frame(width: 253, height: 253)
-                        .clipShape(Circle())
-                        .opacity(viewModel.isSessionRunning ? 1 : 0)
-                    
-                    if !viewModel.isSessionRunning {
-                        Rectangle()
-                            .fill(Color(.systemGray6))
+                    ZStack {
+                        CameraPreview(session: viewModel.captureSession)
                             .frame(width: 253, height: 253)
                             .clipShape(Circle())
-                            .overlay {
-                                Image(systemName: "camera.fill")
-                                    .font(.system(size: 48))
-                                    .foregroundStyle(.secondary)
-                            }
+                            .opacity(viewModel.isSessionRunning ? 1 : 0)
+                        
+                        // Overlay de détection de visage en temps réel
+                        if viewModel.isSessionRunning && viewModel.faceDetectionResult != nil {
+                            FaceDetectionOverlay(
+                                detectionResult: viewModel.faceDetectionResult,
+                                frameSize: CGSize(width: 253, height: 253)
+                            )
+                            .frame(width: 253, height: 253)
+                            .clipShape(Circle())
+                        }
+                        
+                        if !viewModel.isSessionRunning {
+                            Rectangle()
+                                .fill(Color(.systemGray6))
+                                .frame(width: 253, height: 253)
+                                .clipShape(Circle())
+                                .overlay {
+                                    Image(systemName: "camera.fill")
+                                        .font(.system(size: 48))
+                                        .foregroundStyle(.secondary)
+                                }
+                        }
                     }
                 }
                 

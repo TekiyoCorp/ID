@@ -20,21 +20,42 @@ final class PhotoCaptureViewModel: ObservableObject {
     @Published private(set) var isSessionRunning = false
     @Published var validationError: String?
     @Published var isValidating = false
+    @Published var faceDetectionResult: FaceDetectionResult?
     
     let identityData: IdentityData?
     
     private let cameraManager = CameraManager()
     private let photoValidator = PhotoValidator.shared
+    private let faceDetector = RealtimeFaceDetector()
     private var isCameraConfigured = false
     private var cancellables = Set<AnyCancellable>()
     
     init(identityData: IdentityData? = nil) {
         self.identityData = identityData
         cameraPermissionStatus = AVCaptureDevice.authorizationStatus(for: .video)
+        
+        // Observer le statut de la session caméra
         cameraManager.$isSessionRunning
             .receive(on: RunLoop.main)
             .sink { [weak self] running in
                 self?.isSessionRunning = running
+                
+                // Démarrer/arrêter la détection en temps réel
+                if running {
+                    if let session = self?.cameraManager.captureSession {
+                        self?.faceDetector.startDetecting(session: session)
+                    }
+                } else {
+                    self?.faceDetector.stopDetecting()
+                }
+            }
+            .store(in: &cancellables)
+        
+        // Observer les résultats de détection
+        faceDetector.$detectionResult
+            .receive(on: RunLoop.main)
+            .sink { [weak self] result in
+                self?.faceDetectionResult = result
             }
             .store(in: &cancellables)
     }
@@ -172,7 +193,12 @@ final class PhotoCaptureViewModel: ObservableObject {
     }
     
     func stopCameraSession() {
+        faceDetector.stopDetecting()
         cameraManager.stopSession()
+    }
+    
+    deinit {
+        faceDetector.stopDetecting()
     }
     
     func proceedToFingerprintCreation() {
