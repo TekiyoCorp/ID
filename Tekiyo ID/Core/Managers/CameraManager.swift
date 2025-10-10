@@ -2,73 +2,84 @@ import AVFoundation
 import UIKit
 import Combine
 
-// MARK: - Photo Capture Delegate
-private class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
-    let completion: (UIImage?) -> Void
-    
-    init(completion: @escaping (UIImage?) -> Void) {
-        self.completion = completion
-    }
-    
-    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
-        guard let imageData = photo.fileDataRepresentation(),
-              let image = UIImage(data: imageData) else {
-            DispatchQueue.main.async { self.completion(nil) }
-            return
-        }
-        DispatchQueue.main.async { self.completion(image) }
-    }
-}
-
+@MainActor
 final class CameraManager: ObservableObject {
     @Published var previewLayer: AVCaptureVideoPreviewLayer?
-    @Published private(set) var isSessionRunning = false
+    @Published var isSessionRunning = false
+    @Published var errorMessage: String?
     
     private let session = AVCaptureSession()
-    private let sessionQueue = DispatchQueue(label: "CameraManager.SessionQueue")
     private let photoOutput = AVCapturePhotoOutput()
+    private var captureDelegate: PhotoCaptureDelegate?
     
     private var isConfigured = false
     
     func setupCamera() {
+        print("🎥 CameraManager: setupCamera called")
+        
         guard !isConfigured else {
+            print("🎥 CameraManager: Already configured, starting session")
             startSessionIfNeeded()
             return
         }
         
-        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else {
-            print("CameraManager: No front camera available")
-            return
-        }
-        print("CameraManager: Setting up front camera")
-        
-        session.beginConfiguration()
-        session.sessionPreset = .photo
-        
-        do {
-            let input = try AVCaptureDeviceInput(device: device)
+        Task { @MainActor in
+            guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else {
+                print("❌ CameraManager: No front camera available")
+                errorMessage = "Caméra frontale non disponible"
+                return
+            }
+            print("✅ CameraManager: Front camera found")
             
-            if session.canAddInput(input) {
+            session.beginConfiguration()
+            session.sessionPreset = .photo
+            
+            do {
+                // Remove existing inputs
+                session.inputs.forEach { session.removeInput($0) }
+                session.outputs.forEach { session.removeOutput($0) }
+                
+                // Add input
+                let input = try AVCaptureDeviceInput(device: device)
+                guard session.canAddInput(input) else {
+                    print("❌ CameraManager: Cannot add input")
+                    errorMessage = "Impossible d'ajouter l'entrée caméra"
+                    return
+                }
                 session.addInput(input)
-            }
-            
-            if session.canAddOutput(photoOutput) {
+                print("✅ CameraManager: Input added")
+                
+                // Add output
+                guard session.canAddOutput(photoOutput) else {
+                    print("❌ CameraManager: Cannot add output")
+                    errorMessage = "Impossible d'ajouter la sortie photo"
+                    return
+                }
                 session.addOutput(photoOutput)
+                print("✅ CameraManager: Output added")
+                
+                // Configure frame rate
+                try? configureFrameRate(for: device)
+                
+                // Create preview layer
+                let layer = AVCaptureVideoPreviewLayer(session: session)
+                layer.videoGravity = .resizeAspectFill
+                layer.connection?.videoOrientation = .portrait
+                self.previewLayer = layer
+                print("✅ CameraManager: Preview layer created")
+                
+                session.commitConfiguration()
+                isConfigured = true
+                
+                // Start session
+                startSessionIfNeeded()
+                
+            } catch {
+                print("❌ CameraManager: Setup error: \(error.localizedDescription)")
+                errorMessage = "Erreur de configuration: \(error.localizedDescription)"
+                session.commitConfiguration()
             }
-            
-            try configureFrameRate(for: device)
-            
-            let previewLayer = AVCaptureVideoPreviewLayer(session: session)
-            previewLayer.videoGravity = .resizeAspectFill
-            self.previewLayer = previewLayer
-            
-            isConfigured = true
-        } catch {
-            print("Error setting up camera: \(error)")
         }
-        
-        session.commitConfiguration()
-        startSessionIfNeeded()
     }
     
     private func configureFrameRate(for device: AVCaptureDevice) throws {
@@ -86,40 +97,101 @@ final class CameraManager: ObservableObject {
     }
     
     func startSessionIfNeeded() {
-        sessionQueue.async { [weak self] in
-            guard let self = self, !self.session.isRunning else { return }
-            self.session.startRunning()
-            DispatchQueue.main.async { self.isSessionRunning = true }
+        guard !session.isRunning else {
+            print("🎥 CameraManager: Session already running")
+            return
+        }
+        
+        print("🎥 CameraManager: Starting session...")
+        Task.detached(priority: .userInitiated) { [weak self] in
+            self?.session.startRunning()
+            await MainActor.run {
+                self?.isSessionRunning = true
+                print("✅ CameraManager: Session started successfully")
+            }
         }
     }
     
     func stopSession() {
-        sessionQueue.async { [weak self] in
-            guard let self = self, self.session.isRunning else { return }
-            self.session.stopRunning()
-            DispatchQueue.main.async { self.isSessionRunning = false }
+        guard session.isRunning else {
+            print("🎥 CameraManager: Session already stopped")
+            return
+        }
+        
+        print("🎥 CameraManager: Stopping session...")
+        Task.detached(priority: .userInitiated) { [weak self] in
+            self?.session.stopRunning()
+            await MainActor.run {
+                self?.isSessionRunning = false
+                print("✅ CameraManager: Session stopped")
+            }
         }
     }
     
     func capturePhoto(completion: @escaping (UIImage?) -> Void) {
-        print("CameraManager: capturePhoto called")
+        print("📸 CameraManager: capturePhoto called")
+        
         guard isSessionRunning else {
-            print("CameraManager: Session not running, starting...")
+            print("⚠️ CameraManager: Session not running, starting...")
             startSessionIfNeeded()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
                 self.capturePhoto(completion: completion)
             }
             return
         }
         
-        let settings = AVCapturePhotoSettings()
-        let delegate = PhotoCaptureDelegate { [weak self] image in
-            print("CameraManager: Photo captured: \(image != nil ? "Success" : "Failed")")
-            completion(image)
-            self?.stopSession()
+        guard isConfigured else {
+            print("❌ CameraManager: Camera not configured")
+            completion(nil)
+            return
         }
         
-        print("CameraManager: Starting photo capture...")
-        photoOutput.capturePhoto(with: settings, delegate: delegate)
+        print("📸 CameraManager: Capturing photo...")
+        let settings = AVCapturePhotoSettings()
+        
+        // IMPORTANT: Retain the delegate strongly
+        self.captureDelegate = PhotoCaptureDelegate { [weak self] image in
+            Task { @MainActor in
+                print("📸 CameraManager: Photo captured: \(image != nil ? "✅ Success" : "❌ Failed")")
+                completion(image)
+                self?.captureDelegate = nil // Release delegate after use
+            }
+        }
+        
+        photoOutput.capturePhoto(with: settings, delegate: captureDelegate!)
+    }
+}
+
+// MARK: - Photo Capture Delegate
+private class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
+    let completion: (UIImage?) -> Void
+    
+    init(completion: @escaping (UIImage?) -> Void) {
+        self.completion = completion
+        super.init()
+    }
+    
+    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
+        if let error = error {
+            print("❌ PhotoCaptureDelegate: Error: \(error.localizedDescription)")
+            completion(nil)
+            return
+        }
+        
+        guard let imageData = photo.fileDataRepresentation() else {
+            print("❌ PhotoCaptureDelegate: No image data")
+            completion(nil)
+            return
+        }
+        
+        guard let image = UIImage(data: imageData) else {
+            print("❌ PhotoCaptureDelegate: Cannot create UIImage")
+            completion(nil)
+            return
+        }
+        
+        print("✅ PhotoCaptureDelegate: Image created successfully")
+        completion(image)
     }
 }

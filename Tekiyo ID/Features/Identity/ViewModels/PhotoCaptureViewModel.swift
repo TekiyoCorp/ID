@@ -74,10 +74,13 @@ final class PhotoCaptureViewModel: ObservableObject {
     }
     
     func setupCamera() {
+        print("📱 PhotoCaptureViewModel: setupCamera called")
         guard !isCameraConfigured else {
+            print("📱 PhotoCaptureViewModel: Already configured, starting session")
             cameraManager.startSessionIfNeeded()
             return
         }
+        print("📱 PhotoCaptureViewModel: Setting up camera...")
         cameraManager.setupCamera()
         isCameraConfigured = true
     }
