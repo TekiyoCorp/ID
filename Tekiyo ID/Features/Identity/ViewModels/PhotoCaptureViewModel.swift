@@ -7,6 +7,7 @@ import UIKit
 final class PhotoCaptureViewModel: ObservableObject {
     @Published var capturedImage: UIImage?
     @Published var cameraPermissionStatus: AVAuthorizationStatus = .notDetermined
+    @Published var shouldNavigateToFingerprintCreation = false
     
     private let cameraManager = CameraManager()
     
@@ -52,5 +53,9 @@ final class PhotoCaptureViewModel: ObservableObject {
     
     func canAccessCamera() -> Bool {
         cameraPermissionStatus == .authorized
+    }
+    
+    func proceedToFingerprintCreation() {
+        shouldNavigateToFingerprintCreation = true
     }
 }

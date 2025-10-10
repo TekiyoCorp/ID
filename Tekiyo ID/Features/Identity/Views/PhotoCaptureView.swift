@@ -20,7 +20,7 @@ struct PhotoCaptureView: View {
             LargeTitle("Prends toi en photo.", alignment: .center)
             
             // Subtitle - 6px gap from title, 2 lines
-            Text("Cette image restera sur ton appareil,\nelle servira a prouvé ton identité")
+            Text("Cette image restera sur ton appareil,\nelle servira à prouver ton identité")
                 .font(.system(size: 18, weight: .medium))
                 .appTypography(fontSize: 18)
                 .foregroundStyle(.primary)
@@ -78,13 +78,17 @@ struct PhotoCaptureView: View {
             
             Spacer()
             
-            // Continue button
+            // Take photo button
             PrimaryButton(
-                title: "Continuer",
+                title: viewModel.capturedImage != nil ? "Continuer" : "Prendre une photo",
                 style: .blue,
-                isEnabled: viewModel.capturedImage != nil,
+                isEnabled: true,
                 action: {
-                    // TODO: Next screen
+                    if viewModel.capturedImage != nil {
+                        viewModel.proceedToFingerprintCreation()
+                    } else {
+                        viewModel.capturePhoto()
+                    }
                 }
             )
             .padding(.horizontal, 48)
@@ -109,6 +113,9 @@ struct PhotoCaptureView: View {
         }
         .onDisappear {
             viewModel.stopCamera()
+        }
+        .navigationDestination(isPresented: $viewModel.shouldNavigateToFingerprintCreation) {
+            FingerprintCreationView()
         }
     }
 }
