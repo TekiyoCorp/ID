@@ -62,7 +62,7 @@ struct IdentitySetupView: View {
                 }
             }
 
-            if viewModel.isCurrentStepComplete && viewModel.currentStep != .ville {
+            if viewModel.isCurrentStepComplete && (viewModel.currentStep == .nationalite || viewModel.currentStep == .metier) {
                 PrimaryButton(
                     title: "Continuer",
                     style: .blue,
@@ -206,12 +206,50 @@ struct IdentitySetupView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .clipped()
         case .ville:
-            inputField(
-                title: step.title,
-                text: $viewModel.ville,
-                focused: $villeFocused,
-                centerVertically: true
-            )
+            VStack(alignment: .leading, spacing: 12) {
+                TextField(step.placeholder, text: $viewModel.ville)
+                    .font(.system(size: 36, weight: .medium))
+                    .appTypography(fontSize: 36)
+                    .foregroundStyle(.primary)
+                    .focused($villeFocused)
+                    .submitLabel(.done)
+                    .onSubmit {
+                        withAnimation(.easeInOut(duration: 0.35)) {
+                            viewModel.advance()
+                        }
+                    }
+                    .disableAutocorrection(true)
+                    .textInputAutocapitalization(.words)
+                    .padding(.vertical, 8)
+                    .overlay(alignment: .bottomLeading) {
+                        Rectangle()
+                            .fill(Color.clear)
+                            .frame(height: 1)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .onChange(of: viewModel.ville) { _, _ in
+                        viewModel.showSuggestions = true
+                    }
+                
+                if viewModel.showSuggestions && !viewModel.ville.isEmpty {
+                    ForEach(viewModel.villeSuggestions, id: \.self) { suggestion in
+                        Button(action: {
+                            viewModel.selectVille(suggestion)
+                        }) {
+                            Text(suggestion)
+                                .font(.system(size: 22, weight: .medium))
+                                .appTypography(fontSize: 22)
+                                .foregroundStyle(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                                .padding(.vertical, 4)
+                        }
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .clipped()
         }
     }
 

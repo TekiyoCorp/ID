@@ -31,6 +31,25 @@ final class IdentityViewModel: ObservableObject {
         "Étudiant", "Étudiante", "Stagiaire", "Apprenti", "Apprentie", "Retraité", "Retraitée", "Autre"
     ]
     
+    private let villes: [String] = [
+        "Paris", "Lyon", "Marseille", "Toulouse", "Nice", "Nantes", "Montpellier", "Strasbourg", "Bordeaux", "Lille",
+        "Rennes", "Reims", "Le Havre", "Saint-Étienne", "Toulon", "Angers", "Grenoble", "Dijon", "Nîmes", "Aix-en-Provence",
+        "Saint-Denis", "Brest", "Le Mans", "Amiens", "Limoges", "Tours", "Annecy", "Perpignan", "Boulogne-Billancourt", "Orléans",
+        "Mulhouse", "Rouen", "Caen", "Nancy", "Saint-Denis", "Argenteuil", "Montreuil", "Roubaix", "Tourcoing", "Nanterre",
+        "Avignon", "Créteil", "Dunkirk", "Poitiers", "Asnières-sur-Seine", "Versailles", "Courbevoie", "Vitry-sur-Seine", "Colombes", "Aulnay-sous-Bois",
+        "La Rochelle", "Rueil-Malmaison", "Antibes", "Saint-Maur-des-Fossés", "Champigny-sur-Marne", "Aubervilliers", "Béziers", "Cannes", "Colmar", "Drancy",
+        "Mérignac", "Saint-Nazaire", "Issy-les-Moulineaux", "Noisy-le-Grand", "Évry", "Cergy", "Pessac", "Vénissieux", "Troyes", "Clichy",
+        "Montauban", "Neuilly-sur-Seine", "Pantin", "Niort", "Le Tampon", "Sarcelles", "Levallois-Perret", "Antony", "Lorient", "Caluire-et-Cuire",
+        "Boulogne-sur-Mer", "Beauvais", "Hyères", "Le Cannet", "Saint-Ouen", "Massy", "Villejuif", "Épinay-sur-Seine", "Meudon", "Chelles",
+        "Cholet", "Pantin", "Belfort", "Évry-Courcouronnes", "Vincennes", "Laval", "Bobigny", "Saint-Priest", "Montrouge", "Bayonne",
+        "Sartrouville", "Meaux", "Bourges", "Châteauroux", "Blois", "Châlons-en-Champagne", "Charleville-Mézières", "Tarbes", "Alès", "Saint-Germain-en-Laye",
+        "Sète", "Aubagne", "Roanne", "Saint-Brieuc", "Châtelet", "Montbéliard", "Douai", "Tarbes", "Arles", "Mâcon",
+        "Belfort", "Martigues", "Bayonne", "Évreux", "Vannes", "Brive-la-Gaillarde", "Châteauroux", "Saint-Malo", "Chalon-sur-Saône", "Agen",
+        "Bastia", "Castres", "Thionville", "Montauban", "Albi", "Lannion", "Libourne", "Roanne", "Tulle", "Auch",
+        "Cahors", "Foix", "Pamiers", "Saint-Gaudens", "Mirande", "Condom", "Lectoure", "Fleurance", "Vic-en-Bigorre", "Tarbes",
+        "Lourdes", "Bagnères-de-Bigorre", "Argelès-Gazost", "Luz-Saint-Sauveur", "Cauterets", "Autre"
+    ]
+    
     private let countries: [String] = {
         let locale = Locale(identifier: "fr_FR")
         if #available(iOS 16, *) {
@@ -73,6 +92,15 @@ final class IdentityViewModel: ObservableObject {
             .map { $0 }
     }
     
+    var villeSuggestions: [String] {
+        guard !ville.isEmpty else { return [] }
+        let prefix = ville.lowercased()
+        return villes
+            .filter { $0.lowercased().contains(prefix) }
+            .prefix(8)
+            .map { $0 }
+    }
+    
     var isCurrentStepComplete: Bool {
         switch currentStep {
         case .nom: return !nom.isEmpty
@@ -110,6 +138,11 @@ final class IdentityViewModel: ObservableObject {
     
     func selectMetier(_ metierSelected: String) {
         metier = metierSelected
+        showSuggestions = false
+    }
+    
+    func selectVille(_ villeSelected: String) {
+        ville = villeSelected
         showSuggestions = false
     }
     
