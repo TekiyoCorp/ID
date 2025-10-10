@@ -7,13 +7,16 @@ struct FingerprintCreationView: View {
         VStack(spacing: 0) {
             Spacer()
             
-            // Title
-            LargeTitle("Création de ton empreinte..", alignment: .center)
+            // Title - 28px
+            Text("Création de ton empreinte..")
+                .font(.system(size: 28, weight: .medium))
+                .appTypography(fontSize: 28)
+                .foregroundStyle(.primary)
+                .multilineTextAlignment(.center)
             
-            // Subtitle - 6px gap, 2 lines
+            // Subtitle - 6px gap, reduced lineSpacing
             Text("Ton visage reste sur ton appareil.\nSeule une preuve mathématique est inscrite sur la blockchain.")
                 .font(.system(size: 16, weight: .regular))
-                .appTypography(fontSize: 16)
                 .foregroundStyle(.primary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 48)
@@ -21,12 +24,19 @@ struct FingerprintCreationView: View {
             
             Spacer()
             
-            // Animated checkcard icon at Y-351
-            Image("checkcard")
-                .renderingMode(.original)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 142, height: 179)
+            // Animated SF Symbol with gradient
+            Image(systemName: "checkmark.seal.text.page.fill")
+                .font(.system(size: 120, weight: .medium))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.0, green: 0.18, blue: 1.0), // 002FFF
+                            Color(red: 0.0, green: 0.18, blue: 1.0).opacity(0.0) // 0%
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
                 .offset(y: animationOffset)
                 .onAppear {
                     startAnimation()
@@ -36,9 +46,6 @@ struct FingerprintCreationView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemBackground))
-        .onAppear {
-            startAnimation()
-        }
     }
     
     private func startAnimation() {
