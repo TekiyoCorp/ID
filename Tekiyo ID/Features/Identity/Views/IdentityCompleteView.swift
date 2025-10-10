@@ -2,6 +2,7 @@ import SwiftUI
 
 struct IdentityCompleteView: View {
     @StateObject private var viewModel: IdentityCompleteViewModel
+    @State private var shouldNavigateToProfile = false
     
     init(identityData: IdentityData, profileImage: UIImage?) {
         self._viewModel = StateObject(wrappedValue: IdentityCompleteViewModel(
@@ -117,7 +118,7 @@ struct IdentityCompleteView: View {
                         title: "Afficher mon profil Tekiyo",
                         style: .blue,
                         action: {
-                            // TODO: Navigate to profile
+                            shouldNavigateToProfile = true
                         }
                     )
                     .padding(.horizontal, 48)
@@ -129,6 +130,14 @@ struct IdentityCompleteView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemBackground))
         .navigationBarHidden(true)
+        .navigationDestination(isPresented: $shouldNavigateToProfile) {
+            ProfileView(
+                identityData: viewModel.identityData,
+                profileImage: viewModel.profileUIImage,
+                tekiyoID: viewModel.tekiyoID,
+                username: viewModel.username
+            )
+        }
     }
 }
 
