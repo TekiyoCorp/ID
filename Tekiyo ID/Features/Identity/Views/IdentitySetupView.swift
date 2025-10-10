@@ -62,7 +62,19 @@ struct IdentitySetupView: View {
                 }
             }
 
-            if viewModel.isComplete {
+            if viewModel.isCurrentStepComplete && viewModel.currentStep != .ville {
+                PrimaryButton(
+                    title: "Continuer",
+                    style: .blue,
+                    action: {
+                        withAnimation(.easeInOut(duration: 0.35)) {
+                            viewModel.advance()
+                        }
+                    }
+                )
+                .padding(.horizontal, 48)
+                .padding(.bottom, 24)
+            } else if viewModel.isComplete {
                 PrimaryButton(
                     title: "Continuer",
                     style: .blue,

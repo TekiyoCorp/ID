@@ -73,7 +73,7 @@ final class IdentityViewModel: ObservableObject {
             .map { $0 }
     }
     
-    private var isCurrentStepComplete: Bool {
+    var isCurrentStepComplete: Bool {
         switch currentStep {
         case .nom: return !nom.isEmpty
         case .prenom: return !prenom.isEmpty
