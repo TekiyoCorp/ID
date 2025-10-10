@@ -164,6 +164,7 @@ struct ProfileView: View {
                             color: .blue
                         )
                     }
+                    .frame(maxWidth: 250)
                     
                     Button("Voir plus") {
                         shouldNavigateToActivities = true
@@ -184,18 +185,18 @@ struct ProfileView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 12) {
-                        SocialLinkButton(platform: "Facebook", icon: "f", color: .blue)
-                        SocialLinkButton(platform: "Twitter", icon: "🐦", color: .blue)
-                        SocialLinkButton(platform: "Instagram", icon: "📷", color: .pink)
-                        SocialLinkButton(platform: "Snapchat", icon: "👻", color: .yellow)
-                        SocialLinkButton(platform: "LinkedIn", icon: "in", color: .blue)
-                        SocialLinkButton(platform: "GitHub", icon: "🐱", color: .black)
-                        SocialLinkButton(platform: "TikTok", icon: "🎵", color: .black)
-                        SocialLinkButton(platform: "Discord", icon: "💬", color: .blue)
-                        SocialLinkButton(platform: "Telegram", icon: "✈️", color: .blue)
-                        SocialLinkButton(platform: "Gmail", icon: "M", color: .red)
-                        SocialLinkButton(platform: "WhatsApp", icon: "💬", color: .green)
-                        SocialLinkButton(platform: "YouTube", icon: "▶️", color: .red)
+                        SocialCapsuleButton(platform: "Facebook", icon: "f.circle.fill", color: .blue)
+                        SocialCapsuleButton(platform: "Twitter", icon: "bird.fill", color: .blue)
+                        SocialCapsuleButton(platform: "Instagram", icon: "camera.fill", color: .pink)
+                        SocialCapsuleButton(platform: "Snapchat", icon: "ghost.fill", color: .yellow)
+                        SocialCapsuleButton(platform: "LinkedIn", icon: "briefcase.fill", color: .blue)
+                        SocialCapsuleButton(platform: "GitHub", icon: "terminal.fill", color: .black)
+                        SocialCapsuleButton(platform: "TikTok", icon: "music.note", color: .black)
+                        SocialCapsuleButton(platform: "Discord", icon: "bubble.left.fill", color: .blue)
+                        SocialCapsuleButton(platform: "Telegram", icon: "paperplane.fill", color: .blue)
+                        SocialCapsuleButton(platform: "Gmail", icon: "envelope.fill", color: .red)
+                        SocialCapsuleButton(platform: "WhatsApp", icon: "bubble.left.and.bubble.right.fill", color: .green)
+                        SocialCapsuleButton(platform: "YouTube", icon: "play.rectangle.fill", color: .red)
                     }
                 }
                 .padding(.horizontal, 24)
@@ -279,8 +280,8 @@ struct EnhancedActivityRow: View {
     }
 }
 
-// MARK: - Social Link Button Component
-struct SocialLinkButton: View {
+// MARK: - Social Capsule Button Component
+struct SocialCapsuleButton: View {
     let platform: String
     let icon: String
     let color: Color
@@ -289,18 +290,17 @@ struct SocialLinkButton: View {
         Button(action: {
             // Handle social link tap
         }) {
-            VStack(spacing: 4) {
-                Text(icon)
-                    .font(.system(size: 20))
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 16))
                     .foregroundColor(color)
                 
                 Text(platform)
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.primary)
-                    .multilineTextAlignment(.center)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
             .background(Color.gray.opacity(0.1))
             .clipShape(Capsule())
         }
