@@ -1,21 +1,10 @@
 import SwiftUI
 
-private struct BlurOpacityModifier: ViewModifier {
-    let isActive: Bool
-    let radius: CGFloat
-
-    func body(content: Content) -> some View {
-        content
-            .opacity(isActive ? 0 : 1)
-            .blur(radius: isActive ? radius : 0)
-    }
-}
-
 private extension AnyTransition {
-    static func blurOpacity(radius: CGFloat = 10) -> AnyTransition {
-        .modifier(
-            active: BlurOpacityModifier(isActive: true, radius: radius),
-            identity: BlurOpacityModifier(isActive: false, radius: radius)
+    static var flowOpacity: AnyTransition {
+        .asymmetric(
+            insertion: .opacity.combined(with: .offset(y: 10)),
+            removal: .opacity.combined(with: .offset(y: -10))
         )
     }
 }
@@ -25,19 +14,18 @@ struct IntroductionView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            switch viewModel.currentStep {
-            case 1:
-                stepOne
-                    .animation(.easeInOut(duration: 0.3), value: viewModel.currentStep)
-            case 2:
-                stepTwo
-                    .animation(.easeInOut(duration: 0.3), value: viewModel.currentStep)
-            case 3:
-                stepThree
-                    .animation(.easeInOut(duration: 0.3), value: viewModel.currentStep)
-            default:
-                EmptyView()
+            Group {
+                if viewModel.currentStep == 1 {
+                    stepOne
+                } else if viewModel.currentStep == 2 {
+                    stepTwo
+                } else {
+                    stepThree
+                }
             }
+            .id(viewModel.currentStep)
+            .transition(.flowOpacity)
+            .animation(.easeInOut(duration: 0.18), value: viewModel.currentStep)
             
             Spacer()
             
@@ -46,7 +34,7 @@ struct IntroductionView: View {
                     icon: "chevron.right",
                     action: viewModel.proceedToFaceID
                 )
-                .transition(.blurOpacity(radius: 10))
+                .transition(.flowOpacity)
             } else {
                 Text("Inclinez votre téléphone vers la droite")
                     .font(.system(size: 13, weight: .regular))
@@ -54,7 +42,7 @@ struct IntroductionView: View {
                     .foregroundStyle(.primary)
                     .opacity(0.4)
                     .frame(maxWidth: .infinity, alignment: .center)
-                    .transition(.blurOpacity(radius: 10))
+                    .transition(.flowOpacity)
             }
         }
         .frame(maxWidth: 274, alignment: .leading)
@@ -70,12 +58,12 @@ struct IntroductionView: View {
         .onDisappear {
             viewModel.stopMonitoring()
         }
+        .debugRenders("IntroductionView")
     }
     
     private var stepOne: some View {
         VStack(alignment: .leading, spacing: 12) {
             LargeTitle("Ce que tu es ne devrait pas quitter ton téléphone.")
-                .transition(.blurOpacity(radius: 10))
             
             VStack(alignment: .leading, spacing: 12) {
                 Text("Tekiyo ne te regarde pas.")
@@ -83,14 +71,12 @@ struct IntroductionView: View {
                     .appTypography(fontSize: 22)
                     .foregroundStyle(.primary)
                     .multilineTextAlignment(.leading)
-                    .transition(.blurOpacity(radius: 10))
                 
                 Text("Il te reconnaît, puis t'oublie.")
                     .font(.system(size: 22, weight: .medium))
                     .appTypography(fontSize: 22)
                     .foregroundStyle(.primary)
                     .multilineTextAlignment(.leading)
-                    .transition(.blurOpacity(radius: 10))
             }
         }
     }
@@ -98,28 +84,24 @@ struct IntroductionView: View {
     private var stepTwo: some View {
         VStack(alignment: .leading, spacing: 12) {
             LargeTitle("Les machines imitent.")
-                .transition(.blurOpacity(radius: 10))
             
             Text("Toi, tu existes.")
                 .font(.system(size: 22, weight: .medium))
                 .appTypography(fontSize: 22)
                 .foregroundStyle(.primary)
                 .multilineTextAlignment(.leading)
-                .transition(.blurOpacity(radius: 10))
         }
     }
     
     private var stepThree: some View {
         VStack(alignment: .leading, spacing: 12) {
             LargeTitle("Un seul ID.")
-                .transition(.blurOpacity(radius: 10))
             
             Text("Dans un monde sans visage.")
                 .font(.system(size: 22, weight: .medium))
                 .appTypography(fontSize: 22)
                 .foregroundStyle(.primary)
                 .multilineTextAlignment(.leading)
-                .transition(.blurOpacity(radius: 10))
         }
     }
 }
@@ -127,4 +109,3 @@ struct IntroductionView: View {
 #Preview {
     IntroductionView()
 }
-

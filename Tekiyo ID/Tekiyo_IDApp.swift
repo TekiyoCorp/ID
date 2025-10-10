@@ -12,7 +12,7 @@ struct Tekiyo_IDApp: App {
     var body: some Scene {
         WindowGroup {
             StartView()
+                .debugRenders("StartView Root")
         }
     }
 }
-

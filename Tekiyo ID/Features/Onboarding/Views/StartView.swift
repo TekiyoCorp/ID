@@ -11,7 +11,6 @@ struct StartView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(height: 160)
-                    .drawingGroup()
                     .accessibilityLabel("Logo de l'application")
 
                 Spacer()
@@ -41,10 +40,10 @@ struct StartView: View {
                 IntroductionView()
             }
         }
+        .debugRenders("StartView")
     }
 }
 
 #Preview {
     StartView()
 }
-

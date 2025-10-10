@@ -5,13 +5,23 @@ import UIKit
 
 @MainActor
 final class PhotoCaptureViewModel: ObservableObject {
-    @Published var capturedImage: UIImage?
+    @Published var capturedImage: UIImage? {
+        didSet {
+            guard isCameraConfigured else { return }
+            if capturedImage != nil {
+                cameraManager.stopSession()
+            } else if cameraPermissionStatus == .authorized {
+                cameraManager.startSessionIfNeeded()
+            }
+        }
+    }
     @Published var cameraPermissionStatus: AVAuthorizationStatus = .notDetermined
-    @Published var shouldNavigateToFingerprintCreation = false
+@Published var shouldNavigateToFingerprintCreation = false
     
     let identityData: IdentityData?
     
     private let cameraManager = CameraManager()
+    private var isCameraConfigured = false
     
     init(identityData: IdentityData? = nil) {
         self.identityData = identityData
@@ -43,19 +53,50 @@ final class PhotoCaptureViewModel: ObservableObject {
     }
     
     func setupCamera() {
+        guard !isCameraConfigured else {
+            cameraManager.startSessionIfNeeded()
+            return
+        }
         cameraManager.setupCamera()
-        cameraManager.startSession()
+        isCameraConfigured = true
     }
     
-    func capturePhoto() {
-        print("CapturePhoto called - Camera permission: \(cameraPermissionStatus)")
-        cameraManager.capturePhoto { [weak self] image in
-            print("Photo captured: \(image != nil)")
-            self?.capturedImage = image
+    func resumeCameraIfNeeded() {
+        guard cameraPermissionStatus == .authorized else { return }
+        setupCamera()
+    }
+    
+    func handleCaptureCircleTap() {
+        guard cameraPermissionStatus == .authorized else {
+            requestCameraPermission()
+            return
+        }
+        
+        if capturedImage != nil {
+            capturedImage = nil
+            cameraManager.startSessionIfNeeded()
+        } else {
+            capturePhoto()
         }
     }
     
-    func stopCamera() {
+    func handlePrimaryButtonTap() {
+        if capturedImage != nil {
+            proceedToFingerprintCreation()
+        } else {
+            handleCaptureCircleTap()
+        }
+    }
+    
+    private func capturePhoto() {
+        cameraManager.startSessionIfNeeded()
+        cameraManager.capturePhoto { [weak self] image in
+            guard let self = self else { return }
+            self.capturedImage = image
+        }
+    }
+    
+    func stopCameraSession() {
         cameraManager.stopSession()
     }
     

@@ -1,91 +1,97 @@
 import SwiftUI
 import CryptoKit
+import UIKit
 
 struct OptimizedCircularCodeView: View {
     let url: String
     let size: CGFloat
     let dotRadius: CGFloat
     
-    @State private var animationScale: CGFloat = 0.8
+    @State private var animationScale: CGFloat = 0.9
     @State private var animationOpacity: Double = 0.0
-    @State private var isAnimating = false
+    @State private var didAnimate = false
     
-    // Cache computed dots to avoid recalculation
-    private let cachedDots: [DotPosition]
+    private static let imageCache = NSCache<NSString, UIImage>()
+    private let renderedImage: UIImage
     
     init(url: String, size: CGFloat = 120, dotRadius: CGFloat = 2.5) {
         self.url = url
         self.size = size
         self.dotRadius = dotRadius
-        // Pre-compute dots during initialization
-        self.cachedDots = Self.generateDots(from: url, size: size)
+        
+        let cacheKey = "\(url)|\(size)|\(dotRadius)" as NSString
+        if let cachedImage = Self.imageCache.object(forKey: cacheKey) {
+            self.renderedImage = cachedImage
+        } else {
+            let dots = Self.generateDots(from: url, size: size)
+            let image = Self.renderImage(for: dots, size: size, dotRadius: dotRadius)
+            Self.imageCache.setObject(image, forKey: cacheKey)
+            self.renderedImage = image
+        }
     }
     
     var body: some View {
-        ZStack {
-            // Background circle - static, no animation
-            Circle()
-                .fill(Color.white)
-                .frame(width: size, height: size)
-                .overlay(
-                    Circle()
-                        .stroke(Color.blue, lineWidth: 2)
-                )
-            
-            // Dots pattern - optimized Canvas with drawingGroup
-            Canvas { context, canvasSize in
-                let centerX = canvasSize.width / 2
-                let centerY = canvasSize.height / 2
-                
-                for dot in cachedDots {
-                    let rect = CGRect(
-                        x: centerX + dot.x - dotRadius,
-                        y: centerY + dot.y - dotRadius,
-                        width: dotRadius * 2,
-                        height: dotRadius * 2
-                    )
-                    context.fill(
-                        Path(ellipseIn: rect),
-                        with: .color(.blue)
-                    )
-                }
-            }
+        Image(uiImage: renderedImage)
+            .resizable()
+            .interpolation(.high)
+            .antialiased(true)
             .frame(width: size, height: size)
-            .drawingGroup() // Force GPU rendering
-            .opacity(animationOpacity)
             .scaleEffect(animationScale)
-            .animation(.easeOut(duration: 0.8), value: animationOpacity)
-            .animation(.easeOut(duration: 0.8), value: animationScale)
-            
-            // Center logo - static after animation
-            if !isAnimating {
-                ZStack {
-                    Circle()
-                        .fill(Color.blue)
-                        .frame(width: 12, height: 12)
-                    
-                    Circle()
-                        .stroke(Color.blue, lineWidth: 1.5)
-                        .frame(width: 20, height: 20)
+            .opacity(animationOpacity)
+            .onAppear {
+                guard !didAnimate else { return }
+                didAnimate = true
+                
+                animationScale = 0.9
+                animationOpacity = 0.0
+                
+                withAnimation(.easeOut(duration: 0.6)) {
+                    animationScale = 1.0
+                    animationOpacity = 1.0
                 }
-                .opacity(animationOpacity)
-                .scaleEffect(animationScale)
             }
-        }
-        .frame(width: size, height: size)
-        .onAppear {
-            // Single animation trigger
-            guard !isAnimating else { return }
-            isAnimating = true
+            .accessibilityHidden(true)
+            .debugRenders("OptimizedCircularCodeView")
+    }
+    
+    private static func renderImage(for dots: [DotPosition], size: CGFloat, dotRadius: CGFloat) -> UIImage {
+        let rendererFormat = UIGraphicsImageRendererFormat.default()
+        rendererFormat.scale = UIScreen.main.scale
+        rendererFormat.opaque = false
+        
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size), format: rendererFormat)
+        return renderer.image { context in
+            let rect = CGRect(origin: .zero, size: CGSize(width: size, height: size))
+            let cgContext = context.cgContext
             
-            withAnimation(.easeOut(duration: 0.8)) {
-                animationScale = 1.0
-                animationOpacity = 1.0
+            cgContext.setFillColor(UIColor.white.cgColor)
+            cgContext.fillEllipse(in: rect)
+            
+            cgContext.setStrokeColor(UIColor.systemBlue.cgColor)
+            cgContext.setLineWidth(2)
+            cgContext.strokeEllipse(in: rect.insetBy(dx: 1, dy: 1))
+            
+            let center = CGPoint(x: rect.midX, y: rect.midY)
+            let dotDiameter = dotRadius * 2
+            
+            cgContext.setFillColor(UIColor.systemBlue.cgColor)
+            for dot in dots {
+                let dotRect = CGRect(
+                    x: center.x + dot.x - dotRadius,
+                    y: center.y + dot.y - dotRadius,
+                    width: dotDiameter,
+                    height: dotDiameter
+                )
+                cgContext.fillEllipse(in: dotRect)
             }
+            
+            cgContext.fillEllipse(in: CGRect(x: center.x - 6, y: center.y - 6, width: 12, height: 12))
+            cgContext.setStrokeColor(UIColor.systemBlue.cgColor)
+            cgContext.setLineWidth(1.5)
+            cgContext.strokeEllipse(in: CGRect(x: center.x - 10, y: center.y - 10, width: 20, height: 20))
         }
     }
     
-    // Static method to pre-compute dots
     private static func generateDots(from url: String, size: CGFloat) -> [DotPosition] {
         let data = Data(url.utf8)
         let hash = SHA256.hash(data: data)
@@ -95,7 +101,7 @@ struct OptimizedCircularCodeView: View {
         let minRadius: CGFloat = 18
         
         var dots: [DotPosition] = []
-        let targetDotCount = 80 // Reduced for better performance
+        let targetDotCount = 80
         
         for i in 0..<targetDotCount {
             let byteIndex = i % hashBytes.count
@@ -106,13 +112,13 @@ struct OptimizedCircularCodeView: View {
             let progress = Double(i) / Double(targetDotCount - 1)
             let baseRadius = Double(minRadius) + (Double(maxRadius) - Double(minRadius)) * progress
             
-            let variation = (Double(nextByte) / 255.0 - 0.5) * 2.0 // Reduced variation
+            let variation = (Double(nextByte) / 255.0 - 0.5) * 2.0
             let finalRadius = max(Double(minRadius), min(Double(maxRadius), baseRadius + variation))
             
             let x = cos(angle) * finalRadius
             let y = sin(angle) * finalRadius
             
-            let distance = sqrt(x*x + y*y)
+            let distance = sqrt(x * x + y * y)
             if distance <= Double(maxRadius) && distance >= Double(minRadius - 2) {
                 dots.append(DotPosition(x: CGFloat(x), y: CGFloat(y)))
             }
@@ -122,13 +128,11 @@ struct OptimizedCircularCodeView: View {
     }
 }
 
-// MARK: - Dot Position Model
 private struct DotPosition {
     let x: CGFloat
     let y: CGFloat
 }
 
-// MARK: - Preview
 #Preview {
     VStack(spacing: 20) {
         OptimizedCircularCodeView(url: "https://tekiyo.fr/3A1B-7E21")

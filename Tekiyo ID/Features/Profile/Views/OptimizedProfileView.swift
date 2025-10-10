@@ -1,4 +1,18 @@
 import SwiftUI
+import Combine
+
+final class ProfileScreenState: ObservableObject {
+    @Published var trustScore: Int
+    @Published var lastVerification: String
+    @Published var shouldNavigateToActivities = false
+    @Published var showActivitiesOverlay = false
+    @Published var searchText = ""
+    
+    init(trustScore: Int = 3, lastVerification: String = "il y a 2 jours") {
+        self.trustScore = trustScore
+        self.lastVerification = lastVerification
+    }
+}
 
 struct OptimizedProfileView: View {
     let identityData: IdentityData
@@ -6,11 +20,7 @@ struct OptimizedProfileView: View {
     let tekiyoID: String
     let username: String
     
-    @State private var trustScore: Int = 3
-    @State private var lastVerification: String = "il y a 2 jours"
-    @State private var shouldNavigateToActivities = false
-    @State private var showActivitiesOverlay = false
-    @State private var searchText = ""
+    @StateObject private var state: ProfileScreenState
     
     // Pre-computed values to avoid recalculation
     private let fullName: String
@@ -21,6 +31,7 @@ struct OptimizedProfileView: View {
         self.profileImage = profileImage
         self.tekiyoID = tekiyoID
         self.username = username
+        self._state = StateObject(wrappedValue: ProfileScreenState())
         
         // Pre-compute expensive operations
         self.fullName = "\(identityData.prenom) \(identityData.nom)"
@@ -41,8 +52,8 @@ struct OptimizedProfileView: View {
                 
                 // Verification section
                 VerificationSectionView(
-                    trustScore: trustScore,
-                    lastVerification: lastVerification
+                    trustScore: state.trustScore,
+                    lastVerification: state.lastVerification
                 )
                 .padding(.bottom, 32)
                 
@@ -52,8 +63,8 @@ struct OptimizedProfileView: View {
                 
                 // Recent activities - Centered with blur and destack animation
                 RecentActivitiesCardView(
-                    showOverlay: $showActivitiesOverlay,
-                    searchText: $searchText
+                    showOverlay: $state.showActivitiesOverlay,
+                    searchText: $state.searchText
                 )
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
@@ -66,16 +77,16 @@ struct OptimizedProfileView: View {
         }
         .background(Color(.systemBackground))
         .navigationBarHidden(true)
-        .navigationDestination(isPresented: $shouldNavigateToActivities) {
+        .navigationDestination(isPresented: $state.shouldNavigateToActivities) {
             RecentActivitiesView()
         }
         .overlay(
             // Activities Overlay with blur background
             Group {
-                if showActivitiesOverlay {
+                if state.showActivitiesOverlay {
                     ActivitiesOverlayView(
-                        searchText: $searchText,
-                        showOverlay: $showActivitiesOverlay
+                        searchText: $state.searchText,
+                        showOverlay: $state.showActivitiesOverlay
                     )
                     .transition(.asymmetric(
                         insertion: .opacity.combined(with: .scale(scale: 0.9)),
@@ -85,7 +96,7 @@ struct OptimizedProfileView: View {
                 }
             }
         )
-        .animation(.easeInOut(duration: 0.3), value: showActivitiesOverlay)
+        .debugRenders("OptimizedProfileView")
     }
 }
 
@@ -108,7 +119,6 @@ struct ProfileHeaderView: View {
                         Circle()
                             .stroke(StaticGradient.profileBorder, lineWidth: 3)
                     )
-                    .drawingGroup() // Force GPU rendering for complex overlay
             } else {
                 Circle()
                     .fill(Color.gray.opacity(0.3))
@@ -202,7 +212,11 @@ struct VerificationSectionView: View {
 
 // MARK: - Share ID Section Component
 struct ShareIDSectionView: View {
-    let tekiyoID: String
+    private let codeURL: String
+    
+    init(tekiyoID: String) {
+        self.codeURL = "https://tekiyo.fr/\(tekiyoID)"
+    }
     
     var body: some View {
         VStack(spacing: 16) {
@@ -210,11 +224,10 @@ struct ShareIDSectionView: View {
                 .font(.system(size: 18, weight: .medium))
                 .foregroundColor(.blue)
             
-            // TODO: Restore OptimizedCircularCodeView when QR code functionality is needed
-            // Temporarily replaced with simple blue circle
-            Circle()
-                .fill(Color.blue)
+            OptimizedCircularCodeView(url: codeURL)
                 .frame(width: 120, height: 120)
+                .accessibilityLabel("Code Tekiyo à partager")
+                .debugRenders("QR Code - OptimizedProfileView")
             
             Text("Ce code QR prouve ton humanité.")
                 .font(.system(size: 16, weight: .regular))
@@ -237,15 +250,17 @@ struct RecentActivitiesCardView: View {
                 .foregroundColor(.primary)
             
             // Stacked activities with blur effect
-            VStack(spacing: 8) {
+            VStack(spacing: 0) {
                 ActivityRow(
                     profileImage: "person.circle.fill",
                     title: "Connexion avec Damien R.",
                     icon: "person.2.fill",
                     color: .blue
                 )
-                .blur(radius: 2)
+                .opacity(0.65)
                 .scaleEffect(0.95)
+                .offset(y: -12)
+                .allowsHitTesting(false)
                 
                 ActivityRow(
                     profileImage: "person.circle.fill",
@@ -253,8 +268,10 @@ struct RecentActivitiesCardView: View {
                     icon: "qrcode",
                     color: .blue
                 )
-                .blur(radius: 1)
+                .opacity(0.82)
                 .scaleEffect(0.98)
+                .offset(y: -4)
+                .allowsHitTesting(false)
                 
                 ActivityRow(
                     profileImage: "person.circle.fill",
@@ -262,11 +279,13 @@ struct RecentActivitiesCardView: View {
                     icon: "hand.thumbsup.fill",
                     color: .blue
                 )
-                .scaleEffect(1.0)
+                .allowsHitTesting(false)
             }
+            .padding(.vertical, 8)
             .frame(maxWidth: 250)
+            .contentShape(Rectangle())
             .onTapGesture {
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                withAnimation(.easeInOut(duration: 0.25)) {
                     showOverlay = true
                 }
             }
@@ -309,11 +328,12 @@ struct ActivitiesOverlayView: View {
     
     var body: some View {
         ZStack {
-            // Blur background
+            // Dimmed background without live blur to avoid continuous GPU work
             Color.black.opacity(0.4)
                 .ignoresSafeArea()
+                .contentShape(Rectangle())
                 .onTapGesture {
-                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                    withAnimation(.easeInOut(duration: 0.25)) {
                         showOverlay = false
                     }
                 }
@@ -343,9 +363,13 @@ struct ActivitiesOverlayView: View {
             }
             .padding(.vertical, 20)
             .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(.ultraThinMaterial)
-                    .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 10)
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(Color(.systemBackground).opacity(0.95))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                    )
+                    .shadow(color: .black.opacity(0.12), radius: 20, x: 0, y: 10)
             )
             .padding(.horizontal, 20)
         }
@@ -389,17 +413,15 @@ struct LiquidGlassSearchBar: View {
                 .font(.system(size: 16, weight: .regular))
                 .textFieldStyle(PlainTextFieldStyle())
                 .onTapGesture {
-                    withAnimation(.spring(response: 0.3)) {
+                    if !isSearching {
                         isSearching = true
                     }
                 }
             
             if !searchText.isEmpty {
                 Button(action: {
-                    withAnimation(.spring(response: 0.3)) {
-                        searchText = ""
-                        isSearching = false
-                    }
+                    searchText = ""
+                    isSearching = false
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 16, weight: .medium))
@@ -411,7 +433,7 @@ struct LiquidGlassSearchBar: View {
         .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(.ultraThinMaterial)
+                .fill(Color(.systemBackground).opacity(0.9))
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
                         .stroke(
@@ -428,7 +450,7 @@ struct LiquidGlassSearchBar: View {
                 )
         )
         .scaleEffect(isSearching ? 1.02 : 1.0)
-        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSearching)
+        .animation(.easeInOut(duration: 0.2), value: isSearching)
     }
 }
 

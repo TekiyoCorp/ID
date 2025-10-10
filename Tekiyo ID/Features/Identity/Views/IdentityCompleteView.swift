@@ -92,8 +92,9 @@ struct IdentityCompleteView: View {
                 
                 // QR Code Section
                 VStack(spacing: 12) {
-                    CircularCodeView(url: "https://tekiyo.fr/\(viewModel.tekiyoID)")
+                    OptimizedCircularCodeView(url: "https://tekiyo.fr/\(viewModel.tekiyoID)")
                         .frame(width: 120, height: 120)
+                        .debugRenders("QR Code - IdentityCompleteView")
                     
                     Text("Ce code QR prouve ton humanité.")
                         .font(.system(size: 16, weight: .regular))
@@ -138,6 +139,7 @@ struct IdentityCompleteView: View {
                 username: viewModel.username
             )
         }
+        .debugRenders("IdentityCompleteView")
     }
 }
 

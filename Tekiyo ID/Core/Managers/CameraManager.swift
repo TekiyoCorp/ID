@@ -13,26 +13,37 @@ private class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         guard let imageData = photo.fileDataRepresentation(),
               let image = UIImage(data: imageData) else {
-            completion(nil)
+            DispatchQueue.main.async { self.completion(nil) }
             return
         }
-        completion(image)
+        DispatchQueue.main.async { self.completion(image) }
     }
 }
 
 final class CameraManager: ObservableObject {
     @Published var previewLayer: AVCaptureVideoPreviewLayer?
-    @Published var isSessionRunning = false
+    @Published private(set) var isSessionRunning = false
     
     private let session = AVCaptureSession()
+    private let sessionQueue = DispatchQueue(label: "CameraManager.SessionQueue")
     private let photoOutput = AVCapturePhotoOutput()
     
+    private var isConfigured = false
+    
     func setupCamera() {
+        guard !isConfigured else {
+            startSessionIfNeeded()
+            return
+        }
+        
         guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else {
             print("CameraManager: No front camera available")
             return
         }
         print("CameraManager: Setting up front camera")
+        
+        session.beginConfiguration()
+        session.sessionPreset = .photo
         
         do {
             let input = try AVCaptureDeviceInput(device: device)
@@ -45,37 +56,56 @@ final class CameraManager: ObservableObject {
                 session.addOutput(photoOutput)
             }
             
+            try configureFrameRate(for: device)
+            
             let previewLayer = AVCaptureVideoPreviewLayer(session: session)
             previewLayer.videoGravity = .resizeAspectFill
             self.previewLayer = previewLayer
             
+            isConfigured = true
         } catch {
             print("Error setting up camera: \(error)")
         }
+        
+        session.commitConfiguration()
+        startSessionIfNeeded()
     }
     
-    func startSession() {
-        print("CameraManager: Starting session")
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            self?.session.startRunning()
-            DispatchQueue.main.async {
-                self?.isSessionRunning = true
-                print("CameraManager: Session started - \(self?.isSessionRunning ?? false)")
-            }
+    private func configureFrameRate(for device: AVCaptureDevice) throws {
+        let targetFrameRate: Double = 30
+        guard device.activeFormat.videoSupportedFrameRateRanges.contains(where: { $0.minFrameRate <= targetFrameRate && targetFrameRate <= $0.maxFrameRate }) else {
+            return
+        }
+        
+        try device.lockForConfiguration()
+        let timescale = CMTimeScale(Int32(targetFrameRate))
+        let frameDuration = CMTime(value: 1, timescale: timescale)
+        device.activeVideoMinFrameDuration = frameDuration
+        device.activeVideoMaxFrameDuration = frameDuration
+        device.unlockForConfiguration()
+    }
+    
+    func startSessionIfNeeded() {
+        sessionQueue.async { [weak self] in
+            guard let self = self, !self.session.isRunning else { return }
+            self.session.startRunning()
+            DispatchQueue.main.async { self.isSessionRunning = true }
         }
     }
     
     func stopSession() {
-        session.stopRunning()
-        isSessionRunning = false
+        sessionQueue.async { [weak self] in
+            guard let self = self, self.session.isRunning else { return }
+            self.session.stopRunning()
+            DispatchQueue.main.async { self.isSessionRunning = false }
+        }
     }
     
     func capturePhoto(completion: @escaping (UIImage?) -> Void) {
         let settings = AVCapturePhotoSettings()
-        let delegate = PhotoCaptureDelegate { image in
-            DispatchQueue.main.async {
-                completion(image)
-            }
+        let delegate = PhotoCaptureDelegate { [weak self] image in
+            completion(image)
+            self?.stopSession()
         }
         photoOutput.capturePhoto(with: settings, delegate: delegate)
     }

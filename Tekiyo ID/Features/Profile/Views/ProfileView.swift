@@ -24,14 +24,7 @@ struct ProfileView: View {
                             .clipShape(Circle())
                             .overlay(
                                 Circle()
-                                    .stroke(
-                                        LinearGradient(
-                                            colors: [Color(red: 0.61, green: 0.36, blue: 0.9), Color(red: 0.0, green: 0.73, blue: 1.0)], // #9b5de5, #00bbff
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        ),
-                                        lineWidth: 3
-                                    )
+                                    .stroke(Self.profileBorderGradient, lineWidth: 3)
                             )
                     } else {
                         Circle()
@@ -124,8 +117,9 @@ struct ProfileView: View {
                         .font(.system(size: 18, weight: .medium))
                         .foregroundColor(.blue)
                     
-                    CircularCodeView(url: "https://tekiyo.fr/\(tekiyoID)")
+                    OptimizedCircularCodeView(url: "https://tekiyo.fr/\(tekiyoID)")
                         .frame(width: 120, height: 120)
+                        .debugRenders("QR Code - ProfileView")
                     
                     Text("Ce code QR prouve ton humanité.")
                         .font(.system(size: 16, weight: .regular))
@@ -208,7 +202,19 @@ struct ProfileView: View {
         .navigationDestination(isPresented: $shouldNavigateToActivities) {
             RecentActivitiesView()
         }
+        .debugRenders("ProfileView")
     }
+}
+
+private extension ProfileView {
+    static let profileBorderGradient = LinearGradient(
+        colors: [
+            Color(red: 0.61, green: 0.36, blue: 0.9),
+            Color(red: 0.0, green: 0.73, blue: 1.0)
+        ],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
 }
 
 // MARK: - Activity Row Component

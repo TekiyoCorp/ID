@@ -10,13 +10,14 @@ final class IntroductionViewModel: ObservableObject {
     private let hapticManager: HapticManager
     
     private var returnedToZero = true
+    private var didReachFinalStep = false
     
     private let thresholds = (
-        neutralStrict: 5.0 * .pi / 180.0,
-        step2On: 30.0 * .pi / 180.0,
-        step2Off: 12.0 * .pi / 180.0,
-        step3On: 45.0 * .pi / 180.0,
-        step3Off: 35.0 * .pi / 180.0
+        neutralStrict: 3.0 * .pi / 180.0,
+        step2On: 22.0 * .pi / 180.0,
+        step2Off: 10.0 * .pi / 180.0,
+        step3On: 34.0 * .pi / 180.0,
+        step3Off: 22.0 * .pi / 180.0
     )
     
     init(
@@ -28,6 +29,7 @@ final class IntroductionViewModel: ObservableObject {
     }
     
     func startMonitoring() {
+        didReachFinalStep = false
         motionManager.onAngleUpdate = { [weak self] angle in
             guard let self = self else { return }
             Task { @MainActor in
@@ -43,6 +45,7 @@ final class IntroductionViewModel: ObservableObject {
     
     func proceedToFaceID() {
         shouldNavigateToFaceID = true
+        stopMonitoring()
     }
     
     private func handleAngleUpdate(_ smoothedAngle: Double) {
@@ -66,7 +69,10 @@ final class IntroductionViewModel: ObservableObject {
                 returnedToZero = false
             }
         case 3:
-            break
+            if !didReachFinalStep {
+                didReachFinalStep = true
+                motionManager.stopUpdates()
+            }
         default:
             break
         }
@@ -76,4 +82,3 @@ final class IntroductionViewModel: ObservableObject {
         }
     }
 }
-

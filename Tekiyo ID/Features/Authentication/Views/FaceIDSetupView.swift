@@ -52,10 +52,10 @@ struct FaceIDSetupView: View {
         .navigationDestination(isPresented: $viewModel.shouldNavigateToIdentity) {
             IdentitySetupView()
         }
+        .debugRenders("FaceIDSetupView")
     }
 }
 
 #Preview {
     FaceIDSetupView()
 }
-

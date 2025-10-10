@@ -6,7 +6,8 @@ struct OptimizedFingerprintCreationView: View {
     
     @State private var animationOffset: CGFloat = 0
     @State private var shouldNavigateToComplete = false
-    @State private var hasStartedAnimation = false
+    @State private var animationTask: Task<Void, Never>?
+    @State private var navigationTask: Task<Void, Never>?
     
     // Pre-computed gradient to avoid recalculation
     private let iconGradient = LinearGradient(
@@ -48,20 +49,48 @@ struct OptimizedFingerprintCreationView: View {
         .onAppear {
             startOptimizedAnimation()
         }
+        .onDisappear {
+            animationTask?.cancel()
+            animationTask = nil
+            navigationTask?.cancel()
+            navigationTask = nil
+            animationOffset = 0
+        }
+        .debugRenders("OptimizedFingerprintCreationView")
     }
     
     private func startOptimizedAnimation() {
-        guard !hasStartedAnimation else { return }
-        hasStartedAnimation = true
+        guard animationTask == nil else { return }
         
-        // Start animation immediately
-        withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
-            animationOffset = 8
+        let stepDuration: TimeInterval = 0.75
+        let stepNanoseconds = UInt64(stepDuration * Double(NSEC_PER_SEC))
+        let sequence: [CGFloat] = [8, -6, 4, 0]
+        
+        animationTask = Task {
+            for target in sequence {
+                if Task.isCancelled { break }
+                
+                await MainActor.run {
+                    withAnimation(.easeInOut(duration: stepDuration)) {
+                        animationOffset = target
+                    }
+                }
+                
+                try? await Task.sleep(nanoseconds: stepNanoseconds)
+            }
+            
+            await MainActor.run {
+                animationTask = nil
+            }
         }
         
-        // Single timer for navigation
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
-            shouldNavigateToComplete = true
+        navigationTask = Task {
+            try? await Task.sleep(nanoseconds: UInt64(3.5 * Double(NSEC_PER_SEC)))
+            if Task.isCancelled { return }
+            await MainActor.run {
+                shouldNavigateToComplete = true
+                navigationTask = nil
+            }
         }
     }
 }
@@ -95,7 +124,6 @@ struct AnimatedIconView: View {
             .font(.system(size: 160, weight: .medium))
             .foregroundStyle(gradient)
             .offset(y: offset)
-            .drawingGroup() // Force GPU rendering for complex gradient
     }
 }
 

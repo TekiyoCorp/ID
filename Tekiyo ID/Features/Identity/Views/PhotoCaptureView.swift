@@ -7,6 +7,7 @@ struct PhotoCaptureView: View {
     @StateObject private var viewModel: PhotoCaptureViewModel
     @State private var showImagePicker = false
     @State private var showCamera = false
+    @Environment(\.scenePhase) private var phase
     
     init(identityData: IdentityData? = nil) {
         self.identityData = identityData
@@ -69,10 +70,7 @@ struct PhotoCaptureView: View {
                 }
             }
             .onTapGesture {
-                print("Circle tapped - Camera available: \(viewModel.canAccessCamera())")
-                if viewModel.canAccessCamera() {
-                    viewModel.capturePhoto()
-                }
+                viewModel.handleCaptureCircleTap()
             }
             
             // Instructions - 2 lines
@@ -99,11 +97,7 @@ struct PhotoCaptureView: View {
                 style: .blue,
                 isEnabled: true,
                 action: {
-                    if viewModel.capturedImage != nil {
-                        viewModel.proceedToFingerprintCreation()
-                    } else {
-                        viewModel.capturePhoto()
-                    }
+                    viewModel.handlePrimaryButtonTap()
                 }
             )
             .padding(.horizontal, 48)
@@ -127,7 +121,14 @@ struct PhotoCaptureView: View {
             viewModel.requestCameraPermission()
         }
         .onDisappear {
-            viewModel.stopCamera()
+            viewModel.stopCameraSession()
+        }
+        .onChange(of: phase) { _, newPhase in
+            if newPhase == .active {
+                viewModel.resumeCameraIfNeeded()
+            } else {
+                viewModel.stopCameraSession()
+            }
         }
         .navigationDestination(isPresented: $viewModel.shouldNavigateToFingerprintCreation) {
             FingerprintCreationView(
@@ -135,6 +136,7 @@ struct PhotoCaptureView: View {
                 capturedImage: viewModel.capturedImage
             )
         }
+        .debugRenders("PhotoCaptureView")
     }
 }
 

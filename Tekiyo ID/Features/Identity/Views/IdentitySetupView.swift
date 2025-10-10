@@ -78,6 +78,7 @@ struct IdentitySetupView: View {
         .navigationDestination(isPresented: $viewModel.shouldNavigateToPhotoCapture) {
             PhotoCaptureView(identityData: viewModel.buildIdentityData())
         }
+        .debugRenders("IdentitySetupView")
     }
 
     @ViewBuilder
@@ -204,4 +205,3 @@ struct IdentitySetupView: View {
 #Preview {
     IdentitySetupView()
 }
-
