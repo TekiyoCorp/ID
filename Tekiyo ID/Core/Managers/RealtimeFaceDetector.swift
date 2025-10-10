@@ -20,7 +20,7 @@ final class RealtimeFaceDetector: NSObject, ObservableObject {
     }
     
     private var captureSession: AVCaptureSession?
-    private let videoDataOutput = AVCaptureVideoDataOutput()
+    private var videoDataOutput: AVCaptureVideoDataOutput?
     private let videoDataOutputQueue = DispatchQueue(label: "VideoDataOutputQueue")
     nonisolated(unsafe) private var lastDetectionTime: Date = .distantPast
     private let detectionInterval: TimeInterval = 0.3 // Détection toutes les 300ms
@@ -28,26 +28,51 @@ final class RealtimeFaceDetector: NSObject, ObservableObject {
     func startDetecting(session: AVCaptureSession) {
         guard !isDetecting else { return }
         
-        self.captureSession = session
+        let output = AVCaptureVideoDataOutput()
+        output.alwaysDiscardsLateVideoFrames = true
+        output.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
         
-        // Configurer la sortie vidéo pour l'analyse
-        videoDataOutput.setSampleBufferDelegate(self, queue: videoDataOutputQueue)
-        videoDataOutput.alwaysDiscardsLateVideoFrames = true
-        videoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
+        session.beginConfiguration()
+        defer { session.commitConfiguration() }
         
-        if session.canAddOutput(videoDataOutput) {
-            session.addOutput(videoDataOutput)
-            isDetecting = true
-            print("✅ RealtimeFaceDetector: Started detecting")
+        guard session.canAddOutput(output) else {
+            print("❌ RealtimeFaceDetector: Cannot add video data output")
+            return
         }
+        
+        session.addOutput(output)
+        if let connection = output.connection(with: .video) {
+            if connection.isVideoOrientationSupported {
+                connection.videoOrientation = .portrait
+            }
+            if connection.isVideoMirroringSupported {
+                connection.automaticallyAdjustsVideoMirroring = false
+                connection.isVideoMirrored = true
+            }
+        }
+        
+        output.setSampleBufferDelegate(self, queue: videoDataOutputQueue)
+        
+        self.captureSession = session
+        self.videoDataOutput = output
+        isDetecting = true
+        print("✅ RealtimeFaceDetector: Started detecting")
     }
     
     func stopDetecting() {
         guard isDetecting else { return }
-        
-        captureSession?.removeOutput(videoDataOutput)
-        captureSession = nil
         isDetecting = false
+        
+        if let output = videoDataOutput, let session = captureSession {
+            output.setSampleBufferDelegate(nil, queue: nil)
+            
+            session.beginConfiguration()
+            session.removeOutput(output)
+            session.commitConfiguration()
+        }
+        
+        videoDataOutput = nil
+        captureSession = nil
         
         Task { @MainActor in
             detectionResult = nil
@@ -180,4 +205,3 @@ extension RealtimeFaceDetector: AVCaptureVideoDataOutputSampleBufferDelegate {
         return (true, "✓ Parfait !")
     }
 }
-

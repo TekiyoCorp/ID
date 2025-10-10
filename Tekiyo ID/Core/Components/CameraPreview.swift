@@ -2,44 +2,57 @@ import SwiftUI
 import AVFoundation
 
 struct CameraPreview: UIViewRepresentable {
-    let session: AVCaptureSession
+    let previewLayer: AVCaptureVideoPreviewLayer
     
-    func makeUIView(context: Context) -> PreviewView {
-        let view = PreviewView()
-        configurePreviewLayer(in: view)
+    func makeUIView(context: Context) -> PreviewContainerView {
+        let view = PreviewContainerView()
+        view.attach(previewLayer: previewLayer)
         return view
     }
     
-    func updateUIView(_ uiView: PreviewView, context: Context) {
-        configurePreviewLayer(in: uiView)
-        uiView.previewLayer.frame = uiView.bounds
+    func updateUIView(_ uiView: PreviewContainerView, context: Context) {
+        uiView.attach(previewLayer: previewLayer)
+        uiView.updatePreviewFrame()
     }
     
-    private func configurePreviewLayer(in view: PreviewView) {
-        let previewLayer = view.previewLayer
-        if previewLayer.session !== session {
-            previewLayer.session = session
-        }
-        previewLayer.videoGravity = .resizeAspectFill
+    final class PreviewContainerView: UIView {
+        private var attachedLayer: AVCaptureVideoPreviewLayer?
         
-        if let connection = previewLayer.connection {
-            if connection.isVideoOrientationSupported {
-                connection.videoOrientation = .portrait
+        func attach(previewLayer: AVCaptureVideoPreviewLayer) {
+            guard attachedLayer !== previewLayer else {
+                configure(previewLayer)
+                return
             }
-            if connection.isVideoMirroringSupported {
-                connection.automaticallyAdjustsVideoMirroring = false
-                connection.isVideoMirrored = true
-            }
-        }
-    }
-    
-    final class PreviewView: UIView {
-        override class var layerClass: AnyClass {
-            AVCaptureVideoPreviewLayer.self
+            
+            attachedLayer?.removeFromSuperlayer()
+            previewLayer.removeFromSuperlayer()
+            
+            configure(previewLayer)
+            layer.addSublayer(previewLayer)
+            attachedLayer = previewLayer
+            updatePreviewFrame()
         }
         
-        var previewLayer: AVCaptureVideoPreviewLayer {
-            layer as! AVCaptureVideoPreviewLayer
+        override func layoutSubviews() {
+            super.layoutSubviews()
+            updatePreviewFrame()
+        }
+        
+        func updatePreviewFrame() {
+            attachedLayer?.frame = bounds
+        }
+        
+        private func configure(_ layer: AVCaptureVideoPreviewLayer) {
+            layer.videoGravity = .resizeAspectFill
+            if let connection = layer.connection {
+                if connection.isVideoOrientationSupported {
+                    connection.videoOrientation = .portrait
+                }
+                if connection.isVideoMirroringSupported {
+                    connection.automaticallyAdjustsVideoMirroring = false
+                    connection.isVideoMirrored = true
+                }
+            }
         }
     }
 }

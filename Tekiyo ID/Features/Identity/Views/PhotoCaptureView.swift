@@ -61,25 +61,34 @@ struct PhotoCaptureView: View {
                         .aspectRatio(contentMode: .fill)
                         .frame(width: 253, height: 253)
                         .clipShape(Circle())
-                } else {
-                    ZStack {
-                        CameraPreview(session: viewModel.captureSession)
+                } else if let previewLayer = viewModel.previewLayer {
+                    CameraPreview(previewLayer: previewLayer)
+                        .frame(width: 253, height: 253)
+                        .clipShape(Circle())
+                        .opacity(viewModel.isSessionRunning ? 1 : 0.05)
+                        .animation(.easeInOut(duration: 0.2), value: viewModel.isSessionRunning)
+                    
+                    if !viewModel.isSessionRunning {
+                        Rectangle()
+                            .fill(Color(.systemGray6))
                             .frame(width: 253, height: 253)
                             .clipShape(Circle())
-                            .opacity(viewModel.isSessionRunning ? 1 : 0)
-                        
-                        if !viewModel.isSessionRunning {
-                            Rectangle()
-                                .fill(Color(.systemGray6))
-                                .frame(width: 253, height: 253)
-                                .clipShape(Circle())
-                                .overlay {
-                                    Image(systemName: "camera.fill")
-                                        .font(.system(size: 48))
-                                        .foregroundStyle(.secondary)
-                                }
-                        }
+                            .overlay {
+                                Image(systemName: "camera.fill")
+                                    .font(.system(size: 48))
+                                    .foregroundStyle(.secondary)
+                            }
                     }
+                } else {
+                    Rectangle()
+                        .fill(Color(.systemGray6))
+                        .frame(width: 253, height: 253)
+                        .clipShape(Circle())
+                        .overlay {
+                            Image(systemName: "camera.fill")
+                                .font(.system(size: 48))
+                                .foregroundStyle(.secondary)
+                        }
                 }
                 
                 if viewModel.cameraPermissionStatus != .authorized {

@@ -12,23 +12,28 @@ struct IdentityCompleteView: View {
     }
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 32) {
-                Spacer(minLength: 60)
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                Spacer()
                 
-                // Title
-                LargeTitle("Ton identité est prête.", alignment: .center)
+                VStack(spacing: 12) {
+                    // Title
+                    LargeTitle("Ton identité est prête.", alignment: .center)
+                    
+                    // Subtitle - 12px gap
+                    Text("Tu es désormais vérifié, unique et anonyme à la fois.")
+                        .font(.system(size: 18, weight: .regular))
+                        .appTypography(fontSize: 18)
+                        .foregroundStyle(.primary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 48)
+                }
                 
-                // Subtitle
-                Text("Tu es désormais vérifié, unique et anonyme à la fois.")
-                    .font(.system(size: 18, weight: .regular))
-                    .appTypography(fontSize: 18)
-                    .foregroundStyle(.primary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 48)
+                Spacer()
+                    .frame(height: 32)
                 
-                // Profile Card
-                VStack(spacing: 16) {
+                // Profile Card - 254x254, padding 24, border radius 24
+                VStack(spacing: 12) {
                     // Profile Photo
                     if let profileImage = viewModel.profileUIImage {
                         Image(uiImage: profileImage)
@@ -57,19 +62,20 @@ struct IdentityCompleteView: View {
                         .appTypography(fontSize: 18)
                         .foregroundStyle(.primary)
                     
-                    // Username
+                    // Username - 6px gap
                     Text(viewModel.username)
                         .font(.system(size: 14, weight: .regular))
                         .appTypography(fontSize: 14)
                         .foregroundStyle(.secondary)
+                        .padding(.top, -6) // 6px gap au lieu de 12
                     
-                    // Separator
+                    // Separator - 12px gap
                     Rectangle()
                         .fill(Color(.systemGray5))
                         .frame(height: 1)
                         .padding(.horizontal, 20)
                     
-                    // Tekiyo ID
+                    // Tekiyo ID - 12px gap
                     HStack {
                         Text("Tekiyo ID")
                             .font(.system(size: 14, weight: .regular))
@@ -85,48 +91,27 @@ struct IdentityCompleteView: View {
                     }
                     .padding(.horizontal, 20)
                 }
+                .frame(width: 254, height: 254)
                 .padding(24)
                 .background(Color(.systemGray6))
-                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .clipShape(RoundedRectangle(cornerRadius: 24))
+                
+                Spacer()
+                    .frame(height: 40)
+                
+                // Action Button
+                PrimaryButton(
+                    title: "Afficher mon profil Tekiyo",
+                    style: .blue,
+                    action: {
+                        shouldNavigateToProfile = true
+                    }
+                )
                 .padding(.horizontal, 48)
                 
-                // QR Code Section
-                VStack(spacing: 12) {
-                    OptimizedCircularCodeView(url: "https://tekiyo.fr/\(viewModel.tekiyoID)")
-                        .frame(width: 120, height: 120)
-                        .debugRenders("QR Code - IdentityCompleteView")
-                    
-                    Text("Ce code QR prouve ton humanité.")
-                        .font(.system(size: 16, weight: .regular))
-                        .appTypography(fontSize: 16)
-                        .foregroundStyle(.primary)
-                        .opacity(0.7)
-                        .multilineTextAlignment(.center)
-                }
-                
-                Spacer(minLength: 40)
-                
-                // Action Buttons
-                VStack(spacing: 16) {
-                    Button("Partager mon ID") {
-                        // TODO: Implement share functionality
-                    }
-                    .font(.system(size: 17, weight: .medium))
-                    .appTypography(fontSize: 17)
-                    .foregroundStyle(Color(red: 0.0, green: 0.18, blue: 1.0))
-                    
-                    PrimaryButton(
-                        title: "Afficher mon profil Tekiyo",
-                        style: .blue,
-                        action: {
-                            shouldNavigateToProfile = true
-                        }
-                    )
-                    .padding(.horizontal, 48)
-                }
-                
-                Spacer(minLength: 40)
+                Spacer()
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemBackground))

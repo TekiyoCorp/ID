@@ -17,6 +17,7 @@ final class PhotoCaptureViewModel: ObservableObject {
     }
     @Published var cameraPermissionStatus: AVAuthorizationStatus = .notDetermined
     @Published var shouldNavigateToFingerprintCreation = false
+    @Published var previewLayer: AVCaptureVideoPreviewLayer?
     @Published private(set) var isSessionRunning = false
     @Published var validationError: String?
     @Published var isValidating = false
@@ -48,6 +49,13 @@ final class PhotoCaptureViewModel: ObservableObject {
                 } else {
                     self?.faceDetector.stopDetecting()
                 }
+            }
+            .store(in: &cancellables)
+        
+        cameraManager.$previewLayer
+            .receive(on: RunLoop.main)
+            .sink { [weak self] layer in
+                self?.previewLayer = layer
             }
             .store(in: &cancellables)
         
@@ -207,4 +215,3 @@ final class PhotoCaptureViewModel: ObservableObject {
         shouldNavigateToFingerprintCreation = true
     }
 }
-
