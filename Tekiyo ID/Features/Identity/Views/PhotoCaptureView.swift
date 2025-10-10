@@ -81,12 +81,40 @@ struct PhotoCaptureView: View {
                 .opacity(0.7)
                 .multilineTextAlignment(.center)
             
-            // Debug info
+            // Debug info and permission handling
             if !viewModel.canAccessCamera() {
-                Text("Caméra non disponible - Permission: \(viewModel.cameraPermissionStatus.rawValue)")
-                    .font(.caption)
-                    .foregroundStyle(.red)
-                    .padding(.top, 8)
+                VStack(spacing: 12) {
+                    Text(viewModel.cameraPermissionMessage)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(.red)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                    
+                    if viewModel.cameraPermissionStatus == .denied {
+                        Button("Ouvrir les Réglages") {
+                            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                                UIApplication.shared.open(settingsURL)
+                            }
+                        }
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Color.blue)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                    } else if viewModel.cameraPermissionStatus == .notDetermined {
+                        Button("Autoriser l'accès à la caméra") {
+                            viewModel.requestCameraPermission()
+                        }
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Color.blue)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
+                }
+                .padding(.top, 8)
             }
             
             Spacer()

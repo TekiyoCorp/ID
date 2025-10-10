@@ -31,6 +31,21 @@ final class PhotoCaptureViewModel: ObservableObject {
         cameraManager.previewLayer
     }
     
+    var cameraPermissionMessage: String {
+        switch cameraPermissionStatus {
+        case .notDetermined:
+            return "L'accès à la caméra n'a pas encore été autorisé. Appuyez sur le bouton ci-dessous pour autoriser."
+        case .denied:
+            return "L'accès à la caméra a été refusé. Veuillez l'activer dans les Réglages de votre iPhone."
+        case .restricted:
+            return "L'accès à la caméra est restreint sur cet appareil."
+        case .authorized:
+            return "Caméra autorisée"
+        @unknown default:
+            return "Statut de la caméra inconnu"
+        }
+    }
+    
     func requestCameraPermission() {
         let status = AVCaptureDevice.authorizationStatus(for: .video)
         print("PhotoCaptureViewModel: Camera permission status: \(status.rawValue)")
