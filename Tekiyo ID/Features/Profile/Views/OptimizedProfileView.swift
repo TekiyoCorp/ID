@@ -190,7 +190,10 @@ struct ShareIDSectionView: View {
                 .font(.system(size: 18, weight: .medium))
                 .foregroundColor(.blue)
             
-            OptimizedCircularCodeView(url: "https://tekiyo.fr/\(tekiyoID)")
+            // TODO: Restore OptimizedCircularCodeView when QR code functionality is needed
+            // Temporarily replaced with simple blue circle
+            Circle()
+                .fill(Color.blue)
                 .frame(width: 120, height: 120)
             
             Text("Ce code QR prouve ton humanité.")
