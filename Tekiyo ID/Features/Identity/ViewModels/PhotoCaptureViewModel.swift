@@ -39,15 +39,13 @@ final class PhotoCaptureViewModel: ObservableObject {
         cameraManager.$isSessionRunning
             .receive(on: RunLoop.main)
             .sink { [weak self] running in
-                self?.isSessionRunning = running
+                guard let self = self else { return }
+                self.isSessionRunning = running
                 
-                // Démarrer/arrêter la détection en temps réel
                 if running {
-                    if let session = self?.cameraManager.captureSession {
-                        self?.faceDetector.startDetecting(session: session)
-                    }
+                    self.faceDetector.startDetecting(with: self.cameraManager)
                 } else {
-                    self?.faceDetector.stopDetecting()
+                    self.faceDetector.stopDetecting()
                 }
             }
             .store(in: &cancellables)
@@ -67,11 +65,6 @@ final class PhotoCaptureViewModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
-    
-    var captureSession: AVCaptureSession {
-        cameraManager.captureSession
-    }
-    
     var cameraPermissionMessage: String {
         switch cameraPermissionStatus {
         case .notDetermined:

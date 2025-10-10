@@ -20,59 +20,38 @@ final class RealtimeFaceDetector: NSObject, ObservableObject {
     }
     
     private var captureSession: AVCaptureSession?
-    private var videoDataOutput: AVCaptureVideoDataOutput?
+    private let videoDataOutput = AVCaptureVideoDataOutput()
     private let videoDataOutputQueue = DispatchQueue(label: "VideoDataOutputQueue")
-    nonisolated(unsafe) private var lastDetectionTime: Date = .distantPast
-    private let detectionInterval: TimeInterval = 0.3 // Détection toutes les 300ms
+    private var lastDetectionTime = Date.distantPast
+    private let detectionInterval: TimeInterval = 0.3
     
     func startDetecting(session: AVCaptureSession) {
         guard !isDetecting else { return }
         
-        let output = AVCaptureVideoDataOutput()
-        output.alwaysDiscardsLateVideoFrames = true
-        output.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
-        
-        session.beginConfiguration()
-        defer { session.commitConfiguration() }
-        
-        guard session.canAddOutput(output) else {
-            print("❌ RealtimeFaceDetector: Cannot add video data output")
-            return
-        }
-        
-        session.addOutput(output)
-        if let connection = output.connection(with: .video) {
-            if connection.isVideoOrientationSupported {
-                connection.videoOrientation = .portrait
-            }
-            if connection.isVideoMirroringSupported {
-                connection.automaticallyAdjustsVideoMirroring = false
-                connection.isVideoMirrored = true
-            }
-        }
-        
-        output.setSampleBufferDelegate(self, queue: videoDataOutputQueue)
-        
         self.captureSession = session
-        self.videoDataOutput = output
-        isDetecting = true
-        print("✅ RealtimeFaceDetector: Started detecting")
+        
+        // Configurer la sortie vidéo pour l'analyse
+        videoDataOutput.setSampleBufferDelegate(self, queue: videoDataOutputQueue)
+        videoDataOutput.alwaysDiscardsLateVideoFrames = true
+        videoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
+        
+        if session.canAddOutput(videoDataOutput) {
+            session.addOutput(videoDataOutput)
+            isDetecting = true
+            print("✅ RealtimeFaceDetector: Started detecting")
+        }
     }
     
     func stopDetecting() {
         guard isDetecting else { return }
-        isDetecting = false
         
-        if let output = videoDataOutput, let session = captureSession {
-            output.setSampleBufferDelegate(nil, queue: nil)
-            
-            session.beginConfiguration()
-            session.removeOutput(output)
-            session.commitConfiguration()
+        if let session = captureSession {
+            session.removeOutput(videoDataOutput)
         }
         
-        videoDataOutput = nil
         captureSession = nil
+        isDetecting = false
+        lastDetectionTime = .distantPast
         
         Task { @MainActor in
             detectionResult = nil
@@ -85,10 +64,10 @@ final class RealtimeFaceDetector: NSObject, ObservableObject {
 // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
 extension RealtimeFaceDetector: AVCaptureVideoDataOutputSampleBufferDelegate {
     nonisolated func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        // Limiter la fréquence de détection
+        // Limiter la fréquence de détection avec une vérification thread-safe
         let now = Date()
-        guard now.timeIntervalSince(lastDetectionTime) >= detectionInterval else { return }
-        lastDetectionTime = now
+        let interval = now.timeIntervalSince(lastDetectionTime)
+        guard interval >= detectionInterval else { return }
         
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         

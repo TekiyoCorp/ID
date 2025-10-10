@@ -10,6 +10,7 @@ final class CameraManager: ObservableObject {
     
     private let session = AVCaptureSession()
     private let photoOutput = AVCapturePhotoOutput()
+    private let videoDataOutput = AVCaptureVideoDataOutput()
     private var captureDelegate: PhotoCaptureDelegate?
     
     private var isConfigured = false
@@ -60,6 +61,29 @@ final class CameraManager: ObservableObject {
                 
                 // Configure frame rate
                 try? configureFrameRate(for: device)
+                
+                // Configure video data output for real-time processing
+                videoDataOutput.alwaysDiscardsLateVideoFrames = true
+                videoDataOutput.videoSettings = [
+                    kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)
+                ]
+                
+                if session.canAddOutput(videoDataOutput) {
+                    session.addOutput(videoDataOutput)
+                    
+                    if let connection = videoDataOutput.connection(with: .video) {
+                        if connection.isVideoOrientationSupported {
+                            connection.videoOrientation = .portrait
+                        }
+                        if connection.isVideoMirroringSupported {
+                            connection.automaticallyAdjustsVideoMirroring = false
+                            connection.isVideoMirrored = true
+                        }
+                    }
+                } else {
+                    print("❌ CameraManager: Cannot add video output")
+                }
+                
                 // Create preview layer
                 let layer = AVCaptureVideoPreviewLayer(session: session)
                 layer.videoGravity = .resizeAspectFill
@@ -163,6 +187,24 @@ final class CameraManager: ObservableObject {
         }
         
         photoOutput.capturePhoto(with: settings, delegate: captureDelegate!)
+    }
+    
+    func setVideoDataOutputDelegate(_ delegate: AVCaptureVideoDataOutputSampleBufferDelegate?, queue: DispatchQueue?) {
+        if let delegate = delegate, let queue = queue {
+            videoDataOutput.setSampleBufferDelegate(delegate, queue: queue)
+        } else {
+            videoDataOutput.setSampleBufferDelegate(nil, queue: nil)
+        }
+        
+        if let connection = videoDataOutput.connection(with: .video) {
+            if connection.isVideoOrientationSupported {
+                connection.videoOrientation = .portrait
+            }
+            if connection.isVideoMirroringSupported {
+                connection.automaticallyAdjustsVideoMirroring = false
+                connection.isVideoMirrored = true
+            }
+        }
     }
     
     var captureSession: AVCaptureSession {
