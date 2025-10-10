@@ -67,10 +67,18 @@ struct OptimizedProfileView: View {
                             }
                         }
                         .pickerStyle(.menu)
+                        .tint(Color(hex: "002FFF"))
                         .accessibilityLabel("Choisir la nationalité")
                         
+                        // Debug: Afficher la valeur sélectionnée
+                        #if DEBUG
+                        Text("Sélectionné: '\(state.selectedNationality)' - Complete: \(state.isNationalityComplete ? "Oui" : "Non")")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                        #endif
+                        
                         // Bouton Suivant (visible dès qu'une nationalité est sélectionnée)
-                        if state.isNationalityComplete {
+                        if !state.selectedNationality.isEmpty && state.selectedNationality != "" {
                             Button(action: {
                                 state.completedSteps.insert(.nationalite)
                                 state.currentStep = .resume
@@ -87,6 +95,7 @@ struct OptimizedProfileView: View {
                                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                             }
                             .accessibilityLabel("Continuer vers le profil")
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
                         }
                     }
                     .padding(.horizontal, 24)
