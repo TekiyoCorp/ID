@@ -39,17 +39,20 @@ struct PhotoCaptureView: View {
             
             // Camera preview circle
             ZStack {
-                // Dashed circle - changes color based on validation state
+                // Dashed circle - changes color based on face detection and validation state
                 Circle()
                     .stroke(
                         viewModel.validationError != nil ? Color.red :
                         viewModel.isValidating ? Color.orange :
+                        viewModel.faceDetectionResult?.isValid == true ? Color.green :
+                        viewModel.faceDetectionResult != nil ? Color.orange :
                         Color(red: 0.0, green: 0.187, blue: 1.0),
-                        style: StrokeStyle(lineWidth: 2, dash: [8, 8])
+                        style: StrokeStyle(lineWidth: 3, dash: [8, 8])
                     )
                     .frame(width: 253, height: 253)
                     .animation(.easeInOut(duration: 0.3), value: viewModel.validationError != nil)
                     .animation(.easeInOut(duration: 0.3), value: viewModel.isValidating)
+                    .animation(.easeInOut(duration: 0.2), value: viewModel.faceDetectionResult?.isValid)
                 
                 // Camera preview or captured image
                 if let image = viewModel.capturedImage {
@@ -64,16 +67,6 @@ struct PhotoCaptureView: View {
                             .frame(width: 253, height: 253)
                             .clipShape(Circle())
                             .opacity(viewModel.isSessionRunning ? 1 : 0)
-                        
-                        // Overlay de détection de visage en temps réel
-                        if viewModel.isSessionRunning && viewModel.faceDetectionResult != nil {
-                            FaceDetectionOverlay(
-                                detectionResult: viewModel.faceDetectionResult,
-                                frameSize: CGSize(width: 253, height: 253)
-                            )
-                            .frame(width: 253, height: 253)
-                            .clipShape(Circle())
-                        }
                         
                         if !viewModel.isSessionRunning {
                             Rectangle()
@@ -136,7 +129,7 @@ struct PhotoCaptureView: View {
                 viewModel.handleCaptureCircleTap()
             }
             
-            // Instructions or validation error
+            // Instructions, face detection feedback, or validation error
             if let error = viewModel.validationError {
                 VStack(spacing: 8) {
                     Text("Photo non conforme")
@@ -158,6 +151,13 @@ struct PhotoCaptureView: View {
                         .font(.system(size: 18, weight: .medium))
                         .foregroundStyle(.primary)
                 }
+            } else if let faceResult = viewModel.faceDetectionResult, let message = faceResult.message {
+                // Message de détection en temps réel
+                Text(message)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(faceResult.isValid ? .green : .orange)
+                    .multilineTextAlignment(.center)
+                    .animation(.easeInOut(duration: 0.2), value: message)
             } else {
                 Text("Regarde droit devant.\nPas de filtre. Bonne lumière.")
                     .font(.system(size: 18, weight: .medium))

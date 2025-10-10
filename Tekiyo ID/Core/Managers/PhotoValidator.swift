@@ -70,10 +70,10 @@ final class PhotoValidator {
             errors.append(.poorLighting)
         }
         
-        // 2. Vérifier le flou
-        if !checkSharpness(image: cgImage) {
-            errors.append(.blurryImage)
-        }
+        // 2. Vérifier le flou - DÉSACTIVÉ (trop strict)
+        // if !checkSharpness(image: cgImage) {
+        //     errors.append(.blurryImage)
+        // }
         
         // 3. Détecter et valider le visage
         let faceErrors = await validateFace(cgImage: cgImage)

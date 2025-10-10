@@ -1,6 +1,7 @@
 import AVFoundation
 import Vision
 import UIKit
+import Combine
 
 struct FaceDetectionResult {
     let isValid: Bool
@@ -10,13 +11,18 @@ struct FaceDetectionResult {
 
 @MainActor
 final class RealtimeFaceDetector: NSObject, ObservableObject {
+    
     @Published var detectionResult: FaceDetectionResult?
     @Published var isDetecting = false
+
+    override init() {
+        super.init()
+    }
     
     private var captureSession: AVCaptureSession?
     private let videoDataOutput = AVCaptureVideoDataOutput()
     private let videoDataOutputQueue = DispatchQueue(label: "VideoDataOutputQueue")
-    private var lastDetectionTime: Date = .distantPast
+    nonisolated(unsafe) private var lastDetectionTime: Date = .distantPast
     private let detectionInterval: TimeInterval = 0.3 // Détection toutes les 300ms
     
     func startDetecting(session: AVCaptureSession) {

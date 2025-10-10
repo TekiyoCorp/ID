@@ -192,16 +192,19 @@ final class PhotoCaptureViewModel: ObservableObject {
         }
     }
     
-    func stopCameraSession() {
+    @MainActor func stopCameraSession() {
         faceDetector.stopDetecting()
         cameraManager.stopSession()
     }
     
     deinit {
-        faceDetector.stopDetecting()
+        Task { @MainActor in
+            self.faceDetector.stopDetecting()
+        }
     }
     
     func proceedToFingerprintCreation() {
         shouldNavigateToFingerprintCreation = true
     }
 }
+
