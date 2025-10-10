@@ -39,10 +39,17 @@ struct PhotoCaptureView: View {
             
             // Camera preview circle
             ZStack {
-                // Dashed circle
+                // Dashed circle - changes color based on validation state
                 Circle()
-                    .stroke(Color(red: 0.0, green: 0.187, blue: 1.0), style: StrokeStyle(lineWidth: 2, dash: [8, 8]))
+                    .stroke(
+                        viewModel.validationError != nil ? Color.red :
+                        viewModel.isValidating ? Color.orange :
+                        Color(red: 0.0, green: 0.187, blue: 1.0),
+                        style: StrokeStyle(lineWidth: 2, dash: [8, 8])
+                    )
                     .frame(width: 253, height: 253)
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.validationError != nil)
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.isValidating)
                 
                 // Camera preview or captured image
                 if let image = viewModel.capturedImage {
@@ -51,70 +58,101 @@ struct PhotoCaptureView: View {
                         .aspectRatio(contentMode: .fill)
                         .frame(width: 253, height: 253)
                         .clipShape(Circle())
-                } else if let previewLayer = viewModel.previewLayer {
-                    // Live camera preview
-                    CameraPreview(previewLayer: previewLayer)
-                        .frame(width: 253, height: 253)
-                        .clipShape(Circle())
                 } else {
-                    // Camera preview placeholder
-                    Rectangle()
-                        .fill(Color(.systemGray6))
+                    CameraPreview(session: viewModel.captureSession)
                         .frame(width: 253, height: 253)
                         .clipShape(Circle())
-                        .overlay {
-                            Image(systemName: "camera.fill")
-                                .font(.system(size: 48))
-                                .foregroundStyle(.secondary)
-                        }
+                        .opacity(viewModel.isSessionRunning ? 1 : 0)
+                    
+                    if !viewModel.isSessionRunning {
+                        Rectangle()
+                            .fill(Color(.systemGray6))
+                            .frame(width: 253, height: 253)
+                            .clipShape(Circle())
+                            .overlay {
+                                Image(systemName: "camera.fill")
+                                    .font(.system(size: 48))
+                                    .foregroundStyle(.secondary)
+                            }
+                    }
                 }
+                
+                if viewModel.cameraPermissionStatus != .authorized {
+                    Color.black.opacity(0.65)
+                        .frame(width: 253, height: 253)
+                        .clipShape(Circle())
+                    
+                    VStack(spacing: 12) {
+                        Text(viewModel.cameraPermissionMessage)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(.white)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 24)
+                        
+                        if viewModel.cameraPermissionStatus == .denied {
+                            Button("Ouvrir les Réglages") {
+                                if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                                    UIApplication.shared.open(settingsURL)
+                                }
+                            }
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(Color.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                        } else if viewModel.cameraPermissionStatus == .notDetermined {
+                            Button("Autoriser la caméra") {
+                                viewModel.requestCameraPermission()
+                            }
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(Color.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                        }
+                    }
+                }
+                
+                // Dashed circle overlayed on top
+                Circle()
+                    .stroke(Color(red: 0.0, green: 0.187, blue: 1.0), style: StrokeStyle(lineWidth: 2, dash: [8, 8]))
+                    .frame(width: 253, height: 253)
             }
             .onTapGesture {
                 viewModel.handleCaptureCircleTap()
             }
             
-            // Instructions - 2 lines
-            Text("Regarde droit devant.\nPas de filtre. Bonne lumière.")
-                .font(.system(size: 18, weight: .medium))
-                .appTypography(fontSize: 18)
-                .foregroundStyle(.primary)
-                .opacity(0.7)
-                .multilineTextAlignment(.center)
-            
-            // Debug info and permission handling
-            if !viewModel.canAccessCamera() {
-                VStack(spacing: 12) {
-                    Text(viewModel.cameraPermissionMessage)
-                        .font(.system(size: 14, weight: .medium))
+            // Instructions or validation error
+            if let error = viewModel.validationError {
+                VStack(spacing: 8) {
+                    Text("Photo non conforme")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundStyle(.red)
+                    
+                    Text(error)
+                        .font(.system(size: 16, weight: .medium))
                         .foregroundStyle(.red)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
-                    
-                    if viewModel.cameraPermissionStatus == .denied {
-                        Button("Ouvrir les Réglages") {
-                            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
-                                UIApplication.shared.open(settingsURL)
-                            }
-                        }
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(Color.blue)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                    } else if viewModel.cameraPermissionStatus == .notDetermined {
-                        Button("Autoriser l'accès à la caméra") {
-                            viewModel.requestCameraPermission()
-                        }
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(Color.blue)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                    }
                 }
-                .padding(.top, 8)
+            } else if viewModel.isValidating {
+                VStack(spacing: 8) {
+                    ProgressView()
+                        .scaleEffect(1.2)
+                    
+                    Text("Validation en cours...")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundStyle(.primary)
+                }
+            } else {
+                Text("Regarde droit devant.\nPas de filtre. Bonne lumière.")
+                    .font(.system(size: 18, weight: .medium))
+                    .appTypography(fontSize: 18)
+                    .foregroundStyle(.primary)
+                    .opacity(0.7)
+                    .multilineTextAlignment(.center)
             }
             
             Spacer()

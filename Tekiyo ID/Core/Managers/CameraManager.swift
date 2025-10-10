@@ -4,7 +4,6 @@ import Combine
 
 @MainActor
 final class CameraManager: ObservableObject {
-    @Published var previewLayer: AVCaptureVideoPreviewLayer?
     @Published var isSessionRunning = false
     @Published var errorMessage: String?
     
@@ -60,13 +59,6 @@ final class CameraManager: ObservableObject {
                 
                 // Configure frame rate
                 try? configureFrameRate(for: device)
-                
-                // Create preview layer
-                let layer = AVCaptureVideoPreviewLayer(session: session)
-                layer.videoGravity = .resizeAspectFill
-                layer.connection?.videoOrientation = .portrait
-                self.previewLayer = layer
-                print("✅ CameraManager: Preview layer created")
                 
                 session.commitConfiguration()
                 isConfigured = true
@@ -160,6 +152,10 @@ final class CameraManager: ObservableObject {
         }
         
         photoOutput.capturePhoto(with: settings, delegate: captureDelegate!)
+    }
+
+    var captureSession: AVCaptureSession {
+        session
     }
 }
 

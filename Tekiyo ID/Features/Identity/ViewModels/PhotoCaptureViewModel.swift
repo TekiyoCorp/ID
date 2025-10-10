@@ -16,19 +16,31 @@ final class PhotoCaptureViewModel: ObservableObject {
         }
     }
     @Published var cameraPermissionStatus: AVAuthorizationStatus = .notDetermined
-@Published var shouldNavigateToFingerprintCreation = false
+    @Published var shouldNavigateToFingerprintCreation = false
+    @Published private(set) var isSessionRunning = false
+    @Published var validationError: String?
+    @Published var isValidating = false
     
     let identityData: IdentityData?
     
     private let cameraManager = CameraManager()
+    private let photoValidator = PhotoValidator.shared
     private var isCameraConfigured = false
+    private var cancellables = Set<AnyCancellable>()
     
     init(identityData: IdentityData? = nil) {
         self.identityData = identityData
+        cameraPermissionStatus = AVCaptureDevice.authorizationStatus(for: .video)
+        cameraManager.$isSessionRunning
+            .receive(on: RunLoop.main)
+            .sink { [weak self] running in
+                self?.isSessionRunning = running
+            }
+            .store(in: &cancellables)
     }
     
-    var previewLayer: AVCaptureVideoPreviewLayer? {
-        cameraManager.previewLayer
+    var captureSession: AVCaptureSession {
+        cameraManager.captureSession
     }
     
     var cameraPermissionMessage: String {
@@ -118,16 +130,49 @@ final class PhotoCaptureViewModel: ObservableObject {
         cameraManager.capturePhoto { [weak self] image in
             guard let self = self else { return }
             print("PhotoCaptureViewModel: Photo captured callback received: \(image != nil ? "Success" : "Failed")")
-            self.capturedImage = image
+            
+            guard let image = image else {
+                self.validationError = "Échec de la capture photo"
+                return
+            }
+            
+            // Valider la photo
+            self.validateCapturedPhoto(image)
+        }
+    }
+    
+    private func validateCapturedPhoto(_ image: UIImage) {
+        print("🔍 PhotoCaptureViewModel: Starting photo validation...")
+        isValidating = true
+        validationError = nil
+        
+        Task {
+            let result = await photoValidator.validatePhoto(image)
+            
+            await MainActor.run {
+                isValidating = false
+                
+                if result.isValid {
+                    print("✅ PhotoCaptureViewModel: Photo is valid!")
+                    self.capturedImage = image
+                    HapticManager.shared.success()
+                } else {
+                    print("❌ PhotoCaptureViewModel: Photo is invalid")
+                    self.validationError = result.errorMessage
+                    HapticManager.shared.error()
+                    
+                    // Redémarrer la caméra pour reprendre une photo
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                        self.validationError = nil
+                        self.cameraManager.startSessionIfNeeded()
+                    }
+                }
+            }
         }
     }
     
     func stopCameraSession() {
         cameraManager.stopSession()
-    }
-    
-    func canAccessCamera() -> Bool {
-        cameraPermissionStatus == .authorized
     }
     
     func proceedToFingerprintCreation() {

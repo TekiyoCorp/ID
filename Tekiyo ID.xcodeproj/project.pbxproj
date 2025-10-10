@@ -6,11 +6,8 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-/* End PBXBuildFile section */
-
 /* Begin PBXFileReference section */
-	310AC6082E98207B00E9B5A1 /* Tekiyo ID.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tekiyo ID.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		310AC6082E98207B00E9B5A1 /* Tekiyo ID.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tekiyo ID.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -32,14 +29,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-	310AC5FF2E98207B00E9B5A1 = {
-		isa = PBXGroup;
-		children = (
-			310AC60A2E98207B00E9B5A1 /* Tekiyo ID */,
-			310AC6092E98207B00E9B5A1 /* Products */,
-		);
-		sourceTree = "<group>";
-	};
+		310AC5FF2E98207B00E9B5A1 = {
+			isa = PBXGroup;
+			children = (
+				310AC60A2E98207B00E9B5A1 /* Tekiyo ID */,
+				310AC6092E98207B00E9B5A1 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
 		310AC6092E98207B00E9B5A1 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -118,13 +115,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-	310AC6042E98207B00E9B5A1 /* Sources */ = {
-		isa = PBXSourcesBuildPhase;
-		buildActionMask = 2147483647;
-		files = (
-		);
-		runOnlyForDeploymentPostprocessing = 0;
-	};
+		310AC6042E98207B00E9B5A1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
