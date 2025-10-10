@@ -250,22 +250,6 @@ struct RecentActivitiesSectionView: View {
 
 // MARK: - Social Links Section Component
 struct SocialLinksSectionView: View {
-    // Pre-computed social links data
-    private let socialLinks = [
-        ("Facebook", "f.circle.fill", Color.blue),
-        ("Twitter", "bird.fill", Color.blue),
-        ("Instagram", "camera.fill", Color.pink),
-        ("Snapchat", "ghost.fill", Color.yellow),
-        ("LinkedIn", "briefcase.fill", Color.blue),
-        ("GitHub", "terminal.fill", Color.black),
-        ("TikTok", "music.note", Color.black),
-        ("Discord", "bubble.left.fill", Color.blue),
-        ("Telegram", "paperplane.fill", Color.blue),
-        ("Gmail", "envelope.fill", Color.red),
-        ("WhatsApp", "bubble.left.and.bubble.right.fill", Color.green),
-        ("YouTube", "play.rectangle.fill", Color.red)
-    ]
-    
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Liens")
@@ -274,9 +258,18 @@ struct SocialLinksSectionView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 12) {
-                ForEach(socialLinks, id: \.0) { platform, icon, color in
-                    SocialCapsuleButton(platform: platform, icon: icon, color: color)
-                }
+                SocialCapsuleButton(platform: "Facebook", icon: "f.circle.fill", color: .blue)
+                SocialCapsuleButton(platform: "Twitter", icon: "bird.fill", color: .blue)
+                SocialCapsuleButton(platform: "Instagram", icon: "camera.fill", color: .pink)
+                SocialCapsuleButton(platform: "Snapchat", icon: "ghost.fill", color: .yellow)
+                SocialCapsuleButton(platform: "LinkedIn", icon: "briefcase.fill", color: .blue)
+                SocialCapsuleButton(platform: "GitHub", icon: "terminal.fill", color: .black)
+                SocialCapsuleButton(platform: "TikTok", icon: "music.note", color: .black)
+                SocialCapsuleButton(platform: "Discord", icon: "bubble.left.fill", color: .blue)
+                SocialCapsuleButton(platform: "Telegram", icon: "paperplane.fill", color: .blue)
+                SocialCapsuleButton(platform: "Gmail", icon: "envelope.fill", color: .red)
+                SocialCapsuleButton(platform: "WhatsApp", icon: "bubble.left.and.bubble.right.fill", color: .green)
+                SocialCapsuleButton(platform: "YouTube", icon: "play.rectangle.fill", color: .red)
             }
         }
     }
