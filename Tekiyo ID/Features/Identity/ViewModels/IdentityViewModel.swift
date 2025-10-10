@@ -33,7 +33,7 @@ final class IdentityViewModel: ObservableObject {
     }
     
     var isComplete: Bool {
-        currentStep == .ville && !ville.isEmpty
+        currentStep == .nationalite && !nationalite.isEmpty
     }
     
     
@@ -82,7 +82,7 @@ final class IdentityViewModel: ObservableObject {
     }
     
     func validate() -> Bool {
-        !nom.isEmpty && !prenom.isEmpty && !nationalite.isEmpty && !metier.isEmpty && !ville.isEmpty
+        !nom.isEmpty && !prenom.isEmpty && !nationalite.isEmpty
     }
     
     func buildIdentityData() -> IdentityData? {
@@ -92,8 +92,8 @@ final class IdentityViewModel: ObservableObject {
             prenom: prenom,
             dateNaissance: dateNaissance,
             nationalite: nationalite,
-            metier: metier,
-            ville: ville
+            metier: metier.isEmpty ? "Non spécifié" : metier,
+            ville: ville.isEmpty ? "Non spécifiée" : ville
         )
     }
     
