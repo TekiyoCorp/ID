@@ -102,7 +102,7 @@ private func generateDots(from url: String, size: CGFloat) -> [DotPosition] {
         
         // Create spiral pattern with increasing radius
         let progress = Double(i) / Double(targetDotCount - 1)
-        let radius = minRadius + (maxRadius - minRadius) * progress
+        let radius = Double(minRadius) + (Double(maxRadius) - Double(minRadius)) * progress
         
         // Add some variation using adjacent hash bytes
         let variationByte = hashBytes[(byteIndex + 1) % hashBytes.count]
@@ -114,8 +114,8 @@ private func generateDots(from url: String, size: CGFloat) -> [DotPosition] {
         let y = sin(angle) * finalRadius
         
         // Only add dots that fit within the circle
-        if sqrt(x*x + y*y) <= maxRadius {
-            dots.append(DotPosition(x: x, y: y))
+        if sqrt(x*x + y*y) <= Double(maxRadius) {
+            dots.append(DotPosition(x: CGFloat(x), y: CGFloat(y)))
         }
     }
     
