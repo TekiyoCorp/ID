@@ -7,8 +7,8 @@ final class IdentityCompleteViewModel: ObservableObject {
     @Published var tekiyoID: String = ""
     @Published var username: String = ""
     
-    private let identityData: IdentityData
-    private let profileImage: UIImage?
+    let identityData: IdentityData
+    let profileImage: UIImage?
     
     init(identityData: IdentityData, profileImage: UIImage?) {
         self.identityData = identityData
