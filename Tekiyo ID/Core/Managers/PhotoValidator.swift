@@ -146,37 +146,37 @@ final class PhotoValidator {
     private func analyzeFace(_ face: VNFaceObservation, imageSize: CGSize) -> [PhotoValidationError] {
         var errors: [PhotoValidationError] = []
         
-        // 1. Vérifier la taille du visage (doit occuper au moins 30% de l'image)
+        // 1. Vérifier la taille du visage (assoupli: 8% minimum au lieu de 15%)
         let faceArea = face.boundingBox.width * face.boundingBox.height
-        print("🔍 PhotoValidator: Face area: \(faceArea * 100)%")
+        print("🔍 PhotoValidator: Face area: \(String(format: "%.1f", faceArea * 100))%")
         
-        if faceArea < 0.15 { // 15% minimum
+        if faceArea < 0.08 { // 8% minimum (plus permissif)
             errors.append(.faceTooSmall)
         }
         
-        // 2. Vérifier le centrage (visage doit être au centre)
+        // 2. Vérifier le centrage (assoupli: plus de marge)
         let faceCenterX = face.boundingBox.midX
         let faceCenterY = face.boundingBox.midY
-        print("🔍 PhotoValidator: Face center: x=\(faceCenterX), y=\(faceCenterY)")
+        print("🔍 PhotoValidator: Face center: x=\(String(format: "%.2f", faceCenterX)), y=\(String(format: "%.2f", faceCenterY))")
         
-        // Le visage doit être dans le tiers central horizontal et vertical
-        if faceCenterX < 0.3 || faceCenterX > 0.7 || faceCenterY < 0.3 || faceCenterY > 0.7 {
+        // Le visage doit être dans une zone plus large (20%-80% au lieu de 30%-70%)
+        if faceCenterX < 0.2 || faceCenterX > 0.8 || faceCenterY < 0.2 || faceCenterY > 0.8 {
             errors.append(.faceNotCentered)
         }
         
-        // 3. Vérifier l'angle (yaw = rotation horizontale)
+        // 3. Vérifier l'angle (yaw = rotation horizontale) - assoupli à 30°
         if let yaw = face.yaw?.doubleValue {
-            print("🔍 PhotoValidator: Face yaw: \(yaw)")
-            // Yaw doit être proche de 0 (entre -15° et +15°)
-            if abs(yaw) > 0.26 { // ~15 degrés en radians
+            print("🔍 PhotoValidator: Face yaw: \(String(format: "%.2f", yaw)) rad (\(String(format: "%.1f", yaw * 180 / .pi))°)")
+            // Yaw assoupli à 30° (0.52 radians au lieu de 0.26)
+            if abs(yaw) > 0.52 {
                 errors.append(.faceNotFrontFacing)
             }
         }
         
-        // 4. Vérifier pitch (inclinaison tête)
+        // 4. Vérifier pitch (inclinaison tête) - assoupli à 35°
         if let pitch = face.pitch?.doubleValue {
-            print("🔍 PhotoValidator: Face pitch: \(pitch)")
-            if abs(pitch) > 0.35 { // ~20 degrés
+            print("🔍 PhotoValidator: Face pitch: \(String(format: "%.2f", pitch)) rad (\(String(format: "%.1f", pitch * 180 / .pi))°)")
+            if abs(pitch) > 0.61 { // ~35 degrés (au lieu de 20)
                 errors.append(.faceNotFrontFacing)
             }
         }
@@ -215,8 +215,8 @@ final class PhotoValidator {
         let brightness = (Int(bitmap[0]) + Int(bitmap[1]) + Int(bitmap[2])) / 3
         print("🔍 PhotoValidator: Brightness: \(brightness)/255")
         
-        // Luminosité minimale : 60/255 (assez sombre mais acceptable)
-        return brightness >= 60
+        // Luminosité minimale assouplie : 40/255 (au lieu de 60)
+        return brightness >= 40
     }
     
     // MARK: - Sharpness Check (Laplacian variance)
@@ -261,8 +261,8 @@ final class PhotoValidator {
         let sharpness = Int(bitmap[0])
         print("🔍 PhotoValidator: Sharpness: \(sharpness)/255")
         
-        // Seuil de netteté : 15/255 minimum
-        return sharpness >= 15
+        // Seuil de netteté assoupli : 8/255 minimum (au lieu de 15)
+        return sharpness >= 8
     }
 }
 
