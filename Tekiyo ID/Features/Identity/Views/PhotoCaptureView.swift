@@ -3,9 +3,15 @@ import AVFoundation
 import PhotosUI
 
 struct PhotoCaptureView: View {
-    @StateObject private var viewModel = PhotoCaptureViewModel()
+    let identityData: IdentityData?
+    @StateObject private var viewModel: PhotoCaptureViewModel
     @State private var showImagePicker = false
     @State private var showCamera = false
+    
+    init(identityData: IdentityData? = nil) {
+        self.identityData = identityData
+        self._viewModel = StateObject(wrappedValue: PhotoCaptureViewModel(identityData: identityData))
+    }
     
     var body: some View {
         VStack(spacing: 24) {
@@ -124,7 +130,10 @@ struct PhotoCaptureView: View {
             viewModel.stopCamera()
         }
         .navigationDestination(isPresented: $viewModel.shouldNavigateToFingerprintCreation) {
-            FingerprintCreationView()
+            FingerprintCreationView(
+                identityData: identityData,
+                capturedImage: viewModel.capturedImage
+            )
         }
     }
 }

@@ -9,7 +9,13 @@ final class PhotoCaptureViewModel: ObservableObject {
     @Published var cameraPermissionStatus: AVAuthorizationStatus = .notDetermined
     @Published var shouldNavigateToFingerprintCreation = false
     
+    let identityData: IdentityData?
+    
     private let cameraManager = CameraManager()
+    
+    init(identityData: IdentityData? = nil) {
+        self.identityData = identityData
+    }
     
     var previewLayer: AVCaptureVideoPreviewLayer? {
         cameraManager.previewLayer

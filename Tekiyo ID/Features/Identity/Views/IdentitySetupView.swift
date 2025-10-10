@@ -76,7 +76,7 @@ struct IdentitySetupView: View {
         .onAppear { focusCurrentStep() }
         .onChange(of: viewModel.currentStep) { _, _ in focusCurrentStep() }
         .navigationDestination(isPresented: $viewModel.shouldNavigateToPhotoCapture) {
-            PhotoCaptureView()
+            PhotoCaptureView(identityData: viewModel.buildIdentityData())
         }
     }
 
