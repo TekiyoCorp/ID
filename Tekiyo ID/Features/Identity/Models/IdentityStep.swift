@@ -5,6 +5,8 @@ enum IdentityStep: Int, CaseIterable {
     case prenom
     case naissance
     case nationalite
+    case metier
+    case ville
     
     var title: String {
         switch self {
@@ -12,6 +14,8 @@ enum IdentityStep: Int, CaseIterable {
         case .prenom: return "Prénom"
         case .naissance: return "Date de naissance"
         case .nationalite: return "Nationalité"
+        case .metier: return "Métier"
+        case .ville: return "Ville"
         }
     }
     

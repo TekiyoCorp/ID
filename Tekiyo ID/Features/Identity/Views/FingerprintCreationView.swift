@@ -23,7 +23,9 @@ struct FingerprintCreationView: View {
             nom: "Dupont",
             prenom: "Marie",
             dateNaissance: Date(),
-            nationalite: "France"
+            nationalite: "France",
+            metier: "Directrice artistique",
+            ville: "Paris"
         ),
         capturedImage: nil
     )

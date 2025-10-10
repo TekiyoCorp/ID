@@ -8,6 +8,8 @@ final class IdentityViewModel: ObservableObject {
     @Published var prenom = ""
     @Published var dateNaissance = Date()
     @Published var nationalite = ""
+    @Published var metier = ""
+    @Published var ville = ""
     @Published var showSuggestions = true
     @Published var shouldNavigateToPhotoCapture = false
     
@@ -31,7 +33,7 @@ final class IdentityViewModel: ObservableObject {
     }
     
     var isComplete: Bool {
-        currentStep == .nationalite && !nationalite.isEmpty
+        currentStep == .ville && !ville.isEmpty
     }
     
     
@@ -50,6 +52,8 @@ final class IdentityViewModel: ObservableObject {
         case .prenom: return !prenom.isEmpty
         case .naissance: return true
         case .nationalite: return !nationalite.isEmpty
+        case .metier: return !metier.isEmpty
+        case .ville: return !ville.isEmpty
         }
     }
     
@@ -61,7 +65,11 @@ final class IdentityViewModel: ObservableObject {
             currentStep = .naissance
         case .naissance:
             currentStep = .nationalite
-        case .nationalite:
+        case .nationalite where !nationalite.isEmpty:
+            currentStep = .metier
+        case .metier where !metier.isEmpty:
+            currentStep = .ville
+        case .ville:
             break
         default:
             break
@@ -74,7 +82,7 @@ final class IdentityViewModel: ObservableObject {
     }
     
     func validate() -> Bool {
-        !nom.isEmpty && !prenom.isEmpty && !nationalite.isEmpty
+        !nom.isEmpty && !prenom.isEmpty && !nationalite.isEmpty && !metier.isEmpty && !ville.isEmpty
     }
     
     func buildIdentityData() -> IdentityData? {
@@ -83,7 +91,9 @@ final class IdentityViewModel: ObservableObject {
             nom: nom,
             prenom: prenom,
             dateNaissance: dateNaissance,
-            nationalite: nationalite
+            nationalite: nationalite,
+            metier: metier,
+            ville: ville
         )
     }
     

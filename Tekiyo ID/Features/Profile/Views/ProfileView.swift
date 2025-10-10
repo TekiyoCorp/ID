@@ -15,12 +15,12 @@ struct ProfileView: View {
             VStack(spacing: 0) {
                 // Header with profile info
                 VStack(spacing: 16) {
-                    // Profile picture
+                    // Profile picture (agrandie de 25%)
                     if let profileImage = profileImage {
                         Image(uiImage: profileImage)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .frame(width: 100, height: 100)
+                            .frame(width: 125, height: 125)
                             .clipShape(Circle())
                             .overlay(
                                 Circle()
@@ -29,38 +29,52 @@ struct ProfileView: View {
                     } else {
                         Circle()
                             .fill(Color.gray.opacity(0.3))
-                            .frame(width: 100, height: 100)
+                            .frame(width: 125, height: 125)
                             .overlay(
                                 Image(systemName: "person.fill")
-                                    .font(.system(size: 40))
+                                    .font(.system(size: 50))
                                     .foregroundColor(.gray)
                             )
                     }
                     
-                    // Name
-                    Text("\(identityData.prenom) \(identityData.nom)")
-                        .font(.system(size: 22, weight: .medium))
-                        .kerning(-0.6)
-                        .foregroundColor(.primary)
-                        .multilineTextAlignment(.center)
+                    VStack(spacing: 6) {
+                        // Name
+                        Text("\(identityData.prenom) \(identityData.nom)")
+                            .font(.system(size: 22, weight: .medium))
+                            .kerning(-0.6)
+                            .foregroundColor(.primary)
+                            .multilineTextAlignment(.center)
+                        
+                        // Username
+                        Text(username)
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.primary)
+                            .multilineTextAlignment(.center)
+                    }
                     
-                    // Username
-                    Text(username)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
-                        .multilineTextAlignment(.center)
-                    
-                    // Role tag
-                    Text("Directrice artistique")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.primary)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(Color.gray.opacity(0.2))
-                        .clipShape(Capsule())
+                    // Métier + Localisation
+                    HStack(spacing: 8) {
+                        Text(identityData.metier)
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(.primary)
+                        
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(width: 1, height: 12)
+                        
+                        HStack(spacing: 4) {
+                            Image(systemName: "location.fill")
+                                .font(.system(size: 12))
+                                .foregroundColor(.gray)
+                            
+                            Text(identityData.ville)
+                                .font(.system(size: 14, weight: .regular))
+                                .foregroundColor(.primary)
+                        }
+                    }
                 }
                 .padding(.top, 20)
-                .padding(.bottom, 24)
+                .padding(.bottom, 12)
                 
                 // Verification section
                 VStack(spacing: 16) {
@@ -73,28 +87,36 @@ struct ProfileView: View {
                                 .font(.system(size: 14, weight: .regular))
                                 .foregroundColor(.white)
                             
-                            Image(systemName: "checkmark")
+                            Image(systemName: "checkmark.fill")
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundColor(.white)
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
-                        .background(Color.blue)
+                        .background(Color(hex: "002FFF"))
                         .clipShape(Capsule())
                     }
+                    .padding(.bottom, 34)
                     
                     // Trust score
                     VStack(spacing: 8) {
                         Text("Trust score")
-                            .font(.system(size: 17, weight: .medium))
+                            .font(.system(size: 22, weight: .medium))
+                            .kerning(-1.32)
                             .foregroundColor(.primary)
                         
                         // Score indicator
                         HStack(spacing: 4) {
                             ForEach(0..<10, id: \.self) { index in
-                                RoundedRectangle(cornerRadius: 2)
-                                    .fill(index < trustScore ? Color.red : Color.gray.opacity(0.3))
-                                    .frame(width: 20, height: 8)
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(index < trustScore ? Color(hex: "002FFF") : Color.gray.opacity(0.3))
+                                    .frame(width: 12, height: 24)
+                                    .shadow(
+                                        color: index < trustScore ? Color(hex: "FF0000").opacity(0.25) : Color.clear,
+                                        radius: 6,
+                                        x: 0,
+                                        y: 0
+                                    )
                             }
                         }
                         
@@ -321,7 +343,9 @@ struct SocialCapsuleButton: View {
                 nom: "Dupont",
                 prenom: "Marie",
                 dateNaissance: Date(),
-                nationalite: "Française"
+                nationalite: "Française",
+                metier: "Directrice artistique",
+                ville: "Paris"
             ),
             profileImage: nil,
             tekiyoID: "3A1B-7E21",

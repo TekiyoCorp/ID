@@ -6,6 +6,8 @@ struct IdentitySetupView: View {
     @FocusState private var nomFocused: Bool
     @FocusState private var prenomFocused: Bool
     @FocusState private var nationaliteFocused: Bool
+    @FocusState private var metierFocused: Bool
+    @FocusState private var villeFocused: Bool
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -146,6 +148,20 @@ struct IdentitySetupView: View {
             }
             .frame(maxWidth: 293, alignment: .leading)
             .clipped()
+        case .metier:
+            inputField(
+                title: step.title,
+                text: $viewModel.metier,
+                focused: $metierFocused,
+                centerVertically: true
+            )
+        case .ville:
+            inputField(
+                title: step.title,
+                text: $viewModel.ville,
+                focused: $villeFocused,
+                centerVertically: true
+            )
         }
     }
 
@@ -198,6 +214,10 @@ struct IdentitySetupView: View {
             break
         case .nationalite:
             nationaliteFocused = true
+        case .metier:
+            metierFocused = true
+        case .ville:
+            villeFocused = true
         }
     }
 }
