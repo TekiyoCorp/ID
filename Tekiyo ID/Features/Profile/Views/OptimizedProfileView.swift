@@ -9,6 +9,8 @@ struct OptimizedProfileView: View {
     @State private var trustScore: Int = 3
     @State private var lastVerification: String = "il y a 2 jours"
     @State private var shouldNavigateToActivities = false
+    @State private var showActivitiesOverlay = false
+    @State private var searchText = ""
     
     // Pre-computed values to avoid recalculation
     private let fullName: String
@@ -48,9 +50,10 @@ struct OptimizedProfileView: View {
                 ShareIDSectionView(tekiyoID: tekiyoID)
                 .padding(.bottom, 32)
                 
-                // Recent activities
-                RecentActivitiesSectionView(
-                    shouldNavigateToActivities: $shouldNavigateToActivities
+                // Recent activities - Centered with blur and destack animation
+                RecentActivitiesCardView(
+                    showOverlay: $showActivitiesOverlay,
+                    searchText: $searchText
                 )
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
@@ -66,6 +69,23 @@ struct OptimizedProfileView: View {
         .navigationDestination(isPresented: $shouldNavigateToActivities) {
             RecentActivitiesView()
         }
+        .overlay(
+            // Activities Overlay with blur background
+            Group {
+                if showActivitiesOverlay {
+                    ActivitiesOverlayView(
+                        searchText: $searchText,
+                        showOverlay: $showActivitiesOverlay
+                    )
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .scale(scale: 0.9)),
+                        removal: .opacity.combined(with: .scale(scale: 1.1))
+                    ))
+                    .zIndex(1000)
+                }
+            }
+        )
+        .animation(.easeInOut(duration: 0.3), value: showActivitiesOverlay)
     }
 }
 
@@ -205,24 +225,27 @@ struct ShareIDSectionView: View {
     }
 }
 
-// MARK: - Recent Activities Section Component
-struct RecentActivitiesSectionView: View {
-    @Binding var shouldNavigateToActivities: Bool
+// MARK: - Recent Activities Card Component with Destack Animation
+struct RecentActivitiesCardView: View {
+    @Binding var showOverlay: Bool
+    @Binding var searchText: String
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(spacing: 16) {
             Text("Activités récentes")
                 .font(.system(size: 17, weight: .medium))
                 .foregroundColor(.primary)
-                .frame(maxWidth: .infinity, alignment: .leading)
             
-            VStack(spacing: 12) {
+            // Stacked activities with blur effect
+            VStack(spacing: 8) {
                 ActivityRow(
                     profileImage: "person.circle.fill",
                     title: "Connexion avec Damien R.",
                     icon: "person.2.fill",
                     color: .blue
                 )
+                .blur(radius: 2)
+                .scaleEffect(0.95)
                 
                 ActivityRow(
                     profileImage: "person.circle.fill",
@@ -230,6 +253,8 @@ struct RecentActivitiesSectionView: View {
                     icon: "qrcode",
                     color: .blue
                 )
+                .blur(radius: 1)
+                .scaleEffect(0.98)
                 
                 ActivityRow(
                     profileImage: "person.circle.fill",
@@ -237,17 +262,16 @@ struct RecentActivitiesSectionView: View {
                     icon: "hand.thumbsup.fill",
                     color: .blue
                 )
+                .scaleEffect(1.0)
             }
             .frame(maxWidth: 250)
-            
-            Button("Voir plus") {
-                shouldNavigateToActivities = true
+            .onTapGesture {
+                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                    showOverlay = true
+                }
             }
-            .font(.system(size: 16, weight: .regular))
-            .foregroundColor(.primary)
-            .frame(maxWidth: .infinity)
-            .padding(.top, 8)
         }
+        .frame(maxWidth: .infinity)
     }
 }
 
@@ -276,6 +300,146 @@ struct SocialLinksSectionView: View {
             }
         }
     }
+}
+
+// MARK: - Activities Overlay View
+struct ActivitiesOverlayView: View {
+    @Binding var searchText: String
+    @Binding var showOverlay: Bool
+    
+    var body: some View {
+        ZStack {
+            // Blur background
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                        showOverlay = false
+                    }
+                }
+            
+            // Content card
+            VStack(spacing: 20) {
+                // Liquid Glass Search Bar
+                LiquidGlassSearchBar(searchText: $searchText)
+                    .padding(.horizontal, 20)
+                
+                // Activities list
+                ScrollView {
+                    LazyVStack(spacing: 12) {
+                        ForEach(filteredActivities, id: \.id) { activity in
+                            EnhancedActivityRow(
+                                profileImage: activity.profileImage,
+                                profileColor: activity.profileColor,
+                                title: activity.title,
+                                icon: activity.icon,
+                                color: activity.color
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                }
+                .frame(maxHeight: 400)
+            }
+            .padding(.vertical, 20)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(.ultraThinMaterial)
+                    .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 10)
+            )
+            .padding(.horizontal, 20)
+        }
+    }
+    
+    private var filteredActivities: [ActivityData] {
+        if searchText.isEmpty {
+            return allActivities
+        } else {
+            return allActivities.filter { activity in
+                activity.title.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
+    
+    private let allActivities = [
+        ActivityData(id: 1, profileImage: "person.circle.fill", profileColor: .orange, title: "Connexion avec Damien R.", icon: "person.2.fill", color: .blue),
+        ActivityData(id: 2, profileImage: "person.circle.fill", profileColor: .gray, title: "Thomas S. vous a scanné.", icon: "square.dashed.inset.filled", color: .blue),
+        ActivityData(id: 3, profileImage: "person.circle.fill", profileColor: .pink.opacity(0.6), title: "Julie F. vous fait confiance.", icon: "hand.thumbsup.fill", color: .blue),
+        ActivityData(id: 4, profileImage: "person.circle.fill", profileColor: .orange, title: "Connexion avec Damien R.", icon: "person.2.fill", color: .blue),
+        ActivityData(id: 5, profileImage: "person.circle.fill", profileColor: .gray, title: "Thomas S. vous a signalé.", icon: "exclamationmark.octagon.fill", color: .red),
+        ActivityData(id: 6, profileImage: "person.circle.fill", profileColor: .pink.opacity(0.6), title: "Julie F. vous fait confiance.", icon: "hand.thumbsup.fill", color: .blue),
+        ActivityData(id: 7, profileImage: "person.circle.fill", profileColor: .orange, title: "Connexion avec Damien R.", icon: "person.2.fill", color: .blue),
+        ActivityData(id: 8, profileImage: "person.circle.fill", profileColor: .orange, title: "Connexion avec Damien R.", icon: "person.2.fill", color: .blue),
+        ActivityData(id: 9, profileImage: "person.circle.fill", profileColor: .gray, title: "Thomas S. vous a scanné.", icon: "square.dashed.inset.filled", color: .blue)
+    ]
+}
+
+// MARK: - Liquid Glass Search Bar
+struct LiquidGlassSearchBar: View {
+    @Binding var searchText: String
+    @State private var isSearching = false
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.primary.opacity(0.6))
+            
+            TextField("Rechercher dans les activités...", text: $searchText)
+                .font(.system(size: 16, weight: .regular))
+                .textFieldStyle(PlainTextFieldStyle())
+                .onTapGesture {
+                    withAnimation(.spring(response: 0.3)) {
+                        isSearching = true
+                    }
+                }
+            
+            if !searchText.isEmpty {
+                Button(action: {
+                    withAnimation(.spring(response: 0.3)) {
+                        searchText = ""
+                        isSearching = false
+                    }
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.primary.opacity(0.6))
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.3),
+                                    Color.white.opacity(0.1)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
+        )
+        .scaleEffect(isSearching ? 1.02 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSearching)
+    }
+}
+
+// MARK: - Activity Data Model
+struct ActivityData {
+    let id: Int
+    let profileImage: String
+    let profileColor: Color
+    let title: String
+    let icon: String
+    let color: Color
 }
 
 // MARK: - Static Gradient Helper
