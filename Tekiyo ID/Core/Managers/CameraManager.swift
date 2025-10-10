@@ -102,11 +102,24 @@ final class CameraManager: ObservableObject {
     }
     
     func capturePhoto(completion: @escaping (UIImage?) -> Void) {
+        print("CameraManager: capturePhoto called")
+        guard isSessionRunning else {
+            print("CameraManager: Session not running, starting...")
+            startSessionIfNeeded()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.capturePhoto(completion: completion)
+            }
+            return
+        }
+        
         let settings = AVCapturePhotoSettings()
         let delegate = PhotoCaptureDelegate { [weak self] image in
+            print("CameraManager: Photo captured: \(image != nil ? "Success" : "Failed")")
             completion(image)
             self?.stopSession()
         }
+        
+        print("CameraManager: Starting photo capture...")
         photoOutput.capturePhoto(with: settings, delegate: delegate)
     }
 }

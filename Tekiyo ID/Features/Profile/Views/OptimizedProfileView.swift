@@ -451,7 +451,7 @@ struct ActivitiesOverlayView: View {
             // Content card
             VStack(spacing: 20) {
                 // Liquid Glass Search Bar
-                LiquidGlassSearchBar(searchText: $searchText)
+                ActivitiesSearchBar(searchText: $searchText)
                     .padding(.horizontal, 20)
                 
                 // Activities list
@@ -509,7 +509,7 @@ struct ActivitiesOverlayView: View {
 }
 
 // MARK: - Liquid Glass Search Bar
-struct LiquidGlassSearchBar: View {
+struct ActivitiesSearchBar: View {
     @Binding var searchText: String
     @State private var isSearching = false
     

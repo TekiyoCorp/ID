@@ -32,13 +32,17 @@ final class PhotoCaptureViewModel: ObservableObject {
     }
     
     func requestCameraPermission() {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        let status = AVCaptureDevice.authorizationStatus(for: .video)
+        print("PhotoCaptureViewModel: Camera permission status: \(status.rawValue)")
+        
+        switch status {
         case .authorized:
             cameraPermissionStatus = .authorized
             setupCamera()
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
                 DispatchQueue.main.async {
+                    print("PhotoCaptureViewModel: Camera permission request result: \(granted)")
                     self?.cameraPermissionStatus = granted ? .authorized : .denied
                     if granted {
                         self?.setupCamera()
@@ -47,8 +51,10 @@ final class PhotoCaptureViewModel: ObservableObject {
             }
         case .denied, .restricted:
             cameraPermissionStatus = .denied
+            print("PhotoCaptureViewModel: Camera access denied or restricted")
         @unknown default:
             cameraPermissionStatus = .denied
+            print("PhotoCaptureViewModel: Camera access unknown status")
         }
     }
     
@@ -89,9 +95,11 @@ final class PhotoCaptureViewModel: ObservableObject {
     }
     
     private func capturePhoto() {
+        print("PhotoCaptureViewModel: capturePhoto called")
         cameraManager.startSessionIfNeeded()
         cameraManager.capturePhoto { [weak self] image in
             guard let self = self else { return }
+            print("PhotoCaptureViewModel: Photo captured callback received: \(image != nil ? "Success" : "Failed")")
             self.capturedImage = image
         }
     }
