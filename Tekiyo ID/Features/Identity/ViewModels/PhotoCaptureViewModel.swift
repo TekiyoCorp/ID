@@ -42,18 +42,12 @@ final class PhotoCaptureViewModel: ObservableObject {
                 guard let self = self else { return }
                 self.isSessionRunning = running
                 
+                // Démarrer/arrêter la détection en temps réel
                 if running {
-                    self.faceDetector.startDetecting(with: self.cameraManager)
+                    self.faceDetector.startDetecting(session: self.cameraManager.captureSession)
                 } else {
                     self.faceDetector.stopDetecting()
                 }
-            }
-            .store(in: &cancellables)
-        
-        cameraManager.$previewLayer
-            .receive(on: RunLoop.main)
-            .sink { [weak self] layer in
-                self?.previewLayer = layer
             }
             .store(in: &cancellables)
         
@@ -199,8 +193,13 @@ final class PhotoCaptureViewModel: ObservableObject {
     }
     
     deinit {
-        Task { @MainActor in
-            self.faceDetector.stopDetecting()
+        // Cleanup synchrone pour éviter les captures de self
+        if faceDetector.isDetecting {
+            Task { [faceDetector] in
+                await MainActor.run {
+                    faceDetector.stopDetecting()
+                }
+            }
         }
     }
     
