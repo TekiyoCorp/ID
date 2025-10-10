@@ -149,12 +149,50 @@ struct IdentitySetupView: View {
             .frame(maxWidth: 293, alignment: .leading)
             .clipped()
         case .metier:
-            inputField(
-                title: step.title,
-                text: $viewModel.metier,
-                focused: $metierFocused,
-                centerVertically: true
-            )
+            VStack(alignment: .leading, spacing: 12) {
+                TextField(step.placeholder, text: $viewModel.metier)
+                    .font(.system(size: 36, weight: .medium))
+                    .appTypography(fontSize: 36)
+                    .foregroundStyle(.primary)
+                    .focused($metierFocused)
+                    .submitLabel(.done)
+                    .onSubmit {
+                        withAnimation(.easeInOut(duration: 0.35)) {
+                            viewModel.advance()
+                        }
+                    }
+                    .disableAutocorrection(true)
+                    .textInputAutocapitalization(.words)
+                    .padding(.vertical, 8)
+                    .overlay(alignment: .bottomLeading) {
+                        Rectangle()
+                            .fill(Color.clear)
+                            .frame(height: 1)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .onChange(of: viewModel.metier) { _, _ in
+                        viewModel.showSuggestions = true
+                    }
+                
+                if viewModel.showSuggestions && !viewModel.metier.isEmpty {
+                    ForEach(viewModel.metierSuggestions, id: \.self) { suggestion in
+                        Button(action: {
+                            viewModel.selectMetier(suggestion)
+                        }) {
+                            Text(suggestion)
+                                .font(.system(size: 22, weight: .medium))
+                                .appTypography(fontSize: 22)
+                                .foregroundStyle(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                                .padding(.vertical, 4)
+                        }
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .clipped()
         case .ville:
             inputField(
                 title: step.title,

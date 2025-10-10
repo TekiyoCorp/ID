@@ -13,6 +13,24 @@ final class IdentityViewModel: ObservableObject {
     @Published var showSuggestions = true
     @Published var shouldNavigateToPhotoCapture = false
     
+    private let metiers: [String] = [
+        "Développeur", "Développeuse", "Ingénieur", "Ingénieure", "Designer", "Chef de projet", "Cheffe de projet",
+        "Marketing", "Commercial", "Commerciale", "Vendeur", "Vendeuse", "Comptable", "Secrétaire", "Assistant", "Assistante",
+        "Médecin", "Infirmier", "Infirmière", "Pharmacien", "Pharmacienne", "Avocat", "Avocate", "Notaire",
+        "Enseignant", "Enseignante", "Professeur", "Professeure", "Éducateur", "Éducatrice", "Formateur", "Formatrice",
+        "Journaliste", "Rédacteur", "Rédactrice", "Photographe", "Vidéaste", "Graphiste", "Webdesigner", "UX Designer", "UI Designer",
+        "Architecte", "Urbaniste", "Géomètre", "Ingénieur civil", "Ingénieure civile", "Chef de chantier", "Cheffe de chantier",
+        "Cuisinier", "Cuisinière", "Serveur", "Serveuse", "Barman", "Barmaid", "Gérant", "Gérante", "Restaurateur", "Restauratrice",
+        "Coiffeur", "Coiffeuse", "Esthéticien", "Esthéticienne", "Masseur", "Masseuse", "Kinésithérapeute", "Ostéopathe",
+        "Psychologue", "Psychiatre", "Thérapeute", "Coach", "Consultant", "Consultante", "Conseiller", "Conseillère",
+        "Banquier", "Banquière", "Assureur", "Assureuse", "Agent immobilier", "Agente immobilière", "Courtier", "Coutière",
+        "Policier", "Policière", "Gendarme", "Pompier", "Pompière", "Militaire", "Agent de sécurité", "Agente de sécurité",
+        "Artisan", "Artisane", "Électricien", "Électricienne", "Plombier", "Plombière", "Maçon", "Maçonne", "Peintre", "Carreleur", "Carreleuse",
+        "Transporteur", "Transporteuse", "Chauffeur", "Chauffeuse", "Livreur", "Livreuse", "Facteur", "Factrice",
+        "Agriculteur", "Agricultrice", "Éleveur", "Éleveuse", "Vétérinaire", "Technicien", "Technicienne", "Ouvrier", "Ouvrière",
+        "Étudiant", "Étudiante", "Stagiaire", "Apprenti", "Apprentie", "Retraité", "Retraitée", "Autre"
+    ]
+    
     private let countries: [String] = {
         let locale = Locale(identifier: "fr_FR")
         if #available(iOS 16, *) {
@@ -33,7 +51,7 @@ final class IdentityViewModel: ObservableObject {
     }
     
     var isComplete: Bool {
-        currentStep == .nationalite && !nationalite.isEmpty
+        currentStep == .ville && !ville.isEmpty
     }
     
     
@@ -43,6 +61,15 @@ final class IdentityViewModel: ObservableObject {
         return countries
             .filter { $0.lowercased().hasPrefix(prefix) }
             .prefix(5)
+            .map { $0 }
+    }
+    
+    var metierSuggestions: [String] {
+        guard !metier.isEmpty else { return [] }
+        let prefix = metier.lowercased()
+        return metiers
+            .filter { $0.lowercased().contains(prefix) }
+            .prefix(8)
             .map { $0 }
     }
     
@@ -81,8 +108,13 @@ final class IdentityViewModel: ObservableObject {
         showSuggestions = false
     }
     
+    func selectMetier(_ metierSelected: String) {
+        metier = metierSelected
+        showSuggestions = false
+    }
+    
     func validate() -> Bool {
-        !nom.isEmpty && !prenom.isEmpty && !nationalite.isEmpty
+        !nom.isEmpty && !prenom.isEmpty && !nationalite.isEmpty && !metier.isEmpty && !ville.isEmpty
     }
     
     func buildIdentityData() -> IdentityData? {
@@ -92,8 +124,8 @@ final class IdentityViewModel: ObservableObject {
             prenom: prenom,
             dateNaissance: dateNaissance,
             nationalite: nationalite,
-            metier: metier.isEmpty ? "Non spécifié" : metier,
-            ville: ville.isEmpty ? "Non spécifiée" : ville
+            metier: metier,
+            ville: ville
         )
     }
     

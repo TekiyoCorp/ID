@@ -9,7 +9,7 @@ struct IdentityData: Codable, Equatable {
     let ville: String
     
     var isValid: Bool {
-        !nom.isEmpty && !prenom.isEmpty && !nationalite.isEmpty
+        !nom.isEmpty && !prenom.isEmpty && !nationalite.isEmpty && !metier.isEmpty && !ville.isEmpty
     }
     
     var formattedBirthDate: String {
