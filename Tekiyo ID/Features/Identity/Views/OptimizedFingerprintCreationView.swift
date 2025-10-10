@@ -134,7 +134,9 @@ struct AnimatedIconView: View {
             nom: "Dupont",
             prenom: "Marie",
             dateNaissance: Date(),
-            nationalite: "France"
+            nationalite: "France",
+            metier: "Ingénieur",
+            ville: "Paris"
         ),
         capturedImage: nil
     )

@@ -1,12 +1,23 @@
 import SwiftUI
 import Combine
 
+enum ProfileStep: Int, CaseIterable {
+    case nationalite
+    case resume
+}
+
 final class ProfileScreenState: ObservableObject {
     @Published var trustScore: Int
     @Published var lastVerification: String
     @Published var shouldNavigateToActivities = false
     @Published var showActivitiesOverlay = false
     @Published var searchText = ""
+    
+    @Published var selectedNationality: String = ""
+    @Published var currentStep: ProfileStep = .nationalite
+    @Published var completedSteps: Set<ProfileStep> = []
+    
+    var isNationalityComplete: Bool { !selectedNationality.isEmpty }
     
     init(trustScore: Int = 3, lastVerification: String = "il y a 2 jours") {
         self.trustScore = trustScore
@@ -26,6 +37,8 @@ struct OptimizedProfileView: View {
     private let fullName: String
     private let profileImageHash: String
     
+    private let countries = ["", "France", "Belgique", "Suisse", "Canada", "Maroc"]
+    
     init(identityData: IdentityData, profileImage: UIImage?, tekiyoID: String, username: String) {
         self.identityData = identityData
         self.profileImage = profileImage
@@ -39,44 +52,106 @@ struct OptimizedProfileView: View {
     }
     
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 0) { // Use LazyVStack for better performance
-                // Header with profile info
-                ProfileHeaderView(
-                    profileImage: profileImage,
-                    fullName: fullName,
-                    username: username,
-                    metier: identityData.metier,
-                    ville: identityData.ville
-                )
-                .padding(.top, 20)
-                .padding(.bottom, 12)
-                
-                // Verification section
-                VerificationSectionView(
-                    trustScore: state.trustScore,
-                    lastVerification: state.lastVerification
-                )
-                .padding(.bottom, 32)
-                
-                // Share ID section
-                ShareIDSectionView(tekiyoID: tekiyoID)
-                .padding(.bottom, 32)
-                
-                // Recent activities - Centered with blur and destack animation
-                RecentActivitiesCardView(
-                    showOverlay: $state.showActivitiesOverlay,
-                    searchText: $state.searchText
-                )
-                .padding(.horizontal, 24)
-                .padding(.bottom, 32)
-                
-                // Links section
-                SocialLinksSectionView()
-                .padding(.horizontal, 24)
-                .padding(.bottom, 40)
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    // STEP: Nationalité
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Nationalité")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.primary)
+                        
+                        Picker("Choisir un pays", selection: $state.selectedNationality) {
+                            ForEach(countries, id: \.self) { country in
+                                Text(country.isEmpty ? "Sélectionner" : country).tag(country)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .accessibilityLabel("Choisir la nationalité")
+                        
+                        // Bouton Suivant (visible dès qu'une nationalité est sélectionnée)
+                        if state.isNationalityComplete {
+                            Button(action: {
+                                state.completedSteps.insert(.nationalite)
+                                state.currentStep = .resume
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    proxy.scrollTo(ProfileStep.resume, anchor: .top)
+                                }
+                            }) {
+                                Text("Suivant")
+                                    .font(.system(size: 17, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                                    .background(Color(hex: "002FFF"))
+                                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            }
+                            .accessibilityLabel("Continuer vers le profil")
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.top, 20)
+                    .padding(.bottom, 24)
+                    .id(ProfileStep.nationalite)
+
+                    // GATE: Afficher la suite uniquement si nationalité complétée
+                    if state.completedSteps.contains(.nationalite) {
+                        // Header with profile info
+                        ProfileHeaderView(
+                            profileImage: profileImage,
+                            fullName: fullName,
+                            username: username,
+                            metier: identityData.metier,
+                            ville: identityData.ville
+                        )
+                        .padding(.top, 0)
+                        .padding(.bottom, 12)
+                        .id(ProfileStep.resume)
+
+                        // Verification section
+                        VerificationSectionView(
+                            trustScore: state.trustScore,
+                            lastVerification: state.lastVerification
+                        )
+                        .padding(.bottom, 32)
+
+                        // Share ID section
+                        ShareIDSectionView(tekiyoID: tekiyoID)
+                        .padding(.bottom, 32)
+
+                        // Recent activities - Centered with blur and destack animation
+                        RecentActivitiesCardView(
+                            showOverlay: $state.showActivitiesOverlay,
+                            searchText: $state.searchText
+                        )
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 32)
+
+                        // Links section
+                        SocialLinksSectionView()
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 40)
+                    }
+                }
+            }
+            .onAppear {
+                if state.selectedNationality.isEmpty, !identityData.nationalite.isEmpty {
+                    state.selectedNationality = identityData.nationalite
+                    state.completedSteps.insert(.nationalite)
+                    state.currentStep = .resume
+                    DispatchQueue.main.async {
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            proxy.scrollTo(ProfileStep.resume, anchor: .top)
+                        }
+                    }
+                }
             }
         }
+        // Fallback for NavigationView environments
+        NavigationLink(destination: RecentActivitiesView(), isActive: $state.shouldNavigateToActivities) {
+            EmptyView()
+        }
+        .hidden()
         .background(Color(.systemBackground))
         .navigationBarHidden(true)
         .navigationDestination(isPresented: $state.shouldNavigateToActivities) {
@@ -501,13 +576,15 @@ struct StaticGradient {
 
 // MARK: - Preview
 #Preview {
-    NavigationView {
+    NavigationStack {
         OptimizedProfileView(
             identityData: IdentityData(
                 nom: "Dupont",
                 prenom: "Marie",
                 dateNaissance: Date(),
-                nationalite: "Française"
+                nationalite: "Française",
+                metier: "Développeuse iOS",
+                ville: "Paris"
             ),
             profileImage: nil,
             tekiyoID: "3A1B-7E21",
