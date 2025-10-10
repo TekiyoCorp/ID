@@ -10,7 +10,7 @@ final class QRCodeGenerator {
         guard let data = string.data(using: .utf8) else { return nil }
         
         let context = CIContext()
-        let filter = CIFilter.qrCodeGenerator()
+        guard let filter = CIFilter(name: "CIQRCodeGenerator") else { return nil }
         
         filter.setValue(data, forKey: "inputMessage")
         filter.setValue("H", forKey: "inputCorrectionLevel")
@@ -22,7 +22,7 @@ final class QRCodeGenerator {
         let scaledImage = outputImage.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
         
         // Apply color filter
-        let colorFilter = CIFilter.colorMonochrome()
+        guard let colorFilter = CIFilter(name: "CIColorMonochrome") else { return nil }
         colorFilter.setValue(scaledImage, forKey: "inputImage")
         colorFilter.setValue(CIColor(color: color), forKey: "inputColor")
         colorFilter.setValue(1.0, forKey: "inputIntensity")
