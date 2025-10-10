@@ -7,14 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		31564D632E993F9400BA49F4 /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31564D622E993F9400BA49F4 /* CameraPreview.swift */; };
-		31564D652E993F9500BA49F4 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31564D642E993F9500BA49F4 /* CameraManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		310AC6082E98207B00E9B5A1 /* Tekiyo ID.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tekiyo ID.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		31564D622E993F9400BA49F4 /* CameraPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreview.swift; sourceTree = "<group>"; };
-		31564D642E993F9500BA49F4 /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
+	310AC6082E98207B00E9B5A1 /* Tekiyo ID.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tekiyo ID.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -36,16 +32,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		310AC5FF2E98207B00E9B5A1 = {
-			isa = PBXGroup;
-			children = (
-				310AC60A2E98207B00E9B5A1 /* Tekiyo ID */,
-				310AC6092E98207B00E9B5A1 /* Products */,
-				31564D622E993F9400BA49F4 /* CameraPreview.swift */,
-				31564D642E993F9500BA49F4 /* CameraManager.swift */,
-			);
-			sourceTree = "<group>";
-		};
+	310AC5FF2E98207B00E9B5A1 = {
+		isa = PBXGroup;
+		children = (
+			310AC60A2E98207B00E9B5A1 /* Tekiyo ID */,
+			310AC6092E98207B00E9B5A1 /* Products */,
+		);
+		sourceTree = "<group>";
+	};
 		310AC6092E98207B00E9B5A1 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -124,15 +118,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		310AC6042E98207B00E9B5A1 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				31564D632E993F9400BA49F4 /* CameraPreview.swift in Sources */,
-				31564D652E993F9500BA49F4 /* CameraManager.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+	310AC6042E98207B00E9B5A1 /* Sources */ = {
+		isa = PBXSourcesBuildPhase;
+		buildActionMask = 2147483647;
+		files = (
+		);
+		runOnlyForDeploymentPostprocessing = 0;
+	};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
