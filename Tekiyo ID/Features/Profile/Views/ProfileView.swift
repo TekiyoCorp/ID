@@ -8,6 +8,7 @@ struct ProfileView: View {
     
     @State private var trustScore: Int = 3 // Out of 10
     @State private var lastVerification: String = "il y a 2 jours"
+    @State private var shouldNavigateToActivities = false
     
     var body: some View {
         ScrollView {
@@ -164,7 +165,7 @@ struct ProfileView: View {
                     }
                     
                     Button("Voir plus") {
-                        // Handle see more
+                        shouldNavigateToActivities = true
                     }
                     .font(.system(size: 16, weight: .regular))
                     .foregroundColor(.primary)
@@ -202,6 +203,9 @@ struct ProfileView: View {
         }
         .background(Color(.systemBackground))
         .navigationBarHidden(true)
+        .navigationDestination(isPresented: $shouldNavigateToActivities) {
+            RecentActivitiesView()
+        }
     }
 }
 
@@ -236,6 +240,41 @@ struct ActivityRow: View {
         .padding(.vertical, 12)
         .background(Color.gray.opacity(0.1))
         .clipShape(Capsule())
+    }
+}
+
+// MARK: - Enhanced Activity Row Component (for RecentActivitiesView)
+struct EnhancedActivityRow: View {
+    let profileImage: String
+    let profileColor: Color
+    let title: String
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Circle()
+                .fill(profileColor)
+                .frame(width: 40, height: 40)
+                .overlay(
+                    Image(systemName: profileImage)
+                        .font(.system(size: 20))
+                        .foregroundColor(.white)
+                )
+            
+            Text(title)
+                .font(.system(size: 16, weight: .regular))
+                .foregroundColor(.primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundColor(color)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color.gray.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
 
