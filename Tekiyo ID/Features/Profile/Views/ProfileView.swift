@@ -12,6 +12,10 @@ struct ProfileView: View {
     @State private var selectedActivity: ProfileActivity?
     @Namespace private var activityNamespace
     
+    private var profileActivities: [ProfileActivity] {
+        defaultActivities
+    }
+    
     var body: some View {
         ZStack {
             ScrollView {
@@ -27,7 +31,7 @@ struct ProfileView: View {
                             .clipShape(Circle())
                             .overlay(
                                 Circle()
-                                    .stroke(Self.profileBorderGradient, lineWidth: 3)
+                                    .stroke(profileBorderGradient, lineWidth: 3)
                             )
                     } else {
                         Circle()
@@ -239,12 +243,13 @@ struct ProfileView: View {
         .debugRenders("ProfileView")
     }
     
+    // MARK: - Actions
     private func presentActivity(_ activity: ProfileActivity) {
         withAnimation(.spring(response: 0.5, dampingFraction: 0.85, blendDuration: 0.25)) {
             selectedActivity = activity
         }
     }
-    
+
     private func dismissSelectedActivity() {
         withAnimation(.spring(response: 0.5, dampingFraction: 0.9, blendDuration: 0.25)) {
             selectedActivity = nil
@@ -252,65 +257,58 @@ struct ProfileView: View {
     }
 }
 
-private extension ProfileView {
-    static let profileBorderGradient = LinearGradient(
-        colors: [
-            Color(red: 0.61, green: 0.36, blue: 0.9),
-            Color(red: 0.0, green: 0.73, blue: 1.0)
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
+fileprivate let profileBorderGradient = LinearGradient(
+    colors: [
+        Color(red: 0.61, green: 0.36, blue: 0.9),
+        Color(red: 0.0, green: 0.73, blue: 1.0)
+    ],
+    startPoint: .topLeading,
+    endPoint: .bottomTrailing
+)
+
+fileprivate let defaultActivities: [ProfileActivity] = [
+    ProfileActivity(
+        id: UUID(uuidString: "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA") ?? UUID(),
+        contactName: "Damien R.",
+        title: "Connexion avec Damien R.",
+        detail: "Connexion confirmée et sécurisée via Tekiyo ID.",
+        iconName: "person.2.fill",
+        iconColor: Color(hex: "002FFF"),
+        timestamp: "Il y a 2 heures"
+    ),
+    ProfileActivity(
+        id: UUID(uuidString: "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB") ?? UUID(),
+        contactName: "Thomas S.",
+        title: "Thomas S. vous a scanné.",
+        detail: "Thomas a validé votre identité en scannant votre QR code Tekiyo.",
+        iconName: "qrcode",
+        iconColor: Color(hex: "0047FF"),
+        timestamp: "Il y a 1 heure"
+    ),
+    ProfileActivity(
+        id: UUID(uuidString: "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC") ?? UUID(),
+        contactName: "Julie F.",
+        title: "Julie F. vous fait confiance.",
+        detail: "Julie a confirmé qu’elle vous reconnaît et vous fait confiance.",
+        iconName: "hand.thumbsup.fill",
+        iconColor: Color(hex: "0061FF"),
+        timestamp: "Hier"
     )
-    
-    static let defaultActivities: [ProfileActivity] = [
-        ProfileActivity(
-            id: UUID(uuidString: "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA") ?? UUID(),
-            contactName: "Damien R.",
-            title: "Connexion avec Damien R.",
-            detail: "Connexion confirmée et sécurisée via Tekiyo ID.",
-            iconName: "person.2.fill",
-            iconColor: Color(hex: "002FFF"),
-            timestamp: "Il y a 2 heures"
-        ),
-        ProfileActivity(
-            id: UUID(uuidString: "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB") ?? UUID(),
-            contactName: "Thomas S.",
-            title: "Thomas S. vous a scanné.",
-            detail: "Thomas a validé votre identité en scannant votre QR code Tekiyo.",
-            iconName: "qrcode",
-            iconColor: Color(hex: "0047FF"),
-            timestamp: "Il y a 1 heure"
-        ),
-        ProfileActivity(
-            id: UUID(uuidString: "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC") ?? UUID(),
-            contactName: "Julie F.",
-            title: "Julie F. vous fait confiance.",
-            detail: "Julie a confirmé qu’elle vous reconnaît et vous fait confiance.",
-            iconName: "hand.thumbsup.fill",
-            iconColor: Color(hex: "0061FF"),
-            timestamp: "Hier"
-        )
-    ]
-    
-    var profileActivities: [ProfileActivity] {
-        Self.defaultActivities
-    }
-    
-    struct ProfileActivity: Identifiable, Hashable {
-        let id: UUID
-        let contactName: String
-        let title: String
-        let detail: String
-        let iconName: String
-        let iconColor: Color
-        let timestamp: String
-        
-    }
+]
+
+struct ProfileActivity: Identifiable, Hashable {
+    let id: UUID
+    let contactName: String
+    let title: String
+    let detail: String
+    let iconName: String
+    let iconColor: Color
+    let timestamp: String
 }
 
 // MARK: - Interactive Activity Cards
-private struct ActivityListItem: View {
-    let activity: ProfileView.ProfileActivity
+struct ActivityListItem: View {
+    let activity: ProfileActivity
     let namespace: Namespace.ID
     var backgroundColor: Color = Color.gray.opacity(0.1)
     
@@ -350,8 +348,8 @@ private struct ActivityListItem: View {
     }
 }
 
-private struct ActivityDetailOverlay: View {
-    let activity: ProfileView.ProfileActivity
+struct ActivityDetailOverlay: View {
+    let activity: ProfileActivity
     let namespace: Namespace.ID
     let onClose: () -> Void
     
@@ -422,7 +420,7 @@ private struct ActivityDetailOverlay: View {
     }
 }
 
-private enum ActivityCardID {
+enum ActivityCardID {
     static func card(_ id: UUID) -> String { "activity-card-\(id.uuidString)" }
     static func background(_ id: UUID) -> String { "activity-background-\(id.uuidString)" }
     static func avatar(_ id: UUID) -> String { "activity-avatar-\(id.uuidString)" }
