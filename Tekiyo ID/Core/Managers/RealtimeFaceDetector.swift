@@ -9,22 +9,16 @@ struct FaceDetectionResult {
     let message: String?
 }
 
-@MainActor
 final class RealtimeFaceDetector: NSObject, ObservableObject {
     
     @Published var detectionResult: FaceDetectionResult?
     @Published var isDetecting = false
-
-    override init() {
-        super.init()
-    }
     
-    private var captureSession: AVCaptureSession?
-    private let videoDataOutput = AVCaptureVideoDataOutput()
+    private weak var cameraManager: CameraManager?
     private let videoDataOutputQueue = DispatchQueue(label: "VideoDataOutputQueue")
     private let lastDetectionTimeLock = NSLock()
     private var _lastDetectionTime = Date.distantPast
-    private let detectionInterval: TimeInterval = 0.3
+    private let detectionInterval: TimeInterval = 0.3 // Détection toutes les 300ms
     
     nonisolated private var lastDetectionTime: Date {
         get {
@@ -34,56 +28,46 @@ final class RealtimeFaceDetector: NSObject, ObservableObject {
         }
         set {
             lastDetectionTimeLock.lock()
-            defer { lastDetectionTimeLock.unlock() }
             _lastDetectionTime = newValue
+            lastDetectionTimeLock.unlock()
         }
     }
     
-    func startDetecting(session: AVCaptureSession) {
+    @MainActor
+    func startDetecting(with manager: CameraManager) {
         guard !isDetecting else { return }
         
-        self.captureSession = session
+        cameraManager = manager
+        manager.setVideoDataOutputDelegate(self, queue: videoDataOutputQueue)
+        resetDetectionTimestamp()
+        isDetecting = true
         
-        // Configurer la sortie vidéo pour l'analyse
-        videoDataOutput.setSampleBufferDelegate(self, queue: videoDataOutputQueue)
-        videoDataOutput.alwaysDiscardsLateVideoFrames = true
-        videoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
-        
-        if session.canAddOutput(videoDataOutput) {
-            session.addOutput(videoDataOutput)
-            isDetecting = true
-            print("✅ RealtimeFaceDetector: Started detecting")
-        }
+        print("✅ RealtimeFaceDetector: Started detecting")
     }
     
+    @MainActor
     func stopDetecting() {
         guard isDetecting else { return }
-        
-        if let session = captureSession {
-            session.removeOutput(videoDataOutput)
-        }
-        
-        captureSession = nil
         isDetecting = false
-        lastDetectionTime = .distantPast
         
-        Task { @MainActor in
-            detectionResult = nil
-        }
+        cameraManager?.setVideoDataOutputDelegate(nil, queue: nil)
+        cameraManager = nil
+        resetDetectionTimestamp()
+        detectionResult = nil
         
         print("🛑 RealtimeFaceDetector: Stopped detecting")
+    }
+    
+    private func resetDetectionTimestamp() {
+        lastDetectionTime = .distantPast
     }
 }
 
 // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
 extension RealtimeFaceDetector: AVCaptureVideoDataOutputSampleBufferDelegate {
     nonisolated func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        // Limiter la fréquence de détection avec une vérification thread-safe
         let now = Date()
-        let interval = now.timeIntervalSince(lastDetectionTime)
-        guard interval >= detectionInterval else { return }
-        
-        // Mettre à jour le timestamp
+        guard now.timeIntervalSince(lastDetectionTime) >= detectionInterval else { return }
         lastDetectionTime = now
         
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
@@ -98,7 +82,6 @@ extension RealtimeFaceDetector: AVCaptureVideoDataOutputSampleBufferDelegate {
             
             guard let observations = request.results as? [VNFaceObservation] else { return }
             
-            // Traiter sur MainActor
             Task { @MainActor [weak self] in
                 self?.processDetection(observations)
             }
@@ -115,38 +98,37 @@ extension RealtimeFaceDetector: AVCaptureVideoDataOutputSampleBufferDelegate {
         }
     }
     
+    @MainActor
     private func processDetection(_ observations: [VNFaceObservation]) {
-        Task { @MainActor in
-            // Aucun visage
-            if observations.isEmpty {
-                detectionResult = FaceDetectionResult(
-                    isValid: false,
-                    boundingBox: .zero,
-                    message: "Positionnez votre visage"
-                )
-                return
-            }
-            
-            // Plusieurs visages
-            if observations.count > 1 {
-                detectionResult = FaceDetectionResult(
-                    isValid: false,
-                    boundingBox: observations[0].boundingBox,
-                    message: "Une seule personne"
-                )
-                return
-            }
-            
-            // Un seul visage - valider
-            let face = observations[0]
-            let validation = validateFace(face)
-            
+        // Aucun visage
+        if observations.isEmpty {
             detectionResult = FaceDetectionResult(
-                isValid: validation.isValid,
-                boundingBox: face.boundingBox,
-                message: validation.message
+                isValid: false,
+                boundingBox: .zero,
+                message: "Positionnez votre visage"
             )
+            return
         }
+        
+        // Plusieurs visages
+        if observations.count > 1 {
+            detectionResult = FaceDetectionResult(
+                isValid: false,
+                boundingBox: observations[0].boundingBox,
+                message: "Une seule personne"
+            )
+            return
+        }
+        
+        // Un seul visage - valider
+        let face = observations[0]
+        let validation = validateFace(face)
+        
+        detectionResult = FaceDetectionResult(
+            isValid: validation.isValid,
+            boundingBox: face.boundingBox,
+            message: validation.message
+        )
     }
     
     private func validateFace(_ face: VNFaceObservation) -> (isValid: Bool, message: String?) {

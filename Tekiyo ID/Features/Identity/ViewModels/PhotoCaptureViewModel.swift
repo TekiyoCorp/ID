@@ -44,7 +44,7 @@ final class PhotoCaptureViewModel: ObservableObject {
                 
                 // Démarrer/arrêter la détection en temps réel
                 if running {
-                    self.faceDetector.startDetecting(session: self.cameraManager.captureSession)
+                    self.faceDetector.startDetecting(with: self.cameraManager)
                 } else {
                     self.faceDetector.stopDetecting()
                 }
@@ -205,4 +205,3 @@ final class PhotoCaptureViewModel: ObservableObject {
         shouldNavigateToFingerprintCreation = true
     }
 }
-

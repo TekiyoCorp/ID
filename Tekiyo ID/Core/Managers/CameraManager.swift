@@ -72,8 +72,9 @@ final class CameraManager: ObservableObject {
                     session.addOutput(videoDataOutput)
                     
                     if let connection = videoDataOutput.connection(with: .video) {
-                        if connection.isVideoOrientationSupported {
-                            connection.videoOrientation = .portrait
+                        let portraitAngle: CGFloat = 90
+                        if connection.isVideoRotationAngleSupported(portraitAngle) {
+                            connection.videoRotationAngle = portraitAngle
                         }
                         if connection.isVideoMirroringSupported {
                             connection.automaticallyAdjustsVideoMirroring = false
@@ -87,10 +88,15 @@ final class CameraManager: ObservableObject {
                 // Create preview layer
                 let layer = AVCaptureVideoPreviewLayer(session: session)
                 layer.videoGravity = .resizeAspectFill
-                layer.connection?.videoOrientation = .portrait
-                if layer.connection?.isVideoMirroringSupported == true {
-                    layer.connection?.automaticallyAdjustsVideoMirroring = false
-                    layer.connection?.isVideoMirrored = true
+                if let connection = layer.connection {
+                    let portraitAngle: CGFloat = 90
+                    if connection.isVideoRotationAngleSupported(portraitAngle) {
+                        connection.videoRotationAngle = portraitAngle
+                    }
+                    if connection.isVideoMirroringSupported {
+                        connection.automaticallyAdjustsVideoMirroring = false
+                        connection.isVideoMirrored = true
+                    }
                 }
                 self.previewLayer = layer
                 print("✅ CameraManager: Preview layer created")
@@ -199,8 +205,9 @@ final class CameraManager: ObservableObject {
         }
         
         if let connection = videoDataOutput.connection(with: .video) {
-            if connection.isVideoOrientationSupported {
-                connection.videoOrientation = .portrait
+            let portraitAngle: CGFloat = 90
+            if connection.isVideoRotationAngleSupported(portraitAngle) {
+                connection.videoRotationAngle = portraitAngle
             }
             if connection.isVideoMirroringSupported {
                 connection.automaticallyAdjustsVideoMirroring = false

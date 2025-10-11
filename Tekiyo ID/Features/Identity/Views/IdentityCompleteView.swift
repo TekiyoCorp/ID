@@ -13,9 +13,8 @@ struct IdentityCompleteView: View {
     
     var body: some View {
         GeometryReader { geometry in
-            VStack(spacing: 0) {
-                Spacer()
-                
+            ZStack(alignment: .top) {
+                // Title at Y=108
                 VStack(spacing: 12) {
                     // Title
                     LargeTitle("Ton identité est prête.", alignment: .center)
@@ -28,11 +27,10 @@ struct IdentityCompleteView: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 48)
                 }
+                .frame(maxWidth: .infinity)
+                .offset(y: 108)
                 
-                Spacer()
-                    .frame(height: 32)
-                
-                // Profile Card - 254x254, padding 24, border radius 24
+                // Profile Card at Y=241 - 254x254, padding 24, border radius 24
                 VStack(spacing: 12) {
                     // Profile Photo
                     if let profileImage = viewModel.profileUIImage {
@@ -95,21 +93,23 @@ struct IdentityCompleteView: View {
                 .padding(24)
                 .background(Color(.systemGray6))
                 .clipShape(RoundedRectangle(cornerRadius: 24))
+                .offset(y: 241)
                 
-                Spacer()
-                    .frame(height: 40)
-                
-                // Action Button
-                PrimaryButton(
-                    title: "Afficher mon profil Tekiyo",
-                    style: .blue,
-                    action: {
-                        shouldNavigateToProfile = true
-                    }
-                )
-                .padding(.horizontal, 48)
-                
-                Spacer()
+                // Action Button at bottom
+                VStack {
+                    Spacer()
+                    
+                    PrimaryButton(
+                        title: "Afficher mon profil Tekiyo",
+                        style: .blue,
+                        action: {
+                            shouldNavigateToProfile = true
+                        }
+                    )
+                    .padding(.horizontal, 48)
+                    .padding(.bottom, 40)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }

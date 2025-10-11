@@ -45,8 +45,9 @@ struct CameraPreview: UIViewRepresentable {
         private func configure(_ layer: AVCaptureVideoPreviewLayer) {
             layer.videoGravity = .resizeAspectFill
             if let connection = layer.connection {
-                if connection.isVideoOrientationSupported {
-                    connection.videoOrientation = .portrait
+                let portraitAngle: CGFloat = 90
+                if connection.isVideoRotationAngleSupported(portraitAngle) {
+                    connection.videoRotationAngle = portraitAngle
                 }
                 if connection.isVideoMirroringSupported {
                     connection.automaticallyAdjustsVideoMirroring = false

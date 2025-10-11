@@ -7,31 +7,28 @@ struct OptimizedCircularCodeView: View {
     let size: CGFloat
     let dotRadius: CGFloat
     
+    @Environment(\.displayScale) private var displayScale
     @State private var animationScale: CGFloat = 0.9
     @State private var animationOpacity: Double = 0.0
     @State private var didAnimate = false
     
     private static let imageCache = NSCache<NSString, UIImage>()
-    private let renderedImage: UIImage
     
     init(url: String, size: CGFloat = 120, dotRadius: CGFloat = 2.5) {
         self.url = url
         self.size = size
         self.dotRadius = dotRadius
-        
-        let cacheKey = "\(url)|\(size)|\(dotRadius)" as NSString
-        if let cachedImage = Self.imageCache.object(forKey: cacheKey) {
-            self.renderedImage = cachedImage
-        } else {
-            let dots = Self.generateDots(from: url, size: size)
-            let image = Self.renderImage(for: dots, size: size, dotRadius: dotRadius)
-            Self.imageCache.setObject(image, forKey: cacheKey)
-            self.renderedImage = image
-        }
     }
     
     var body: some View {
-        Image(uiImage: renderedImage)
+        let image = Self.cachedImage(
+            for: url,
+            size: size,
+            dotRadius: dotRadius,
+            scale: max(displayScale, 1.0)
+        )
+        
+        return Image(uiImage: image)
             .resizable()
             .interpolation(.high)
             .antialiased(true)
@@ -54,9 +51,22 @@ struct OptimizedCircularCodeView: View {
             .debugRenders("OptimizedCircularCodeView")
     }
     
-    private static func renderImage(for dots: [DotPosition], size: CGFloat, dotRadius: CGFloat) -> UIImage {
+    private static func cachedImage(for url: String, size: CGFloat, dotRadius: CGFloat, scale: CGFloat) -> UIImage {
+        let cacheKey = "\(url)|\(size)|\(dotRadius)|\(scale)" as NSString
+        
+        if let cached = imageCache.object(forKey: cacheKey) {
+            return cached
+        }
+        
+        let dots = generateDots(from: url, size: size)
+        let image = renderImage(for: dots, size: size, dotRadius: dotRadius, scale: scale)
+        imageCache.setObject(image, forKey: cacheKey)
+        return image
+    }
+    
+    private static func renderImage(for dots: [DotPosition], size: CGFloat, dotRadius: CGFloat, scale: CGFloat) -> UIImage {
         let rendererFormat = UIGraphicsImageRendererFormat.default()
-        rendererFormat.scale = UIScreen.main.scale
+        rendererFormat.scale = scale
         rendererFormat.opaque = false
         
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size), format: rendererFormat)

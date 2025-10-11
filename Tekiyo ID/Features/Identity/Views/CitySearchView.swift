@@ -5,13 +5,15 @@ struct CitySearchView: View {
     @Binding var selectedCity: String
     @Binding var isPresented: Bool
     
-    @State private var searchText = ""
-    @State private var region = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: 46.603354, longitude: 1.888334), // Centre de la France
+    private static let defaultRegion = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(latitude: 46.603354, longitude: 1.888334),
         span: MKCoordinateSpan(latitudeDelta: 5.0, longitudeDelta: 5.0)
     )
-    @State private var searchResults: [MKMapItem] = []
-    @State private var selectedLocation: MKMapItem?
+    
+    @State private var searchText = ""
+    @State private var cameraPosition: MapCameraPosition = .region(Self.defaultRegion)
+    @State private var searchResults: [CitySearchResult] = []
+    @State private var selectedLocation: CitySearchResult?
     @State private var isSearching = false
     @State private var showResultsList = false
     
@@ -19,33 +21,14 @@ struct CitySearchView: View {
         NavigationView {
             ZStack(alignment: .top) {
                 // Map interactive
-                Map(coordinateRegion: $region, annotationItems: annotations) { item in
-                    MapAnnotation(coordinate: item.coordinate) {
-                        VStack(spacing: 0) {
-                            Image(systemName: "mappin.circle.fill")
-                                .font(.system(size: 32))
-                                .foregroundColor(selectedLocation == item.mapItem ? .green : .blue)
-                                .background(
-                                    Circle()
-                                        .fill(.white)
-                                        .frame(width: 20, height: 20)
-                                )
-                            
-                            if selectedLocation == item.mapItem {
-                                Text(item.mapItem.name ?? "")
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(
-                                        Capsule()
-                                            .fill(Color.green)
-                                    )
-                                    .offset(y: 4)
-                            }
-                        }
-                        .onTapGesture {
-                            selectLocation(item.mapItem)
+                Map(position: $cameraPosition, interactionModes: [.all]) {
+                    ForEach(annotations) { item in
+                        Annotation(item.displayName, coordinate: item.coordinate) {
+                            CityAnnotationPin(
+                                result: item,
+                                isSelected: selectedLocation?.id == item.id,
+                                onTap: { selectLocation(item) }
+                            )
                         }
                     }
                 }
@@ -61,18 +44,18 @@ struct CitySearchView: View {
                     if showResultsList && !searchResults.isEmpty {
                         ScrollView {
                             VStack(spacing: 0) {
-                                ForEach(searchResults, id: \.self) { mapItem in
+                                ForEach(searchResults) { result in
                                     CitySearchResultRow(
-                                        mapItem: mapItem,
-                                        isSelected: selectedLocation == mapItem,
+                                        result: result,
+                                        isSelected: selectedLocation?.id == result.id,
                                         onSelect: {
-                                            selectLocation(mapItem)
-                                            centerMapOnLocation(mapItem)
+                                            selectLocation(result)
+                                            centerMapOnLocation(result)
                                             showResultsList = false
                                         }
                                     )
                                     
-                                    if mapItem != searchResults.last {
+                                    if result.id != searchResults.last?.id {
                                         Divider()
                                             .padding(.leading, 48)
                                     }
@@ -93,7 +76,7 @@ struct CitySearchView: View {
                         Spacer()
                         
                         Button(action: {
-                            if let city = selectedLocation?.placemark.locality ?? selectedLocation?.name {
+                            if let city = selectedLocation?.city {
                                 selectedCity = city
                                 isPresented = false
                             }
@@ -145,22 +128,23 @@ struct CitySearchView: View {
         }
     }
     
-    private var annotations: [MapAnnotationItem] {
-        searchResults.map { MapAnnotationItem(mapItem: $0) }
+    private var annotations: [CitySearchResult] {
+        searchResults
     }
     
-    private func selectLocation(_ mapItem: MKMapItem) {
+    private func selectLocation(_ result: CitySearchResult) {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-            selectedLocation = mapItem
+            selectedLocation = result
         }
     }
     
-    private func centerMapOnLocation(_ mapItem: MKMapItem) {
+    private func centerMapOnLocation(_ result: CitySearchResult) {
         withAnimation {
-            region = MKCoordinateRegion(
-                center: mapItem.placemark.coordinate,
+            let newRegion = MKCoordinateRegion(
+                center: result.coordinate,
                 span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
             )
+            cameraPosition = .region(newRegion)
         }
     }
     
@@ -186,8 +170,8 @@ struct CitySearchView: View {
                 
                 if let response = response {
                     // Filtrer pour ne garder que les villes
-                    let cityResults = response.mapItems.filter { mapItem in
-                        mapItem.placemark.locality != nil
+                    let cityResults = response.mapItems.compactMap { mapItem -> CitySearchResult? in
+                        CitySearchResult(mapItem: mapItem)
                     }
                     
                     searchResults = Array(cityResults.prefix(10))
@@ -200,18 +184,9 @@ struct CitySearchView: View {
 }
 
 // MARK: - Map Annotation Item
-struct MapAnnotationItem: Identifiable {
-    let id = UUID()
-    let mapItem: MKMapItem
-    
-    var coordinate: CLLocationCoordinate2D {
-        mapItem.placemark.coordinate
-    }
-}
-
 // MARK: - City Search Result Row
 struct CitySearchResultRow: View {
-    let mapItem: MKMapItem
+    let result: CitySearchResult
     let isSelected: Bool
     let onSelect: () -> Void
     
@@ -224,11 +199,11 @@ struct CitySearchResultRow: View {
                     .frame(width: 24)
                 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(mapItem.placemark.locality ?? mapItem.name ?? "Ville inconnue")
+                    Text(result.displayName)
                         .font(.system(size: 16, weight: isSelected ? .semibold : .medium))
                         .foregroundColor(isSelected ? .green : .primary)
                     
-                    if let country = mapItem.placemark.country {
+                    if let country = result.country {
                         Text(country)
                             .font(.system(size: 14))
                             .foregroundColor(.secondary)
@@ -242,6 +217,39 @@ struct CitySearchResultRow: View {
             .background(isSelected ? Color.green.opacity(0.1) : Color.clear)
         }
         .buttonStyle(PlainButtonStyle())
+    }
+}
+
+private struct CityAnnotationPin: View {
+    let result: CitySearchResult
+    let isSelected: Bool
+    let onTap: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            Image(systemName: "mappin.circle.fill")
+                .font(.system(size: 32))
+                .foregroundColor(isSelected ? .green : .blue)
+                .background(
+                    Circle()
+                        .fill(.white)
+                        .frame(width: 20, height: 20)
+                )
+            
+            if isSelected {
+                Text(result.displayName)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(Color.green)
+                    )
+                    .offset(y: 4)
+            }
+        }
+        .onTapGesture(perform: onTap)
     }
 }
 
