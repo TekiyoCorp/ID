@@ -9,12 +9,15 @@ struct ProfileView: View {
     @State private var trustScore: Int = 3 // Out of 10
     @State private var lastVerification: String = "il y a 2 jours"
     @State private var shouldNavigateToActivities = false
+    @State private var selectedActivity: ProfileActivity?
+    @Namespace private var activityNamespace
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                // Header with profile info
-                VStack(spacing: 16) {
+        ZStack {
+            ScrollView {
+                VStack(spacing: 0) {
+                    // Header with profile info
+                    VStack(spacing: 16) {
                     // Profile picture (agrandie de 25%)
                     if let profileImage = profileImage {
                         Image(uiImage: profileImage)
@@ -159,26 +162,20 @@ struct ProfileView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
                     VStack(spacing: 12) {
-                        ActivityRow(
-                            profileImage: "person.circle.fill",
-                            title: "Connexion avec Damien R.",
-                            icon: "person.2.fill",
-                            color: .blue
-                        )
-                        
-                        ActivityRow(
-                            profileImage: "person.circle.fill",
-                            title: "Thomas S. vous a scanné.",
-                            icon: "qrcode",
-                            color: .blue
-                        )
-                        
-                        ActivityRow(
-                            profileImage: "person.circle.fill",
-                            title: "Julie F. vous fait confiance.",
-                            icon: "hand.thumbsup.fill",
-                            color: .blue
-                        )
+                        ForEach(profileActivities) { activity in
+                            ActivityListItem(
+                                activity: activity,
+                                namespace: activityNamespace
+                            )
+                            .opacity(selectedActivity?.id == activity.id ? 0 : 1)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                presentActivity(activity)
+                            }
+                            .accessibilityElement()
+                            .accessibilityLabel(activity.title)
+                            .accessibilityAddTraits(.isButton)
+                        }
                     }
                     .frame(maxWidth: 250)
                     
@@ -218,6 +215,21 @@ struct ProfileView: View {
                 .padding(.horizontal, 24)
                 .padding(.bottom, 40)
             }
+            .blur(radius: selectedActivity == nil ? 0 : 10, opaque: false)
+            .allowsHitTesting(selectedActivity == nil)
+            
+            if let activity = selectedActivity {
+                ActivityDetailOverlay(
+                    activity: activity,
+                    namespace: activityNamespace,
+                    onClose: dismissSelectedActivity
+                )
+                .transition(.asymmetric(
+                    insertion: AnyTransition.scale(scale: 0.95, anchor: .center)
+                        .combined(with: .opacity),
+                    removal: .opacity
+                ))
+            }
         }
         .background(Color(.systemBackground))
         .navigationBarHidden(true)
@@ -225,6 +237,18 @@ struct ProfileView: View {
             RecentActivitiesView()
         }
         .debugRenders("ProfileView")
+    }
+    
+    private func presentActivity(_ activity: ProfileActivity) {
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.85, blendDuration: 0.25)) {
+            selectedActivity = activity
+        }
+    }
+    
+    private func dismissSelectedActivity() {
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.9, blendDuration: 0.25)) {
+            selectedActivity = nil
+        }
     }
 }
 
@@ -237,6 +261,173 @@ private extension ProfileView {
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
+    
+    static let defaultActivities: [ProfileActivity] = [
+        ProfileActivity(
+            id: UUID(uuidString: "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA") ?? UUID(),
+            contactName: "Damien R.",
+            title: "Connexion avec Damien R.",
+            detail: "Connexion confirmée et sécurisée via Tekiyo ID.",
+            iconName: "person.2.fill",
+            iconColor: Color(hex: "002FFF"),
+            timestamp: "Il y a 2 heures"
+        ),
+        ProfileActivity(
+            id: UUID(uuidString: "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB") ?? UUID(),
+            contactName: "Thomas S.",
+            title: "Thomas S. vous a scanné.",
+            detail: "Thomas a validé votre identité en scannant votre QR code Tekiyo.",
+            iconName: "qrcode",
+            iconColor: Color(hex: "0047FF"),
+            timestamp: "Il y a 1 heure"
+        ),
+        ProfileActivity(
+            id: UUID(uuidString: "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC") ?? UUID(),
+            contactName: "Julie F.",
+            title: "Julie F. vous fait confiance.",
+            detail: "Julie a confirmé qu’elle vous reconnaît et vous fait confiance.",
+            iconName: "hand.thumbsup.fill",
+            iconColor: Color(hex: "0061FF"),
+            timestamp: "Hier"
+        )
+    ]
+    
+    var profileActivities: [ProfileActivity] {
+        Self.defaultActivities
+    }
+    
+    struct ProfileActivity: Identifiable, Hashable {
+        let id: UUID
+        let contactName: String
+        let title: String
+        let detail: String
+        let iconName: String
+        let iconColor: Color
+        let timestamp: String
+        
+    }
+}
+
+// MARK: - Interactive Activity Cards
+private struct ActivityListItem: View {
+    let activity: ProfileView.ProfileActivity
+    let namespace: Namespace.ID
+    var backgroundColor: Color = Color.gray.opacity(0.1)
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Circle()
+                .fill(Color.gray.opacity(0.3))
+                .frame(width: 40, height: 40)
+                .overlay(
+                    Image(systemName: "person.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(.gray)
+                )
+                .matchedGeometryEffect(id: ActivityCardID.avatar(activity.id), in: namespace)
+            
+            Text(activity.title)
+                .font(.system(size: 16, weight: .regular))
+                .foregroundColor(.primary)
+                .lineLimit(2)
+                .matchedGeometryEffect(id: ActivityCardID.title(activity.id), in: namespace)
+            
+            Spacer()
+            
+            Image(systemName: activity.iconName)
+                .font(.system(size: 16))
+                .foregroundColor(activity.iconColor)
+                .matchedGeometryEffect(id: ActivityCardID.icon(activity.id), in: namespace)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(
+            Capsule()
+                .fill(backgroundColor)
+                .matchedGeometryEffect(id: ActivityCardID.background(activity.id), in: namespace)
+        )
+        .matchedGeometryEffect(id: ActivityCardID.card(activity.id), in: namespace)
+    }
+}
+
+private struct ActivityDetailOverlay: View {
+    let activity: ProfileView.ProfileActivity
+    let namespace: Namespace.ID
+    let onClose: () -> Void
+    
+    @GestureState private var dragOffset: CGFloat = 0
+    @State private var appeared = false
+    
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+                .onTapGesture(perform: onClose)
+            
+            VStack(spacing: 20) {
+                ActivityListItem(activity: activity, namespace: namespace, backgroundColor: Color.white.opacity(0.12))
+                    .padding(.top, 12)
+                
+                Divider()
+                    .opacity(0.1)
+                
+                VStack(alignment: .leading, spacing: 12) {
+                    Label(activity.timestamp, systemImage: "clock")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.secondary)
+                    
+                    Text(activity.detail)
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundColor(.primary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(24)
+            .frame(maxWidth: 320)
+            .background(
+                RoundedRectangle(cornerRadius: 32, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                    .shadow(color: Color.black.opacity(0.22), radius: 24, x: 0, y: 18)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 32, style: .continuous)
+                    .stroke(Color.white.opacity(0.06))
+            )
+            .scaleEffect(appeared ? 1 : 0.92)
+            .rotationEffect(.degrees(appeared ? 0 : -4))
+            .offset(y: dragOffset)
+            .gesture(
+                DragGesture()
+                    .updating($dragOffset) { value, state, _ in
+                        if value.translation.height > 0 {
+                            state = value.translation.height
+                        }
+                    }
+                    .onEnded { value in
+                        if value.translation.height > 120 {
+                            onClose()
+                        }
+                    }
+            )
+            .onAppear {
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.82, blendDuration: 0.25)) {
+                    appeared = true
+                }
+            }
+            .onDisappear {
+                appeared = false
+            }
+        }
+    }
+}
+
+private enum ActivityCardID {
+    static func card(_ id: UUID) -> String { "activity-card-\(id.uuidString)" }
+    static func background(_ id: UUID) -> String { "activity-background-\(id.uuidString)" }
+    static func avatar(_ id: UUID) -> String { "activity-avatar-\(id.uuidString)" }
+    static func title(_ id: UUID) -> String { "activity-title-\(id.uuidString)" }
+    static func icon(_ id: UUID) -> String { "activity-icon-\(id.uuidString)" }
 }
 
 // MARK: - Activity Row Component

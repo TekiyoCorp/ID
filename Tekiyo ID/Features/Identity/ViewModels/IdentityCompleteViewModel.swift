@@ -6,6 +6,7 @@ import UIKit
 final class IdentityCompleteViewModel: ObservableObject {
     @Published var tekiyoID: String = ""
     @Published var username: String = ""
+    @Published var recentActivities: [IdentityActivity] = []
     
     let identityData: IdentityData
     let profileImage: UIImage?
@@ -28,6 +29,7 @@ final class IdentityCompleteViewModel: ObservableObject {
     private func generateData() {
         tekiyoID = generateTekiyoID()
         username = generateUsername(from: identityData.prenom)
+        recentActivities = generateRecentActivities()
     }
     
     private func generateTekiyoID() -> String {
@@ -42,4 +44,34 @@ final class IdentityCompleteViewModel: ObservableObject {
         return "@\(firstName.lowercased())\(randomDigits)"
     }
     
+    private func generateRecentActivities() -> [IdentityActivity] {
+        [
+            IdentityActivity(
+                icon: "faceid",
+                title: "Reconnaissance faciale réussie",
+                detail: "Connexion confirmée pour \(identityData.prenom)",
+                timestamp: "Il y a 2 minutes"
+            ),
+            IdentityActivity(
+                icon: "person.crop.circle.badge.checkmark",
+                title: "Badge vérifié obtenu",
+                detail: "Ton profil Tekiyo est désormais certifié",
+                timestamp: "Il y a 1 heure"
+            ),
+            IdentityActivity(
+                icon: "hand.raised.fill",
+                title: "Nouvelle confiance reçue",
+                detail: "\(identityData.prenom) \(identityData.nom) approuve ton identité",
+                timestamp: "Hier"
+            )
+        ]
+    }
+}
+
+struct IdentityActivity: Identifiable {
+    let id = UUID()
+    let icon: String
+    let title: String
+    let detail: String
+    let timestamp: String
 }
