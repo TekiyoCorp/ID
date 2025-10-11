@@ -354,48 +354,53 @@ struct RecentActivitiesCardView: View {
                 .font(.system(size: 17, weight: .medium))
                 .foregroundColor(.primary)
             
-            // Stacked activities with blur effect
-            VStack(spacing: 0) {
+            // Stacked activities with blur effect - CENTRÉ et amélioré
+            ZStack {
+                // Card arrière (plus floue et petite)
                 ActivityRow(
                     profileImage: "person.circle.fill",
                     title: "Connexion avec Damien R.",
                     icon: "person.2.fill",
                     color: .blue
                 )
-                .opacity(0.65)
-                .scaleEffect(0.95)
-                .offset(y: -12)
+                .opacity(0.5)
+                .scaleEffect(0.92)
+                .offset(y: -16)
+                .blur(radius: 1.5)
                 .allowsHitTesting(false)
                 
+                // Card du milieu
                 ActivityRow(
                     profileImage: "person.circle.fill",
                     title: "Thomas S. vous a scanné.",
                     icon: "qrcode",
                     color: .blue
                 )
-                .opacity(0.82)
-                .scaleEffect(0.98)
-                .offset(y: -4)
+                .opacity(0.75)
+                .scaleEffect(0.96)
+                .offset(y: -8)
+                .blur(radius: 0.5)
                 .allowsHitTesting(false)
                 
+                // Card du dessus (la plus visible)
                 ActivityRow(
                     profileImage: "person.circle.fill",
                     title: "Julie F. vous fait confiance.",
                     icon: "hand.thumbsup.fill",
                     color: .blue
                 )
-                .allowsHitTesting(false)
+                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 4)
             }
-            .padding(.vertical, 8)
-            .frame(maxWidth: 250)
+            .frame(maxWidth: 280)
             .contentShape(Rectangle())
             .onTapGesture {
-                withAnimation(.easeInOut(duration: 0.25)) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                     showOverlay = true
                 }
             }
         }
         .frame(maxWidth: .infinity)
+        .padding(.vertical, 20)
     }
 }
 
