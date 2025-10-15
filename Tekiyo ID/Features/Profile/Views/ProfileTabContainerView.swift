@@ -36,7 +36,7 @@ struct ProfileTabContainerView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            MessageListView()
+            PlaceholderTabView(title: "Accueil")
                 .tabItem {
                     Image(systemName: Tab.home.icon)
                 }
@@ -53,7 +53,7 @@ struct ProfileTabContainerView: View {
             }
             .tag(Tab.tekiyoID)
             
-            PlaceholderTabView(title: "Notifications")
+            MessageListView()
                 .tabItem {
                     Image(systemName: Tab.notifications.icon)
                 }
