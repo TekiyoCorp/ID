@@ -15,18 +15,19 @@ struct ProfileView: View {
     
     var body: some View {
         ZStack {
-            // Background
-            backgroundColor
-                .ignoresSafeArea()
+            // Global Background - OLED Black
+            Color(hex: "111111")
+                .ignoresSafeArea(.all)
             
-            VStack(spacing: 0) {
-                // Header (Top Bar) - FIXED, NO BACKGROUND
-                headerView
-                    .padding(.horizontal, 24)
-                    .padding(.top, 8)
-                
-                ScrollView {
-                    VStack(spacing: 24) { // Harmonized spacing
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 0) {
+                    // Header (Top Bar) - FIXED, NO BACKGROUND
+                    headerView
+                        .padding(.horizontal, 24)
+                        .padding(.top, 8)
+                        .padding(.bottom, 20)
+                    
+                    VStack(spacing: 24) {
                         // Location & Greeting
                         locationAndGreetingView
                             .padding(.top, 20)
@@ -37,16 +38,17 @@ struct ProfileView: View {
                         // Score Indicator
                         scoreIndicatorView
                         
-                        // WalletWidget
+                        // WalletWidget - Centered with fixed width
                         WalletWidget()
+                            .frame(maxWidth: 326)
+                            .padding(.horizontal, 16)
                         
                         // Links Section
                         linksSection
                             .padding(.bottom, 20)
                     }
-                    .frame(maxWidth: .infinity)
                     .padding(.horizontal, 24)
-                    .padding(.bottom, 100) // Space for TabBar
+                    .padding(.bottom, 96) // Space for floating TabBar
                 }
             }
             
@@ -64,7 +66,7 @@ struct ProfileView: View {
             viewModel.requestLocation()
         }
         .safeAreaInset(edge: .bottom) {
-            // Native TabBar - NO BACKGROUND
+            // Floating TabBar - NO BACKGROUND
             TabView(selection: $selectedTab) {
                 // Home Tab
                 Color.clear
@@ -99,7 +101,7 @@ struct ProfileView: View {
                     .tag(BottomNavigationBar.TabItem.wallet)
             }
             .frame(height: 60)
-            .background(Color.clear) // Transparent background
+            .background(Color.clear) // Completely transparent
         }
         .debugRenders("ProfileView")
     }
@@ -253,17 +255,6 @@ struct ProfileView: View {
         .frame(maxWidth: 280) // Max width comme dans l'image
     }
     
-    // MARK: - Background Color
-    private var backgroundColor: Color {
-        switch colorScheme {
-        case .light:
-            return .white
-        case .dark:
-            return Color(hex: "111111")
-        @unknown default:
-            return .white
-        }
-    }
 }
 
 // MARK: - Extensions
