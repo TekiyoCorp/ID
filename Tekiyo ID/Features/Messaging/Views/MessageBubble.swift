@@ -14,11 +14,11 @@ struct MessageBubble: View {
                     .overlay(
                         Image(systemName: user.avatarImage)
                             .font(.system(size: 14))
-                            .foregroundColor(.white.opacity(0.9))
+                            .foregroundColor(.white)
                     )
             } else if !message.isFromCurrentUser {
                 Circle()
-                    .fill(Color.gray.opacity(0.3))
+                    .fill(Color(.systemGray4))
                     .frame(width: 32, height: 32)
             }
             
@@ -27,14 +27,13 @@ struct MessageBubble: View {
             }
             
             Text(message.text)
-                .font(.custom("SF Pro Display", size: 16))
-                .fontWeight(.regular)
-                .foregroundColor(.white.opacity(0.9))
+                .font(.body)
+                .foregroundColor(message.isFromCurrentUser ? .white : .primary)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
                 .background(
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(message.isFromCurrentUser ? Color.white.opacity(0.15) : Color.white.opacity(0.08))
+                        .fill(message.isFromCurrentUser ? Color.blue : Color(.systemGray5))
                 )
             
             if !message.isFromCurrentUser {

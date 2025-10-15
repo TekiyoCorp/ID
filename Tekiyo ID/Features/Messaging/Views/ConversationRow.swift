@@ -13,16 +13,16 @@ struct ConversationRow: View {
                     .overlay(
                         Image(systemName: conversation.user.avatarImage)
                             .font(.system(size: 24))
-                            .foregroundColor(.white.opacity(0.9))
+                            .foregroundColor(.white)
                     )
                 
                 if conversation.user.isOnline {
                     Circle()
                         .fill(Color.green)
-                        .frame(width: 16, height: 16)
+                        .frame(width: 14, height: 14)
                         .overlay(
                             Circle()
-                                .stroke(Color(hex: "111111"), lineWidth: 2)
+                                .stroke(Color(.systemBackground), lineWidth: 2)
                         )
                 }
             }
@@ -31,21 +31,19 @@ struct ConversationRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 6) {
                     Text(conversation.user.name)
-                        .font(.custom("SF Pro Display", size: 17))
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white.opacity(0.9))
+                        .font(.headline)
+                        .foregroundColor(.primary)
                     
                     if conversation.user.isVerified {
                         Image(systemName: "checkmark.seal.fill")
-                            .font(.system(size: 14))
+                            .font(.caption)
                             .foregroundColor(.green)
                     }
                 }
                 
                 Text(conversation.lastMessage)
-                    .font(.custom("SF Pro Display", size: 15))
-                    .fontWeight(.regular)
-                    .foregroundColor(.white.opacity(0.6))
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
                     .lineLimit(1)
             }
             
@@ -54,13 +52,12 @@ struct ConversationRow: View {
             // Timestamp and unread indicator
             VStack(alignment: .trailing, spacing: 8) {
                 Text(conversation.timeString)
-                    .font(.custom("SF Pro Display", size: 13))
-                    .fontWeight(.regular)
-                    .foregroundColor(.white.opacity(0.5))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
                 
                 if conversation.isUnread {
                     Circle()
-                        .fill(Color.white)
+                        .fill(Color.blue)
                         .frame(width: 8, height: 8)
                 }
             }

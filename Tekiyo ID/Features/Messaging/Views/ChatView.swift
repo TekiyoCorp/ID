@@ -93,36 +93,38 @@ struct ChatView: View {
         HStack(spacing: 12) {
             // Plus button
             Button(action: {}) {
-                Image(systemName: "plus")
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(.white.opacity(0.7))
-                    .frame(width: 40, height: 40)
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 28))
+                    .foregroundColor(.secondary)
             }
-            .buttonStyle(.plain)
             
             // Text field
-            TextField("Tapez votre message", text: $viewModel.messageText)
-                .font(.custom("SF Pro Display", size: 16))
-                .foregroundColor(.white.opacity(0.9))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .fill(Color.white.opacity(0.08))
-                )
-                .onSubmit {
-                    viewModel.sendMessage()
+            HStack {
+                TextField("Tapez votre message", text: $viewModel.messageText)
+                    .textFieldStyle(.plain)
+                
+                if !viewModel.messageText.isEmpty {
+                    Button(action: { viewModel.sendMessage() }) {
+                        Image(systemName: "arrow.up.circle.fill")
+                            .font(.system(size: 28))
+                            .foregroundColor(.blue)
+                    }
+                } else {
+                    Button(action: {}) {
+                        Image(systemName: "mic.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(.secondary)
+                    }
                 }
-            
-            // Mic button
-            Button(action: {}) {
-                Image(systemName: "mic.fill")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(.white.opacity(0.7))
-                    .frame(width: 40, height: 40)
             }
-            .buttonStyle(.plain)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(Color(.systemGray6))
+            )
         }
+        .padding(.horizontal, 16)
         .padding(.bottom, 8)
     }
 }

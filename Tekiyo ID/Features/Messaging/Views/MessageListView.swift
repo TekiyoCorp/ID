@@ -40,42 +40,13 @@ struct MessageListView: View {
     }
     
     private var segmentedControl: some View {
-        HStack(spacing: 0) {
+        Picker("", selection: $viewModel.selectedSegment) {
             ForEach(MessageSegment.allCases, id: \.self) { segment in
-                Button(action: { viewModel.selectedSegment = segment }) {
-                    VStack(spacing: 8) {
-                        HStack(spacing: 6) {
-                            Text(segment.rawValue)
-                                .font(.custom("SF Pro Display", size: 16))
-                                .fontWeight(.medium)
-                                .foregroundColor(viewModel.selectedSegment == segment ? .white.opacity(0.9) : .white.opacity(0.5))
-                            
-                            if segment == .messages && viewModel.selectedSegment == segment {
-                                Circle()
-                                    .fill(Color.blue)
-                                    .frame(width: 8, height: 8)
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                    }
-                }
-                .buttonStyle(.plain)
+                Text(segment.rawValue).tag(segment)
             }
         }
-        .background(
-            GeometryReader { geometry in
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(.ultraThinMaterial)
-                    .frame(width: geometry.size.width / 2)
-                    .offset(x: viewModel.selectedSegment == .messages ? 0 : geometry.size.width / 2)
-                    .animation(.spring(response: 0.3), value: viewModel.selectedSegment)
-            }
-        )
-        .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
-        )
+        .pickerStyle(.segmented)
+        .padding(.horizontal, 20)
     }
     
     private var eventsSection: some View {
