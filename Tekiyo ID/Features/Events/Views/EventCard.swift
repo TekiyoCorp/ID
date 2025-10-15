@@ -91,27 +91,16 @@ struct EventCard: View {
                     Spacer()
                     
                     // Button
-                    if event.title.contains("Tennis") {
-                        Circle()
-                            .fill(Color(hex: "1D1D1D"))
-                            .frame(width: 44, height: 44)
-                            .overlay(
-                                Image(systemName: "plus")
-                                    .font(.system(size: 18, weight: .medium))
-                                    .foregroundColor(.secondary)
-                            )
-                    } else {
-                        Text("S'inscrire")
-                            .font(.headline)
-                            .fontWeight(.medium)
-                            .foregroundColor(.primary)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .fill(Color(hex: "1D1D1D"))
-                            )
-                    }
+                    Text("S'inscrire")
+                        .font(.headline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(Color(hex: "1D1D1D"))
+                        )
                 }
             }
             .padding(24)
@@ -119,7 +108,6 @@ struct EventCard: View {
             .background(
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .fill(Color(hex: "1D1D1D"))
-                    .background(.ultraThinMaterial)
             )
         }
         .buttonStyle(.plain)

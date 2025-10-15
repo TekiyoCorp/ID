@@ -47,13 +47,13 @@ struct WalletWidget: View {
         }
         .frame(width: 342, height: 291)
         .padding(8)
-           .background(
-               RoundedRectangle(cornerRadius: 60, style: .continuous)
-                   .fill(Color.black.opacity(0.15))
-                   .shadow(color: .white.opacity(0.05), radius: 12, x: 0, y: 8)
-                   .background(.ultraThinMaterial) // Frosted glass effect
-           )
-           .clipShape(RoundedRectangle(cornerRadius: 60, style: .continuous))
+        .background(
+            RoundedRectangle(cornerRadius: 60, style: .continuous)
+                .fill(Color.black.opacity(0.15))
+                .shadow(color: .white.opacity(0.05), radius: 12, x: 0, y: 8)
+        )
+        .background(.ultraThinMaterial) // Frosted glass effect
+        .clipShape(RoundedRectangle(cornerRadius: 60, style: .continuous))
     }
     
     private func walletButton(icon: String, label: String, action: @escaping () -> Void) -> some View {

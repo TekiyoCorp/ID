@@ -7,6 +7,7 @@ final class EventsViewModel: ObservableObject {
     @Published var events: [Event] = []
     @Published var selectedEvent: Event?
     @Published var showEventDetail: Bool = false
+    @Published var showCreateEvent: Bool = false
     
     init() {
         loadEvents()

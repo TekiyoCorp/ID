@@ -66,7 +66,6 @@ struct MessageListView: View {
                 .background(
                     Circle()
                         .fill(Color.white.opacity(0.2))
-                        .background(.ultraThinMaterial)
                 )
         }
         .padding(.horizontal, 20)
@@ -74,7 +73,6 @@ struct MessageListView: View {
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(Color.white.opacity(0.05))
-                .background(.ultraThinMaterial)
         )
         .padding(.horizontal, 20)
     }

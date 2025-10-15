@@ -24,7 +24,20 @@ struct EventsListView: View {
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 20)
-                    .padding(.bottom, 40)
+                    .padding(.bottom, 100) // Extra space for floating button
+                }
+            }
+            
+            // Floating Create Button
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    CreateEventFloatingButton {
+                        viewModel.showCreateEvent = true
+                    }
+                    .padding(.trailing, 20)
+                    .padding(.bottom, 20)
                 }
             }
         }
@@ -43,6 +56,9 @@ struct EventsListView: View {
                 .presentationDragIndicator(.visible)
             }
         }
+        .sheet(isPresented: $viewModel.showCreateEvent) {
+            CreateEventView()
+        }
     }
     
     private var headerView: some View {
@@ -56,7 +72,6 @@ struct EventsListView: View {
                     .background(
                         Circle()
                             .fill(Color.white.opacity(0.1))
-                            .background(.ultraThinMaterial)
                     )
             }
             .buttonStyle(.plain)
@@ -83,7 +98,6 @@ struct EventsListView: View {
             .background(
                 Capsule()
                     .fill(Color.white.opacity(0.1))
-                    .background(.ultraThinMaterial)
             )
             
             Spacer()
@@ -97,7 +111,6 @@ struct EventsListView: View {
                     .background(
                         Circle()
                             .fill(Color.white.opacity(0.1))
-                            .background(.ultraThinMaterial)
                     )
             }
             .buttonStyle(.plain)
