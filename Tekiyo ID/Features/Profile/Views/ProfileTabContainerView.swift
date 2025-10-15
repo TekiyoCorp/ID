@@ -36,9 +36,9 @@ struct ProfileTabContainerView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            PlaceholderTabView(title: "Accueil")
+            MessageListView()
                 .tabItem {
-                    Label(Tab.home.label, systemImage: Tab.home.icon)
+                    Image(systemName: Tab.home.icon)
                 }
                 .tag(Tab.home)
             
@@ -49,19 +49,19 @@ struct ProfileTabContainerView: View {
                 username: username
             )
             .tabItem {
-                Label(Tab.tekiyoID.label, systemImage: Tab.tekiyoID.icon)
+                Image(systemName: Tab.tekiyoID.icon)
             }
             .tag(Tab.tekiyoID)
             
             PlaceholderTabView(title: "Notifications")
                 .tabItem {
-                    Label(Tab.notifications.label, systemImage: Tab.notifications.icon)
+                    Image(systemName: Tab.notifications.icon)
                 }
                 .tag(Tab.notifications)
             
-            PlaceholderTabView(title: "Portefeuille")
+            WalletView()
                 .tabItem {
-                    Label(Tab.wallet.label, systemImage: Tab.wallet.icon)
+                    Image(systemName: Tab.wallet.icon)
                 }
                 .tag(Tab.wallet)
         }
