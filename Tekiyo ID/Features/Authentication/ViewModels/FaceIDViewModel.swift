@@ -45,5 +45,19 @@ final class FaceIDViewModel: ObservableObject {
             authMessage = "Face ID non disponible sur cet appareil."
         }
     }
+    
+    #if DEBUG
+    func simulateSuccess() {
+        authMessage = "Face ID activé avec succès (simulé)."
+        hapticManager.success()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.shouldNavigateToIdentity = true
+        }
+    }
+    
+    func skipFaceID() {
+        shouldNavigateToIdentity = true
+    }
+    #endif
 }
 

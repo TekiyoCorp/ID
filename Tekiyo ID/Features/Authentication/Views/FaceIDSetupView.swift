@@ -2,6 +2,9 @@ import SwiftUI
 
 struct FaceIDSetupView: View {
     @StateObject private var viewModel = FaceIDViewModel()
+    #if DEBUG
+    @State private var showDebugControls = false
+    #endif
     
     var body: some View {
         VStack(spacing: 24) {
@@ -53,6 +56,52 @@ struct FaceIDSetupView: View {
             IdentitySetupView()
         }
         .debugRenders("FaceIDSetupView")
+        #if DEBUG
+        .overlay(alignment: .topTrailing) {
+            VStack {
+                Button(action: {
+                    showDebugControls.toggle()
+                }) {
+                    Image(systemName: "wrench.and.screwdriver")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.white)
+                        .frame(width: 32, height: 32)
+                        .background(Color.black.opacity(0.6))
+                        .clipShape(Circle())
+                }
+                .padding(.top, 8)
+                .padding(.trailing, 8)
+                
+                if showDebugControls {
+                    VStack(spacing: 8) {
+                        Button("Simuler succès") {
+                            viewModel.simulateSuccess()
+                        }
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.green)
+                        .clipShape(Capsule())
+                        
+                        Button("Passer FaceID") {
+                            viewModel.skipFaceID()
+                        }
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.blue)
+                        .clipShape(Capsule())
+                    }
+                    .padding(8)
+                    .background(Color.black.opacity(0.8))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .transition(.scale.combined(with: .opacity))
+                }
+            }
+        }
+        #endif
     }
 }
 
