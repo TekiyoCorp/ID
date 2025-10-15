@@ -159,7 +159,7 @@ struct IdentityCompleteView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationBarHidden(true)
         .navigationDestination(isPresented: $shouldNavigateToProfile) {
-            ProfileView(
+            ProfileTabContainerView(
                 identityData: viewModel.identityData,
                 profileImage: viewModel.profileUIImage,
                 tekiyoID: viewModel.tekiyoID,

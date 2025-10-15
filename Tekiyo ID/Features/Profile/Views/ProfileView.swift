@@ -10,10 +10,9 @@ struct ProfileView: View {
     @State private var trustScore: Int = 3 // Out of 10
     @State private var lastVerification: String = "il y a 2 jours"
     @State private var showActivitiesOverlay = false
-    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottom) {
             // Global Background - OLED Black
             Color(hex: "111111")
                 .ignoresSafeArea(.all)
@@ -37,6 +36,25 @@ struct ProfileView: View {
                         
                         // Score Indicator
                         scoreIndicatorView
+                        VStack(alignment: .leading, spacing: 12) {
+                            ProfileActivityCirclesRow(activities: profileActivities)
+                                .padding(.leading, 8)
+
+                            Button(action: {
+                                withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) {
+                                    showActivitiesOverlay = true
+                                }
+                            }) {
+                                Text("Voir plus")
+                                    .font(.custom("SF Pro Display", size: 16))
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.white.opacity(0.85))
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.leading, 8)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
                         
                         // WalletWidget - Centered with fixed width
                         WalletWidget()
@@ -49,10 +67,10 @@ struct ProfileView: View {
                     }
                     .padding(.horizontal, 24)
                 }
+                .padding(.bottom, 160)
             }
             .scrollContentBackground(.hidden)
             .background(Color.clear)
-            
             // Activities Overlay
             if showActivitiesOverlay {
                 ActivitiesOverlayContainer(
@@ -60,7 +78,7 @@ struct ProfileView: View {
                     activities: profileActivities
                 )
                 .transition(.move(edge: .trailing))
-                .zIndex(1)
+                .zIndex(2)
             }
         }
         .onAppear {
@@ -111,8 +129,7 @@ struct ProfileView: View {
             .buttonStyle(.plain)
         }
     }
-    
-    // MARK: - Location & Greeting
+// MARK: - Location & Greeting
     private var locationAndGreetingView: some View {
         VStack(spacing: 8) {
             // Sun icon + City
@@ -218,7 +235,6 @@ struct ProfileView: View {
         }
         .frame(maxWidth: 280) // Max width comme dans l'image
     }
-    
 }
 
 // MARK: - Extensions
