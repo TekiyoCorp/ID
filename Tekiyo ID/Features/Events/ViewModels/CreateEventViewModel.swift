@@ -9,6 +9,7 @@ final class CreateEventViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var showImagePicker: Bool = false
     @Published var showLocationSearch: Bool = false
+    @Published var showDateTimePicker: Bool = false
     @Published var showPreview: Bool = false
     
     // Location
