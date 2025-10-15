@@ -102,6 +102,22 @@ struct LargeCircularCodeView: View {
             cgContext.setStrokeColor(UIColor.systemBlue.cgColor)
             cgContext.setLineWidth(2)
             cgContext.strokeEllipse(in: CGRect(x: center.x - 14, y: center.y - 14, width: 28, height: 28))
+            
+            // Add highlighted dot with white ring (visible in Figma image)
+            if !dots.isEmpty {
+                let highlightedDot = dots[dots.count / 2] // Middle dot as highlight
+                let highlightRadius: CGFloat = 6
+                
+                // White ring around highlighted dot
+                cgContext.setStrokeColor(UIColor.white.cgColor)
+                cgContext.setLineWidth(2)
+                cgContext.strokeEllipse(in: CGRect(
+                    x: center.x + highlightedDot.x - highlightRadius,
+                    y: center.y + highlightedDot.y - highlightRadius,
+                    width: highlightRadius * 2,
+                    height: highlightRadius * 2
+                ))
+            }
         }
     }
     

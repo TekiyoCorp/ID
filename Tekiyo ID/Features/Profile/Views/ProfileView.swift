@@ -26,7 +26,7 @@ struct ProfileView: View {
                     .padding(.top, 8)
                 
                 ScrollView {
-                    VStack(spacing: 40) {
+                    VStack(spacing: 24) { // Harmonized spacing
                         // Location & Greeting
                         locationAndGreetingView
                             .padding(.top, 20)
@@ -107,9 +107,7 @@ struct ProfileView: View {
     // MARK: - Header View
     private var headerView: some View {
         HStack {
-            Spacer()
-            
-            // Profile Photo (43x43px)
+            // Profile Photo (43x43px) - LEFT SIDE
             if let profileImage = profileImage {
                 Image(uiImage: profileImage)
                     .resizable()
@@ -133,13 +131,13 @@ struct ProfileView: View {
             
             Spacer()
             
-            // Search Button (43x43px, liquid glass)
+            // Search Button (43x43px, liquid glass) - RIGHT SIDE
             Button(action: {
                 // Handle search
             }) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.black)
+                    .foregroundColor(.white.opacity(0.9))
                     .frame(width: 32, height: 32)
                     .background(Color.gray.opacity(0.1))
                     .clipShape(Circle())
@@ -155,30 +153,34 @@ struct ProfileView: View {
             HStack(spacing: 6) {
                 Image(systemName: "sun.max")
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.primary)
+                    .foregroundColor(.white.opacity(0.9))
                 
                 Text(viewModel.getDisplayCity())
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.primary)
+                    .font(.custom("SF Pro Display", size: 16))
+                    .fontWeight(.medium)
+                    .foregroundColor(.white.opacity(0.9))
                     .opacity(0.8)
             }
             
             // Greeting
             Text("Bonjour \(identityData.prenom)!")
-                .font(.system(size: 28, weight: .medium))
-                .foregroundColor(.primary)
+                .font(.custom("SF Pro Display", size: 28))
+                .fontWeight(.medium)
+                .kerning(-1.68) // -6% of 28px
+                .foregroundColor(.white.opacity(0.9))
         }
     }
     
     // MARK: - Circular Code View
     private var circularCodeView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) { // Harmonized spacing
             LargeCircularCodeView(url: "https://tekiyo.fr/\(tekiyoID)")
                 .frame(width: 194, height: 194)
             
             Text("Ce code QR prouve ton humanité.")
-                .font(.system(size: 16, weight: .regular))
-                .foregroundColor(.primary)
+                .font(.custom("SF Pro Display", size: 14))
+                .fontWeight(.regular)
+                .foregroundColor(.white.opacity(0.9))
                 .opacity(0.7)
                 .multilineTextAlignment(.center)
         }
@@ -186,7 +188,7 @@ struct ProfileView: View {
     
     // MARK: - Score Indicator
     private var scoreIndicatorView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) { // Harmonized spacing
             // Score bars
             HStack(spacing: 4) {
                 ForEach(0..<10, id: \.self) { index in
@@ -194,8 +196,8 @@ struct ProfileView: View {
                         .fill(index < trustScore ? Color.red : Color.gray.opacity(0.3))
                         .frame(width: 12, height: 24)
                         .shadow(
-                            color: index < trustScore ? Color.red.opacity(0.25) : Color.clear,
-                            radius: 6,
+                            color: index < trustScore ? Color.red.opacity(0.35) : Color.clear,
+                            radius: 8,
                             x: 0,
                             y: 0
                         )
@@ -204,19 +206,22 @@ struct ProfileView: View {
             
             // Percentage
             Text("27%")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(.primary)
+                .font(.custom("SF Pro Display", size: 18))
+                .fontWeight(.bold)
+                .foregroundColor(.white.opacity(0.9))
             
             // Last verification
             Text("Dernière vérification : \(lastVerification)")
-                .font(.system(size: 12, weight: .regular))
-                .foregroundColor(.primary)
+                .font(.custom("SF Pro Display", size: 12))
+                .fontWeight(.regular)
+                .foregroundColor(.white.opacity(0.9))
             
             // Help link
             Button("Comment augmenter mon score ?") {
                 // Handle score increase info
             }
-            .font(.system(size: 12, weight: .regular))
+            .font(.custom("SF Pro Display", size: 12))
+            .fontWeight(.regular)
             .foregroundColor(.blue)
         }
         .frame(maxWidth: .infinity, alignment: .center)
@@ -224,7 +229,7 @@ struct ProfileView: View {
     
     // MARK: - Links Section
     private var linksSection: some View {
-        VStack(alignment: .center, spacing: 16) {
+        VStack(alignment: .center, spacing: 12) { // Harmonized spacing
             Text("Liens")
                 .font(.system(size: 18, weight: .medium))
                 .foregroundColor(.primary)
