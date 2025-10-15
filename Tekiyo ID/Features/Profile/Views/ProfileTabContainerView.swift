@@ -29,7 +29,7 @@ struct ProfileTabContainerView: View {
     
     @State private var selectedTab: Tab = .tekiyoID
     
-    let identityData: IdentityData
+    let identityData: Tekiyo_ID.IdentityData
     let profileImage: UIImage?
     let tekiyoID: String
     let username: String

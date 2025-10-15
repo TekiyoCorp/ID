@@ -1,7 +1,8 @@
 import SwiftUI
+import UIKit
 
 struct ProfileView: View {
-    let identityData: IdentityData
+    let identityData: Tekiyo_ID.IdentityData
     let profileImage: UIImage?
     let tekiyoID: String
     let username: String
@@ -9,7 +10,6 @@ struct ProfileView: View {
     @StateObject private var viewModel = ProfileViewModel()
     @State private var trustScore: Int = 3 // Out of 10
     @State private var lastVerification: String = "il y a 2 jours"
-    @State private var showActivitiesOverlay = false
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -36,25 +36,6 @@ struct ProfileView: View {
                         
                         // Score Indicator
                         scoreIndicatorView
-                        VStack(alignment: .leading, spacing: 12) {
-                            ProfileActivityCirclesRow(activities: profileActivities)
-                                .padding(.leading, 8)
-
-                            Button(action: {
-                                withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) {
-                                    showActivitiesOverlay = true
-                                }
-                            }) {
-                                Text("Voir plus")
-                                    .font(.custom("SF Pro Display", size: 16))
-                                    .fontWeight(.medium)
-                                    .foregroundColor(.white.opacity(0.85))
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.leading, 8)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
                         
                         // WalletWidget - Centered with fixed width
                         WalletWidget()
@@ -71,15 +52,6 @@ struct ProfileView: View {
             }
             .scrollContentBackground(.hidden)
             .background(Color.clear)
-            // Activities Overlay
-            if showActivitiesOverlay {
-                ActivitiesOverlayContainer(
-                    isPresented: $showActivitiesOverlay,
-                    activities: profileActivities
-                )
-                .transition(.move(edge: .trailing))
-                .zIndex(2)
-            }
         }
         .onAppear {
             viewModel.requestLocation()
@@ -248,252 +220,6 @@ private extension ProfileView {
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
-    
-    static let defaultActivities: [ProfileActivity] = [
-        ProfileActivity(
-            id: UUID(uuidString: "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA") ?? UUID(),
-            contactName: "Damien R.",
-            title: "Connexion avec Damien R.",
-            detail: "Connexion confirmée et sécurisée via Tekiyo ID.",
-            iconName: "person.2.fill",
-            iconColor: Color(hex: "002FFF"),
-            backgroundColor: Color(hex: "F5A3BC"),
-            timestamp: "Il y a 2 heures"
-        ),
-        ProfileActivity(
-            id: UUID(uuidString: "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB") ?? UUID(),
-            contactName: "Thomas S.",
-            title: "Thomas S. vous a scanné.",
-            detail: "Thomas a validé votre identité en scannant votre QR code Tekiyo.",
-            iconName: "qrcode",
-            iconColor: Color(hex: "0047FF"),
-            backgroundColor: Color(hex: "F0E9D2"),
-            timestamp: "Il y a 1 heure"
-        ),
-        ProfileActivity(
-            id: UUID(uuidString: "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC") ?? UUID(),
-            contactName: "Julie F.",
-            title: "Julie F. vous fait confiance.",
-            detail: "Julie a confirmé qu'elle vous reconnaît et vous fait confiance.",
-            iconName: "hand.thumbsup.fill",
-            iconColor: Color(hex: "0061FF"),
-            backgroundColor: Color(hex: "F9C7A0"),
-            timestamp: "Hier"
-        ),
-        ProfileActivity(
-            id: UUID(uuidString: "DDDDDDDD-DDDD-DDDD-DDDD-DDDDDDDDDDDD") ?? UUID(),
-            contactName: "Laura M.",
-            title: "Laura M. a partagé ton ID.",
-            detail: "Laura a partagé ton identité Tekiyo avec son cercle.",
-            iconName: "arrowshape.turn.up.right.fill",
-            iconColor: Color(hex: "FF6B35"),
-            backgroundColor: Color(hex: "0F0F0F"),
-            timestamp: "Il y a 3 jours"
-        )
-    ]
-    
-    var profileActivities: [ProfileActivity] {
-        Self.defaultActivities
-    }
-    
-    struct ProfileActivity: Identifiable, Hashable {
-        let id: UUID
-        let contactName: String
-        let title: String
-        let detail: String
-        let iconName: String
-        let iconColor: Color
-        let backgroundColor: Color
-        let timestamp: String
-        
-        var initials: String {
-            contactName
-                .split(whereSeparator: { !$0.isLetter })
-                .compactMap { $0.first }
-                .prefix(2)
-                .map { String($0).uppercased() }
-                .joined()
-        }
-    }
-}
-
-// MARK: - Interactive Activity Circles & Overlay
-private struct ProfileActivityCirclesRow: View {
-    let activities: [ProfileView.ProfileActivity]
-    
-    var body: some View {
-        HStack(spacing: -40) {
-            ForEach(Array(activities.enumerated()), id: \.element.id) { index, activity in
-                ActivityCircleView(activity: activity, opacity: opacity(for: index))
-                    .zIndex(Double(activities.count - index))
-            }
-        }
-        .padding(.trailing, CGFloat(max(activities.count - 1, 0)) * 40)
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-    
-    private func opacity(for index: Int) -> Double {
-        let baseOpacity: Double = 0.68
-        let step: Double = 0.14
-        return min(1.0, baseOpacity + step * Double((activities.count - 1) - index))
-    }
-}
-
-private struct ActivityCircleView: View {
-    let activity: ProfileView.ProfileActivity
-    let opacity: Double
-    
-    var body: some View {
-        Circle()
-            .fill(activity.backgroundColor)
-            .frame(width: 86, height: 86)
-            .overlay(
-                Text(activity.initials)
-                    .font(.system(size: 28, weight: .semibold))
-                    .foregroundStyle(Color.white)
-            )
-            .overlay(
-                Circle()
-                    .stroke(Color.white.opacity(0.32), lineWidth: 2)
-            )
-            .shadow(color: Color.black.opacity(0.25), radius: 14, x: 0, y: 10)
-            .opacity(opacity)
-    }
-}
-
-private struct ActivitiesOverlayContainer: View {
-    @Binding var isPresented: Bool
-    let activities: [ProfileView.ProfileActivity]
-    @GestureState private var dragOffset: CGFloat = 0
-    
-    var body: some View {
-        GeometryReader { proxy in
-            ZStack(alignment: .trailing) {
-                Color.black.opacity(0.4)
-                    .ignoresSafeArea()
-                    .onTapGesture(perform: close)
-                
-                ActivitiesOverlayPanel(
-                    activities: activities,
-                    onClose: close
-                )
-                .frame(width: min(proxy.size.width * 0.85, 340))
-                .offset(x: max(0, dragOffset))
-                .gesture(
-                    DragGesture()
-                        .updating($dragOffset) { value, state, _ in
-                            if value.translation.width > 0 {
-                                state = value.translation.width
-                            }
-                        }
-                        .onEnded { value in
-                            if value.translation.width > 140 {
-                                close()
-                            }
-                        }
-                )
-                .padding(.vertical, max(24, proxy.safeAreaInsets.top + 18))
-                .padding(.trailing, 20)
-                .transition(.move(edge: .trailing))
-            }
-        }
-    }
-    
-    private func close() {
-        withAnimation(.spring(response: 0.55, dampingFraction: 0.85, blendDuration: 0.2)) {
-            isPresented = false
-        }
-    }
-}
-
-private struct ActivitiesOverlayPanel: View {
-    let activities: [ProfileView.ProfileActivity]
-    let onClose: () -> Void
-    
-    var body: some View {
-        VStack(spacing: 24) {
-            HStack {
-                Text("Activités récentes")
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundStyle(.primary)
-                Spacer()
-                Button(action: onClose) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 26, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                }
-                .buttonStyle(.plain)
-            }
-            
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 18) {
-                    ForEach(activities) { activity in
-                        ActivityOverlayRow(activity: activity)
-                    }
-                }
-                .padding(.vertical, 6)
-            }
-        }
-        .padding(26)
-        .frame(maxHeight: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 32, style: .continuous)
-                .fill(.ultraThinMaterial)
-                .shadow(color: Color.black.opacity(0.28), radius: 28, x: 0, y: 20)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 32, style: .continuous)
-                .stroke(Color.white.opacity(0.08))
-        )
-    }
-}
-
-private struct ActivityOverlayRow: View {
-    let activity: ProfileView.ProfileActivity
-    
-    var body: some View {
-        HStack(spacing: 16) {
-            Circle()
-                .fill(activity.backgroundColor)
-                .frame(width: 50, height: 50)
-                .overlay(
-                    Text(activity.initials)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(.white)
-                )
-                .overlay(
-                    Circle().stroke(Color.white.opacity(0.32), lineWidth: 1)
-                )
-                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 6)
-            
-            VStack(alignment: .leading, spacing: 6) {
-                Text(activity.title)
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(.primary)
-                Text(activity.detail)
-                    .font(.system(size: 15, weight: .regular))
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                Text(activity.timestamp)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(.secondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            
-            Image(systemName: activity.iconName)
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(activity.iconColor)
-        }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 26, style: .continuous)
-                .fill(Color.white.opacity(0.04))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 26, style: .continuous)
-                .stroke(Color.white.opacity(0.06))
-        )
-    }
 }
 
 // MARK: - Social Capsule Button Component
@@ -535,9 +261,10 @@ struct SocialCapsuleButton: View {
                 metier: "Directrice artistique",
                 ville: "Paris"
             ),
-            profileImage: nil,
+            profileImage: (nil as UIImage?),
             tekiyoID: "3A1B-7E21",
             username: "@marieD77"
         )
     }
 }
+

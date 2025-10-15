@@ -14,7 +14,7 @@ struct Tekiyo_IDApp: App {
             #if DEBUG
             // Démarrer directement sur le profil en dev
             ProfileTabContainerView(
-                identityData: IdentityData(
+                identityData: Tekiyo_ID.IdentityData(
                     nom: "Dupont",
                     prenom: "Marie",
                     dateNaissance: Date(),
