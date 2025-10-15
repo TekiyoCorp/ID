@@ -48,6 +48,16 @@ final class IntroductionViewModel: ObservableObject {
         stopMonitoring()
     }
     
+    #if DEBUG
+    func setStep(_ step: Int) {
+        currentStep = step
+        if step == 3 {
+            didReachFinalStep = true
+            stopMonitoring()
+        }
+    }
+    #endif
+    
     private func handleAngleUpdate(_ smoothedAngle: Double) {
         let oldStep = currentStep
         
