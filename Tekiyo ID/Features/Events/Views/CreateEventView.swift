@@ -6,49 +6,32 @@ struct CreateEventView: View {
     
     var body: some View {
         NavigationView {
-            ZStack {
-                Color(hex: "111111")
-                    .ignoresSafeArea(.all)
-                
-                VStack(spacing: 0) {
-                    // Header avec liquid glass
-                    headerView
+            ScrollView {
+                VStack(spacing: 32) {
+                    // All sections in one scroll
+                    basicInfoSection
+                    locationSection
+                    dateTimeSection
+                    imageSection
+                    settingsSection
                     
-                    // Content
-                    ScrollView(showsIndicators: false) {
-                        VStack(spacing: 24) {
-                            switch viewModel.currentStep {
-                            case 0:
-                                basicInfoStep
-                            case 1:
-                                locationStep
-                            case 2:
-                                dateTimeStep
-                            case 3:
-                                imageStep
-                            case 4:
-                                settingsStep
-                            default:
-                                basicInfoStep
-                            }
-                        }
-                        .padding(.horizontal, 20)
+                    // Publish button at the bottom
+                    publishButton
                         .padding(.top, 20)
-                        .padding(.bottom, 100)
-                    }
                 }
-                
-                // Bottom navigation
-                VStack {
-                    Spacer()
-                    bottomNavigationView
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 20)
-                        .background(
-                            Rectangle()
-                                .fill(.ultraThinMaterial)
-                                .ignoresSafeArea(edges: .bottom)
-                        )
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+                .padding(.bottom, 40)
+            }
+            .background(Color(hex: "111111").ignoresSafeArea(.all))
+            .navigationTitle("Créer un événement")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Annuler") {
+                        dismiss()
+                    }
+                    .foregroundColor(.blue)
                 }
             }
         }
@@ -67,217 +50,171 @@ struct CreateEventView: View {
         }
     }
     
-    private var headerView: some View {
-        HStack {
-            Button(action: { dismiss() }) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(.white.opacity(0.9))
-                    .frame(width: 44, height: 44)
-                    .background(
-                        Circle()
-                            .fill(.ultraThinMaterial)
-                    )
-            }
-            .buttonStyle(.plain)
-            
-            Spacer()
-            
-            Text("Créer un événement")
-                .font(.headline)
-                .fontWeight(.semibold)
-                .foregroundColor(.white.opacity(0.9))
-            
-            Spacer()
-            
-            // Progress indicator
-            HStack(spacing: 4) {
-                ForEach(0..<5) { index in
-                    Circle()
-                        .fill(index <= viewModel.currentStep ? Color.blue : Color.gray.opacity(0.3))
-                        .frame(width: 8, height: 8)
-                }
-            }
-            .frame(width: 44, height: 44)
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 8)
-        .padding(.bottom, 16)
-    }
-    
-    private var basicInfoStep: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Informations de base")
+    private var basicInfoSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Informations")
                 .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.white.opacity(0.9))
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
             
-            // Nom de l'événement
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Nom de l'événement")
-                    .font(.headline)
-                    .foregroundColor(.white.opacity(0.8))
+            VStack(spacing: 16) {
+                // Nom de l'événement
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Nom de l'événement")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                    
+                    TextField("Soirée Rooftop Paris", text: $viewModel.eventData.eventName)
+                        .textFieldStyle(.roundedBorder)
+                }
                 
-                TextField("Soirée Rooftop Paris", text: $viewModel.eventData.eventName)
-                    .textFieldStyle(.plain)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color(hex: "1D1D1D"))
-                    )
-                    .foregroundColor(.white.opacity(0.9))
-            }
-            
-            // Catégorie
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Catégorie")
-                    .font(.headline)
-                    .foregroundColor(.white.opacity(0.8))
-                
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
-                    ForEach(EventCategory.allCases) { category in
-                        CategoryButton(
-                            category: category,
-                            isSelected: viewModel.eventData.category.id == category.id
-                        ) {
-                            viewModel.eventData.category = category
+                // Catégorie
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Catégorie")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                    
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 8) {
+                        ForEach(EventCategory.allCases) { category in
+                            CategoryButton(
+                                category: category,
+                                isSelected: viewModel.eventData.category.id == category.id
+                            ) {
+                                viewModel.eventData.category = category
+                            }
                         }
                     }
                 }
-            }
-            
-            // Description
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Description")
-                    .font(.headline)
-                    .foregroundColor(.white.opacity(0.8))
                 
-                VStack(alignment: .trailing, spacing: 4) {
-                    TextField("Courte description de votre événement...", text: $viewModel.eventData.description, axis: .vertical)
-                        .textFieldStyle(.plain)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .fill(Color(hex: "1D1D1D"))
-                        )
-                        .foregroundColor(.white.opacity(0.9))
-                        .lineLimit(3...6)
+                // Description
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Description")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
                     
-                    Text("\(viewModel.eventData.description.count)/200")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    VStack(alignment: .trailing, spacing: 4) {
+                        TextField("Courte description de votre événement...", text: $viewModel.eventData.description, axis: .vertical)
+                            .textFieldStyle(.roundedBorder)
+                            .lineLimit(3...6)
+                        
+                        Text("\(viewModel.eventData.description.count)/200")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
         }
     }
     
-    private var locationStep: some View {
-        VStack(alignment: .leading, spacing: 20) {
+    private var locationSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
             Text("Lieu")
                 .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.white.opacity(0.9))
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
             
-            // Localisation automatique
-            Button(action: {
-                viewModel.requestCurrentLocation()
-                viewModel.eventData.useCurrentLocation = true
-            }) {
-                HStack {
-                    Image(systemName: "location.fill")
-                        .foregroundColor(.blue)
-                    Text("Utiliser ma position")
-                        .foregroundColor(.blue)
-                    Spacer()
+            VStack(spacing: 16) {
+                // Localisation automatique
+                Button(action: {
+                    viewModel.requestCurrentLocation()
+                    viewModel.eventData.useCurrentLocation = true
+                }) {
+                    HStack {
+                        Image(systemName: "location.fill")
+                            .foregroundColor(.accentColor)
+                        Text("Utiliser ma position")
+                            .foregroundColor(.accentColor)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(Color.accentColor.opacity(0.1))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .stroke(Color.accentColor.opacity(0.3), lineWidth: 1)
+                            )
+                    )
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.blue.opacity(0.1))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .stroke(Color.blue.opacity(0.3), lineWidth: 1)
-                        )
-                )
-            }
-            .buttonStyle(.plain)
-            
-            // Recherche d'adresse
-            Button(action: {
-                viewModel.showLocationSearch = true
-            }) {
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.white.opacity(0.6))
-                    Text(viewModel.eventData.location?.address ?? "Rechercher une adresse...")
-                        .foregroundColor(viewModel.eventData.location == nil ? .white.opacity(0.6) : .white.opacity(0.9))
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.4))
+                .buttonStyle(.plain)
+                
+                // Recherche d'adresse
+                Button(action: {
+                    viewModel.showLocationSearch = true
+                }) {
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.secondary)
+                        Text(viewModel.eventData.location?.address ?? "Rechercher une adresse...")
+                            .foregroundColor(viewModel.eventData.location == nil ? .secondary : .primary)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(Color(.systemGray6))
+                    )
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color(hex: "1D1D1D"))
-                )
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
     }
     
-    private var dateTimeStep: some View {
-        VStack(alignment: .leading, spacing: 20) {
+    private var dateTimeSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
             Text("Date & Heure")
                 .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.white.opacity(0.9))
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
             
-            // Date de début
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Date de début")
-                    .font(.headline)
-                    .foregroundColor(.white.opacity(0.8))
-                
-                DatePicker("", selection: $viewModel.eventData.startDate, displayedComponents: [.date, .hourAndMinute])
-                    .datePickerStyle(.compact)
-                    .colorScheme(.dark)
-                    .accentColor(.blue)
-            }
-            
-            // Date de fin (optionnelle)
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Date de fin")
-                        .font(.headline)
-                        .foregroundColor(.white.opacity(0.8))
+            VStack(spacing: 16) {
+                // Date de début
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Date de début")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
                     
-                    Spacer()
-                    
-                    Toggle("", isOn: $viewModel.eventData.hasEndTime)
-                        .toggleStyle(SwitchToggleStyle(tint: .blue))
+                    DatePicker("", selection: $viewModel.eventData.startDate, displayedComponents: [.date, .hourAndMinute])
+                        .datePickerStyle(.compact)
                 }
                 
-                if viewModel.eventData.hasEndTime {
-                    DatePicker("", selection: $viewModel.eventData.endDate, displayedComponents: [.date, .hourAndMinute])
-                        .datePickerStyle(.compact)
-                        .colorScheme(.dark)
-                        .accentColor(.blue)
+                // Date de fin (optionnelle)
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Date de fin")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.primary)
+                        
+                        Spacer()
+                        
+                        Toggle("", isOn: $viewModel.eventData.hasEndTime)
+                    }
+                    
+                    if viewModel.eventData.hasEndTime {
+                        DatePicker("", selection: $viewModel.eventData.endDate, displayedComponents: [.date, .hourAndMinute])
+                            .datePickerStyle(.compact)
+                    }
                 }
             }
         }
     }
     
-    private var imageStep: some View {
-        VStack(alignment: .leading, spacing: 20) {
+    private var imageSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
             Text("Image de couverture")
                 .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.white.opacity(0.9))
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
             
             Button(action: {
                 viewModel.showImagePicker = true
@@ -287,29 +224,29 @@ struct CreateEventView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .frame(height: 200)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 } else {
                     VStack(spacing: 12) {
                         Image(systemName: "photo")
                             .font(.system(size: 48))
-                            .foregroundColor(.white.opacity(0.4))
+                            .foregroundColor(.secondary)
                         
                         Text("Ajouter une image")
                             .font(.headline)
-                            .foregroundColor(.white.opacity(0.8))
+                            .foregroundColor(.primary)
                         
                         Text("Optionnel mais conseillé")
                             .font(.subheadline)
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(.secondary)
                     }
                     .frame(height: 200)
                     .frame(maxWidth: .infinity)
                     .background(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color(hex: "1D1D1D"))
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color(.systemGray6))
                             .overlay(
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .stroke(Color.white.opacity(0.1), style: StrokeStyle(lineWidth: 1, dash: [5]))
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .stroke(Color.secondary.opacity(0.3), style: StrokeStyle(lineWidth: 1, dash: [5]))
                             )
                     )
                 }
@@ -318,141 +255,107 @@ struct CreateEventView: View {
         }
     }
     
-    private var settingsStep: some View {
-        VStack(alignment: .leading, spacing: 20) {
+    private var settingsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
             Text("Paramètres")
                 .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.white.opacity(0.9))
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
             
-            // Accès
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Accès")
-                    .font(.headline)
-                    .foregroundColor(.white.opacity(0.8))
-                
-                HStack {
-                    Text("Public")
-                        .foregroundColor(.white.opacity(0.8))
-                    Spacer()
-                    Toggle("", isOn: $viewModel.eventData.isPublic)
-                        .toggleStyle(SwitchToggleStyle(tint: .blue))
-                }
-                
-                Text(viewModel.eventData.isPublic ? "Visible sur la map & le feed" : "Sur invitation uniquement")
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.6))
-            }
-            
-            // Conditions d'accès
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Conditions d'accès")
-                    .font(.headline)
-                    .foregroundColor(.white.opacity(0.8))
-                
-                VStack(spacing: 12) {
+            VStack(spacing: 20) {
+                // Accès
+                VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Image(systemName: "checkmark.seal")
-                            .foregroundColor(.green)
-                        Text("Profil vérifié requis")
-                            .foregroundColor(.white.opacity(0.8))
+                        Text("Accès")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.primary)
+                        
                         Spacer()
-                        Toggle("", isOn: $viewModel.eventData.requiresVerifiedProfile)
-                            .toggleStyle(SwitchToggleStyle(tint: .blue))
+                        
+                        Toggle("Public", isOn: $viewModel.eventData.isPublic)
                     }
                     
-                    HStack {
-                        Image(systemName: "sparkles")
-                            .foregroundColor(.yellow)
-                        Text("Trust score minimum")
-                            .foregroundColor(.white.opacity(0.8))
-                        Spacer()
-                        Text("\(Int(viewModel.eventData.minimumTrustScore))/10")
-                            .foregroundColor(.blue)
-                    }
-                    
-                    Slider(value: $viewModel.eventData.minimumTrustScore, in: 0...10, step: 1)
-                        .accentColor(.blue)
-                }
-            }
-            
-            // Places limitées
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Places limitées")
-                        .foregroundColor(.white.opacity(0.8))
-                    Spacer()
-                    Toggle("", isOn: $viewModel.eventData.hasCapacityLimit)
-                        .toggleStyle(SwitchToggleStyle(tint: .blue))
+                    Text(viewModel.eventData.isPublic ? "Visible sur la map & le feed" : "Sur invitation uniquement")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
                 
-                if viewModel.eventData.hasCapacityLimit {
+                // Conditions d'accès
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Conditions d'accès")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 12) {
+                        HStack {
+                            Image(systemName: "checkmark.seal")
+                                .foregroundColor(.green)
+                            Text("Profil vérifié requis")
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Toggle("", isOn: $viewModel.eventData.requiresVerifiedProfile)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Image(systemName: "sparkles")
+                                    .foregroundColor(.yellow)
+                                Text("Trust score minimum")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Text("\(Int(viewModel.eventData.minimumTrustScore))/10")
+                                    .foregroundColor(.accentColor)
+                            }
+                            
+                            Slider(value: $viewModel.eventData.minimumTrustScore, in: 0...10, step: 1)
+                        }
+                    }
+                }
+                
+                // Places limitées
+                VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Text("Maximum")
-                            .foregroundColor(.white.opacity(0.8))
+                        Text("Places limitées")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.primary)
+                        
                         Spacer()
-                        TextField("100", value: $viewModel.eventData.maxCapacity, format: .number)
-                            .textFieldStyle(.plain)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                    .fill(Color(hex: "1D1D1D"))
-                            )
-                            .foregroundColor(.white.opacity(0.9))
-                            .frame(width: 80)
+                        
+                        Toggle("", isOn: $viewModel.eventData.hasCapacityLimit)
+                    }
+                    
+                    if viewModel.eventData.hasCapacityLimit {
+                        HStack {
+                            Text("Maximum")
+                                .foregroundColor(.primary)
+                            Spacer()
+                            TextField("100", value: $viewModel.eventData.maxCapacity, format: .number)
+                                .textFieldStyle(.roundedBorder)
+                                .frame(width: 80)
+                        }
                     }
                 }
             }
         }
     }
     
-    private var bottomNavigationView: some View {
-        HStack {
-            if viewModel.currentStep > 0 {
-                Button("Précédent") {
-                    viewModel.previousStep()
-                }
-                .foregroundColor(.blue)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(.ultraThinMaterial)
-                )
-            }
-            
-            Spacer()
-            
-            Button("Suivant") {
-                if viewModel.currentStep == 4 {
-                    viewModel.showPreview = true
-                } else {
-                    viewModel.nextStep()
-                }
-            }
-            .foregroundColor(.white)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color.blue)
-            )
-            .disabled(!canProceed)
-            .opacity(canProceed ? 1 : 0.6)
+    private var publishButton: some View {
+        Button("Publier l'événement") {
+            viewModel.showPreview = true
         }
-    }
-    
-    private var canProceed: Bool {
-        switch viewModel.currentStep {
-        case 0:
-            return !viewModel.eventData.eventName.isEmpty && !viewModel.eventData.description.isEmpty
-        case 1:
-            return viewModel.eventData.location != nil
-        case 2:
-            return !viewModel.eventData.hasEndTime || viewModel.eventData.endDate > viewModel.eventData.startDate
-        default:
-            return true
-        }
+        .foregroundColor(.white)
+        .font(.headline)
+        .fontWeight(.semibold)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.accentColor)
+        )
+        .disabled(!viewModel.eventData.isValid)
+        .opacity(viewModel.eventData.isValid ? 1 : 0.6)
     }
 }

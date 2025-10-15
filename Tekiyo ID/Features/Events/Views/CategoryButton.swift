@@ -14,18 +14,18 @@ struct CategoryButton: View {
                 Text(category.name)
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(.white.opacity(0.9))
+                    .foregroundColor(.primary)
                 
                 Spacer()
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(isSelected ? category.color.opacity(0.2) : Color(hex: "1D1D1D"))
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(isSelected ? category.color.opacity(0.15) : Color(.systemGray6))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .stroke(isSelected ? category.color.opacity(0.5) : Color.clear, lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .stroke(isSelected ? category.color.opacity(0.4) : Color.clear, lineWidth: 1)
                     )
             )
         }
