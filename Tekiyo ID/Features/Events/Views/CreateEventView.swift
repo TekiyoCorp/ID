@@ -53,7 +53,7 @@ struct CreateEventView: View {
             }
         }
         .sheet(isPresented: $viewModel.showImagePicker) {
-            ImagePicker(selectedImage: $viewModel.eventData.coverImage)
+            EventImagePicker(selectedImage: $viewModel.eventData.coverImage)
         }
         .sheet(isPresented: $viewModel.showLocationSearch) {
             LocationSearchView(
