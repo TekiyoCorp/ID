@@ -100,9 +100,7 @@ struct ProfileView: View {
                         .tag(BottomNavigationBar.TabItem.wallet)
                 }
                 .frame(height: 60)
-                .background(.ultraThinMaterial) // Frosted glass effect for visibility
-                .background(Color.black.opacity(0.3)) // Dark overlay for better contrast
-                .clipShape(RoundedRectangle(cornerRadius: 0, style: .continuous))
+                .background(Color.clear) // Completely transparent
             }
             .ignoresSafeArea(.keyboard, edges: .bottom)
         }
