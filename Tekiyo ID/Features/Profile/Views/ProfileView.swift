@@ -7,19 +7,18 @@ struct ProfileView: View {
     let username: String
     
     @StateObject private var viewModel = ProfileViewModel()
-    @State private var selectedTab: BottomNavigationBar.TabItem = .grid
     @State private var trustScore: Int = 3 // Out of 10
     @State private var lastVerification: String = "il y a 2 jours"
     @State private var showActivitiesOverlay = false
     @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack {
             // Global Background - OLED Black
             Color(hex: "111111")
                 .ignoresSafeArea(.all)
             
-            // Content ScrollView - Transparent and stops before TabBar
+            // Content ScrollView - Full screen
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 0) {
                     // Header (Top Bar) - FIXED, NO BACKGROUND
@@ -46,21 +45,13 @@ struct ProfileView: View {
                         
                         // Links Section
                         linksSection
-                            .padding(.bottom, 20)
+                            .padding(.bottom, 40)
                     }
                     .padding(.horizontal, 24)
-                    .padding(.bottom, 120) // Space for floating TabBar
                 }
             }
-            .scrollContentBackground(.hidden) // Hide ScrollView background
-            .background(Color.clear) // Transparent background
-            
-            // TabBar - Floating with premium blur effect
-            tabBarView
-                .background(.ultraThinMaterial)
-                .blendMode(.overlay)
-                .background(Color.clear)
-                .ignoresSafeArea(edges: .bottom)
+            .scrollContentBackground(.hidden)
+            .background(Color.clear)
             
             // Activities Overlay
             if showActivitiesOverlay {
@@ -78,44 +69,6 @@ struct ProfileView: View {
         .debugRenders("ProfileView")
     }
     
-    // MARK: - TabBar View
-    private var tabBarView: some View {
-        TabView(selection: $selectedTab) {
-            // Home Tab
-            Color.clear
-                .tabItem {
-                    Image(systemName: "house")
-                    Text("Home")
-                }
-                .tag(BottomNavigationBar.TabItem.home)
-            
-            // Grid Tab (Active)
-            Color.clear
-                .tabItem {
-                    Image(systemName: "square.grid.3x3")
-                    Text("Grid")
-                }
-                .tag(BottomNavigationBar.TabItem.grid)
-            
-            // Bell Tab
-            Color.clear
-                .tabItem {
-                    Image(systemName: "bell")
-                    Text("Notifications")
-                }
-                .tag(BottomNavigationBar.TabItem.bell)
-            
-            // Wallet Tab
-            Color.clear
-                .tabItem {
-                    Image(systemName: "wallet.pass")
-                    Text("Wallet")
-                }
-                .tag(BottomNavigationBar.TabItem.wallet)
-        }
-        .frame(height: 60)
-        .background(Color.clear)
-    }
     
     // MARK: - Header View
     private var headerView: some View {
@@ -269,6 +222,7 @@ struct ProfileView: View {
 }
 
 // MARK: - Extensions
+
 private extension ProfileView {
     static let profileBorderGradient = LinearGradient(
         colors: [
@@ -347,7 +301,50 @@ private extension ProfileView {
     }
 }
 
-// MARK: - Activities Overlay
+// MARK: - Interactive Activity Circles & Overlay
+private struct ProfileActivityCirclesRow: View {
+    let activities: [ProfileView.ProfileActivity]
+    
+    var body: some View {
+        HStack(spacing: -40) {
+            ForEach(Array(activities.enumerated()), id: \.element.id) { index, activity in
+                ActivityCircleView(activity: activity, opacity: opacity(for: index))
+                    .zIndex(Double(activities.count - index))
+            }
+        }
+        .padding(.trailing, CGFloat(max(activities.count - 1, 0)) * 40)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private func opacity(for index: Int) -> Double {
+        let baseOpacity: Double = 0.68
+        let step: Double = 0.14
+        return min(1.0, baseOpacity + step * Double((activities.count - 1) - index))
+    }
+}
+
+private struct ActivityCircleView: View {
+    let activity: ProfileView.ProfileActivity
+    let opacity: Double
+    
+    var body: some View {
+        Circle()
+            .fill(activity.backgroundColor)
+            .frame(width: 86, height: 86)
+            .overlay(
+                Text(activity.initials)
+                    .font(.system(size: 28, weight: .semibold))
+                    .foregroundStyle(Color.white)
+            )
+            .overlay(
+                Circle()
+                    .stroke(Color.white.opacity(0.32), lineWidth: 2)
+            )
+            .shadow(color: Color.black.opacity(0.25), radius: 14, x: 0, y: 10)
+            .opacity(opacity)
+    }
+}
+
 private struct ActivitiesOverlayContainer: View {
     @Binding var isPresented: Bool
     let activities: [ProfileView.ProfileActivity]
@@ -360,30 +357,34 @@ private struct ActivitiesOverlayContainer: View {
                     .ignoresSafeArea()
                     .onTapGesture(perform: close)
                 
-                ActivitiesOverlayPanel(activities: activities, onClose: close)
-                    .frame(width: min(proxy.size.width * 0.85, 340))
-                    .offset(x: max(0, dragOffset))
-                    .gesture(
-                        DragGesture()
-                            .updating($dragOffset) { value, state, _ in
-                                if value.translation.width > 0 {
-                                    state = value.translation.width
-                                }
+                ActivitiesOverlayPanel(
+                    activities: activities,
+                    onClose: close
+                )
+                .frame(width: min(proxy.size.width * 0.85, 340))
+                .offset(x: max(0, dragOffset))
+                .gesture(
+                    DragGesture()
+                        .updating($dragOffset) { value, state, _ in
+                            if value.translation.width > 0 {
+                                state = value.translation.width
                             }
-                            .onEnded { value in
-                                if value.translation.width > 140 {
-                                    close()
-                                }
+                        }
+                        .onEnded { value in
+                            if value.translation.width > 140 {
+                                close()
                             }
-                    )
-                    .padding(.vertical, max(24, proxy.safeAreaInsets.top + 16))
-                    .padding(.trailing, 16)
+                        }
+                )
+                .padding(.vertical, max(24, proxy.safeAreaInsets.top + 18))
+                .padding(.trailing, 20)
+                .transition(.move(edge: .trailing))
             }
         }
     }
     
     private func close() {
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.85, blendDuration: 0.25)) {
+        withAnimation(.spring(response: 0.55, dampingFraction: 0.85, blendDuration: 0.2)) {
             isPresented = false
         }
     }
@@ -394,7 +395,7 @@ private struct ActivitiesOverlayPanel: View {
     let onClose: () -> Void
     
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 24) {
             HStack {
                 Text("Activités récentes")
                     .font(.system(size: 22, weight: .semibold))
@@ -409,20 +410,24 @@ private struct ActivitiesOverlayPanel: View {
             }
             
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 16) {
+                VStack(spacing: 18) {
                     ForEach(activities) { activity in
                         ActivityOverlayRow(activity: activity)
                     }
                 }
-                .padding(.vertical, 4)
+                .padding(.vertical, 6)
             }
         }
-        .padding(24)
+        .padding(26)
         .frame(maxHeight: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 32, style: .continuous)
                 .fill(.ultraThinMaterial)
-                .shadow(color: Color.black.opacity(0.25), radius: 24, x: 0, y: 18)
+                .shadow(color: Color.black.opacity(0.28), radius: 28, x: 0, y: 20)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 32, style: .continuous)
+                .stroke(Color.white.opacity(0.08))
         )
     }
 }
@@ -434,15 +439,16 @@ private struct ActivityOverlayRow: View {
         HStack(spacing: 16) {
             Circle()
                 .fill(activity.backgroundColor)
-                .frame(width: 48, height: 48)
+                .frame(width: 50, height: 50)
                 .overlay(
                     Text(activity.initials)
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(.white)
                 )
                 .overlay(
-                    Circle().stroke(Color.white.opacity(0.4), lineWidth: 1)
+                    Circle().stroke(Color.white.opacity(0.32), lineWidth: 1)
                 )
+                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 6)
             
             VStack(alignment: .leading, spacing: 6) {
                 Text(activity.title)
@@ -462,13 +468,13 @@ private struct ActivityOverlayRow: View {
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(activity.iconColor)
         }
-        .padding(18)
+        .padding(20)
         .background(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
                 .fill(Color.white.opacity(0.04))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
                 .stroke(Color.white.opacity(0.06))
         )
     }
