@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- CallKit Configuration -->
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Tekiyo ID a besoin d'accéder à votre microphone pour les appels audio et vidéo.</string>
+    
+    <key>NSCameraUsageDescription</key>
+    <string>Tekiyo ID a besoin d'accéder à votre caméra pour les appels vidéo.</string>
+    
+    <!-- Background Modes for VoIP -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>voip</string>
+        <string>audio</string>
+    </array>
+    
+    <!-- CallKit Provider Configuration -->
+    <key>CXProviderConfiguration</key>
+    <dict>
+        <key>localizedName</key>
+        <string>Tekiyo ID</string>
+        <key>supportsVideo</key>
+        <true/>
+        <key>maximumCallGroups</key>
+        <integer>1</integer>
+        <key>maximumCallsPerCallGroup</key>
+        <integer>1</integer>
+        <key>supportedHandleTypes</key>
+        <array>
+            <string>generic</string>
+        </array>
+        <key>ringtoneSound</key>
+        <string>TekiyoRingtone.caf</string>
+    </dict>
+    
+    <!-- PushKit Configuration -->
+    <key>PKPushRegistryConfiguration</key>
+    <dict>
+        <key>voip</key>
+        <dict>
+            <key>enabled</key>
+            <true/>
+        </dict>
+    </dict>
+    
+    <!-- Audio Session Configuration -->
+    <key>AVAudioSessionCategory</key>
+    <string>AVAudioSessionCategoryPlayAndRecord</string>
+    
+    <key>AVAudioSessionMode</key>
+    <string>AVAudioSessionModeVoiceChat</string>
+    
+    <key>AVAudioSessionOptions</key>
+    <array>
+        <string>AVAudioSessionCategoryOptionDefaultToSpeaker</string>
+        <string>AVAudioSessionCategoryOptionAllowBluetooth</string>
+        <string>AVAudioSessionCategoryOptionAllowBluetoothA2DP</string>
+    </array>
+</dict>
+</plist>

@@ -4,6 +4,8 @@ struct ChatView: View {
     let conversation: Conversation
     @StateObject private var viewModel: ChatViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var showCallView = false
+    @State private var callType: CallType = .video
     
     init(conversation: Conversation) {
         self.conversation = conversation
@@ -47,6 +49,12 @@ struct ChatView: View {
             }
         }
         .navigationBarHidden(true)
+        .fullScreenCover(isPresented: $showCallView) {
+            CallView(
+                conversation: conversation,
+                callType: callType
+            )
+        }
     }
     
     private var header: some View {
@@ -84,6 +92,41 @@ struct ChatView: View {
             }
             
             Spacer()
+            
+            // Call buttons
+            HStack(spacing: 12) {
+                // Video call button
+                Button(action: {
+                    callType = .video
+                    showCallView = true
+                }) {
+                    Image(systemName: "video.fill")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(.white.opacity(0.9))
+                        .frame(width: 36, height: 36)
+                        .background(
+                            Circle()
+                                .fill(.ultraThinMaterial)
+                        )
+                }
+                .buttonStyle(.plain)
+                
+                // Audio call button
+                Button(action: {
+                    callType = .audio
+                    showCallView = true
+                }) {
+                    Image(systemName: "phone.fill")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.white.opacity(0.9))
+                        .frame(width: 36, height: 36)
+                        .background(
+                            Circle()
+                                .fill(.ultraThinMaterial)
+                        )
+                }
+                .buttonStyle(.plain)
+            }
         }
         .padding(.horizontal, 16)
         .padding(.bottom, 12)
