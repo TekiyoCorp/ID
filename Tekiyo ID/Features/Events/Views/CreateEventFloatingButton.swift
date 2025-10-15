@@ -12,12 +12,8 @@ struct CreateEventFloatingButton: View {
                 .background(
                     Circle()
                         .fill(.ultraThinMaterial)
-                        .overlay(
-                            Circle()
-                                .fill(Color.blue.opacity(0.8))
-                        )
+                        .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
                 )
-                .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
         }
         .buttonStyle(.plain)
     }

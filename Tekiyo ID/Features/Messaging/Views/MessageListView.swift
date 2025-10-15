@@ -21,6 +21,9 @@ struct MessageListView: View {
                             eventsSection
                                 .padding(.top, 20)
                             
+                            // Messages Section Header with + button
+                            messagesSectionHeader
+                            
                             // Conversations List
                             VStack(spacing: 0) {
                                 ForEach(viewModel.filteredConversations) { conversation in
@@ -67,6 +70,39 @@ struct MessageListView: View {
                     Circle()
                         .fill(Color.white.opacity(0.2))
                 )
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.white.opacity(0.05))
+        )
+        .padding(.horizontal, 20)
+    }
+    
+    private var messagesSectionHeader: some View {
+        HStack {
+            Text("Messages")
+                .font(.custom("SF Pro Display", size: 17))
+                .fontWeight(.medium)
+                .foregroundColor(.white.opacity(0.9))
+            
+            Spacer()
+            
+            // + Button with liquid glass
+            Button(action: {
+                // Action pour créer un nouveau message
+            }) {
+                Image(systemName: "plus")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.white.opacity(0.9))
+                    .frame(width: 32, height: 32)
+                    .background(
+                        Circle()
+                            .fill(.ultraThinMaterial)
+                    )
+            }
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)

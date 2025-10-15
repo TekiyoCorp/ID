@@ -69,7 +69,7 @@ struct CreateEventView: View {
                     .frame(width: 44, height: 44)
                     .background(
                         Circle()
-                            .fill(Color(hex: "1D1D1D"))
+                            .fill(.ultraThinMaterial)
                     )
             }
             .buttonStyle(.plain)
@@ -88,7 +88,7 @@ struct CreateEventView: View {
                     .padding(.vertical, 8)
                     .background(
                         RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .fill(Color(hex: "1D1D1D"))
+                            .fill(.ultraThinMaterial)
                     )
             }
             .buttonStyle(.plain)
@@ -109,7 +109,7 @@ struct CreateEventView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 } else {
                     Circle()
-                        .fill(Color(hex: "1D1D1D"))
+                        .fill(.ultraThinMaterial)
                         .frame(width: 80, height: 80)
                         .overlay(
                             Image(systemName: "photo")
@@ -366,7 +366,7 @@ struct CreateEventView: View {
         .padding(.vertical, 16)
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.blue)
+                .fill(.ultraThinMaterial)
         )
         .disabled(!viewModel.eventData.isValid)
         .opacity(viewModel.eventData.isValid ? 1 : 0.6)
