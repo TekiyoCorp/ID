@@ -43,7 +43,7 @@ struct WalletWidget: View {
             .frame(width: 326, height: 167)
             .padding(.horizontal, 32)
             .background(Color(hex: "111111"))
-            .clipShape(RoundedRectangle(cornerRadius: 52))
+            .clipShape(RoundedRectangle(cornerRadius: 52, style: .continuous))
             
             // Action Buttons Row
             HStack(spacing: 0) {
@@ -107,7 +107,7 @@ struct WalletWidget: View {
         .frame(width: 342, height: 291)
         .padding(8)
         .background(Color.white.opacity(0.1))
-        .clipShape(RoundedRectangle(cornerRadius: 60))
+        .clipShape(RoundedRectangle(cornerRadius: 60, style: .continuous))
     }
 }
 
