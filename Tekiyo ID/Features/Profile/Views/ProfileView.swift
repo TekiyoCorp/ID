@@ -20,9 +20,9 @@ struct ProfileView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Header (Top Bar) - NO BACKGROUND
+                // Header (Top Bar) - FIXED, NO BACKGROUND
                 headerView
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 24)
                     .padding(.top, 8)
                 
                 ScrollView {
@@ -45,7 +45,7 @@ struct ProfileView: View {
                             .padding(.bottom, 20)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 24)
                     .padding(.bottom, 100) // Space for TabBar
                 }
             }
@@ -64,7 +64,7 @@ struct ProfileView: View {
             viewModel.requestLocation()
         }
         .safeAreaInset(edge: .bottom) {
-            // Native TabBar
+            // Native TabBar - NO BACKGROUND
             TabView(selection: $selectedTab) {
                 // Home Tab
                 Color.clear
@@ -99,7 +99,7 @@ struct ProfileView: View {
                     .tag(BottomNavigationBar.TabItem.wallet)
             }
             .frame(height: 60)
-            .background(Color(.systemGray6))
+            .background(Color.clear) // Transparent background
         }
         .debugRenders("ProfileView")
     }
