@@ -104,19 +104,6 @@ struct ProfileView: View {
     // MARK: - Header View
     private var headerView: some View {
         HStack {
-            // Back Button (left)
-            Button(action: {
-                // Handle back navigation
-            }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.black)
-                    .frame(width: 32, height: 32)
-                    .background(Color.gray.opacity(0.1))
-                    .clipShape(Circle())
-            }
-            .buttonStyle(.plain)
-            
             Spacer()
             
             // Profile Photo (43x43px)
