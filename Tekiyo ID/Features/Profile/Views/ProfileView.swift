@@ -14,53 +14,53 @@ struct ProfileView: View {
     @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottom) {
             // Global Background - OLED Black
             Color(hex: "111111")
                 .ignoresSafeArea(.all)
             
-            // Main Content - VStack separates ScrollView and TabBar
-            VStack(spacing: 0) {
-                // Content ScrollView - Limited height
-                ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 0) {
-                        // Header (Top Bar) - FIXED, NO BACKGROUND
-                        headerView
-                            .padding(.horizontal, 24)
-                            .padding(.top, 8)
-                            .padding(.bottom, 20)
-                        
-                        VStack(spacing: 24) {
-                            // Location & Greeting
-                            locationAndGreetingView
-                                .padding(.top, 20)
-                            
-                            // Grand CircularCodeView
-                            circularCodeView
-                            
-                            // Score Indicator
-                            scoreIndicatorView
-                            
-                            // WalletWidget - Centered with fixed width
-                            WalletWidget()
-                                .frame(maxWidth: 342)
-                                .padding(.horizontal, 16)
-                            
-                            // Links Section
-                            linksSection
-                                .padding(.bottom, 20)
-                        }
+            // Content ScrollView - Transparent and stops before TabBar
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 0) {
+                    // Header (Top Bar) - FIXED, NO BACKGROUND
+                    headerView
                         .padding(.horizontal, 24)
-                        .padding(.bottom, 24) // Normal bottom padding
+                        .padding(.top, 8)
+                        .padding(.bottom, 20)
+                    
+                    VStack(spacing: 24) {
+                        // Location & Greeting
+                        locationAndGreetingView
+                            .padding(.top, 20)
+                        
+                        // Grand CircularCodeView
+                        circularCodeView
+                        
+                        // Score Indicator
+                        scoreIndicatorView
+                        
+                        // WalletWidget - Centered with fixed width
+                        WalletWidget()
+                            .frame(maxWidth: 342)
+                            .padding(.horizontal, 16)
+                        
+                        // Links Section
+                        linksSection
+                            .padding(.bottom, 20)
                     }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 120) // Space for floating TabBar
                 }
-                .scrollContentBackground(.hidden)
-                .background(Color.clear)
-                
-                // TabBar - Separate from ScrollView
-                tabBarView
-                    .background(Color.clear)
             }
+            .scrollContentBackground(.hidden) // Hide ScrollView background
+            .background(Color.clear) // Transparent background
+            
+            // TabBar - Floating with premium blur effect
+            tabBarView
+                .background(.ultraThinMaterial)
+                .blendMode(.overlay)
+                .background(Color.clear)
+                .ignoresSafeArea(edges: .bottom)
             
             // Activities Overlay
             if showActivitiesOverlay {
