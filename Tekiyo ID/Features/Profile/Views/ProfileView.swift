@@ -37,6 +37,9 @@ struct ProfileView: View {
                         // Score Indicator
                         scoreIndicatorView
                         
+                        // WalletWidget
+                        WalletWidget()
+                        
                         // Links Section
                         linksSection
                             .padding(.bottom, 20)

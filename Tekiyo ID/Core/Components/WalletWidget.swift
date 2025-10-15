@@ -7,7 +7,7 @@ struct WalletWidget: View {
     let onAdd: () -> Void
     
     init(
-        balance: String = "12,754.84€",
+        balance: String = "12, 754.84 €",
         onSend: @escaping () -> Void = {},
         onReceive: @escaping () -> Void = {},
         onAdd: @escaping () -> Void = {}
@@ -20,99 +20,93 @@ struct WalletWidget: View {
     
     var body: some View {
         VStack(spacing: 24) {
-            // Wallet Container (326x167px, radius 52px, padding 28x32px)
-            VStack(spacing: 10) {
-                // Header (icon + "Wallet")
-                HStack(spacing: 10) {
-                    Image(systemName: "wallet.pass.fill")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(.primary)
-                    
-                    Text("Wallet")
-                        .font(.system(size: 24, weight: .regular))
-                        .kerning(-1.44) // -6% of 24px
-                        .foregroundColor(.primary)
-                }
-                .frame(height: 55)
+            // Wallet Container (326x167px, radius 52px, background #111111)
+            VStack(spacing: 0) {
+                // Header "Wallet"
+                Text("Wallet")
+                    .font(.system(size: 24, weight: .regular, design: .default))
+                    .kerning(-1.44) // Exact tracking from Figma
+                    .foregroundColor(Color.white.opacity(0.7))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 28)
+                
+                Spacer()
                 
                 // Balance
                 Text(balance)
-                    .font(.system(size: 46, weight: .regular))
-                    .kerning(-2.76) // -6% of 46px
-                    .foregroundColor(.primary)
+                    .font(.system(size: 46, weight: .regular, design: .default))
+                    .kerning(-2.28) // Exact tracking from Figma
+                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                
-                // Action Buttons (56x44px each, radius 24px)
-                HStack(spacing: 0) {
-                    // Envoyer
-                    VStack(spacing: 12) {
-                        Button(action: onSend) {
-                            Image(systemName: "arrow.up.right")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.primary)
-                                .frame(width: 56, height: 44)
-                                .background(.ultraThinMaterial)
-                                .clipShape(RoundedRectangle(cornerRadius: 24))
-                        }
-                        .buttonStyle(.plain)
-                        
-                        Text("Envoyer")
-                            .font(.system(size: 14, weight: .medium))
-                            .kerning(-0.84) // -6% of 14px
-                            .foregroundColor(.primary)
-                    }
-                    
-                    Spacer()
-                    
-                    // Recevoir
-                    VStack(spacing: 12) {
-                        Button(action: onReceive) {
-                            Image(systemName: "arrow.down.left")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.primary)
-                                .frame(width: 56, height: 44)
-                                .background(.ultraThinMaterial)
-                                .clipShape(RoundedRectangle(cornerRadius: 24))
-                        }
-                        .buttonStyle(.plain)
-                        
-                        Text("Recevoir")
-                            .font(.system(size: 14, weight: .medium))
-                            .kerning(-0.84) // -6% of 14px
-                            .foregroundColor(.primary)
-                    }
-                    
-                    Spacer()
-                    
-                    // Ajouter
-                    VStack(spacing: 12) {
-                        Button(action: onAdd) {
-                            Image(systemName: "plus")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.primary)
-                                .frame(width: 56, height: 44)
-                                .background(.ultraThinMaterial)
-                                .clipShape(RoundedRectangle(cornerRadius: 24))
-                        }
-                        .buttonStyle(.plain)
-                        
-                        Text("Ajouter")
-                            .font(.system(size: 14, weight: .medium))
-                            .kerning(-0.84) // -6% of 14px
-                            .foregroundColor(.primary)
-                    }
-                }
-                .padding(.horizontal, 24)
+                    .padding(.bottom, 28)
             }
             .frame(width: 326, height: 167)
             .padding(.horizontal, 32)
-            .padding(.vertical, 28)
-            .background(.ultraThinMaterial)
+            .background(Color(hex: "111111"))
             .clipShape(RoundedRectangle(cornerRadius: 52))
+            
+            // Action Buttons Row
+            HStack(spacing: 0) {
+                // Envoyer
+                VStack(spacing: 12) {
+                    Button(action: onSend) {
+                        Image(systemName: "arrow.up.right")
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundColor(.white)
+                            .frame(width: 56, height: 44)
+                            .background(Color.clear)
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Text("Envoyer")
+                        .font(.system(size: 14, weight: .medium, design: .default))
+                        .kerning(-0.84) // Exact tracking from Figma
+                        .foregroundColor(.white)
+                }
+                
+                Spacer()
+                
+                // Recevoir
+                VStack(spacing: 12) {
+                    Button(action: onReceive) {
+                        Image(systemName: "arrow.down.left")
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundColor(.white)
+                            .frame(width: 56, height: 44)
+                            .background(Color.clear)
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Text("Recevoir")
+                        .font(.system(size: 14, weight: .medium, design: .default))
+                        .kerning(-0.84) // Exact tracking from Figma
+                        .foregroundColor(.white)
+                }
+                
+                Spacer()
+                
+                // Ajouter
+                VStack(spacing: 12) {
+                    Button(action: onAdd) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundColor(.white)
+                            .frame(width: 56, height: 44)
+                            .background(Color.clear)
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Text("Ajouter")
+                        .font(.system(size: 14, weight: .medium, design: .default))
+                        .kerning(-0.84) // Exact tracking from Figma
+                        .foregroundColor(.white)
+                }
+            }
+            .padding(.horizontal, 24)
         }
-        .frame(width: 342, height: 291.64)
+        .frame(width: 342, height: 291)
         .padding(8)
-        .background(.ultraThinMaterial)
+        .background(Color.white.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 60))
     }
 }
