@@ -94,21 +94,15 @@ struct EventCard: View {
                     Text("S'inscrire")
                         .font(.headline)
                         .fontWeight(.medium)
-                        .foregroundColor(.primary)
+                        .foregroundColor(.white.opacity(0.9))
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(Color(hex: "1D1D1D"))
-                        )
+                        .maximumGlassEffect()
                 }
             }
             .padding(24)
             .frame(width: 342, height: 281)
-            .background(
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(Color(hex: "1D1D1D"))
-            )
+            .glassCard()
         }
         .buttonStyle(.plain)
     }

@@ -21,9 +21,6 @@ struct MessageListView: View {
                             eventsSection
                                 .padding(.top, 20)
                             
-                            // Messages Section Header with + button
-                            messagesSectionHeader
-                            
                             // Conversations List
                             VStack(spacing: 0) {
                                 ForEach(viewModel.filteredConversations) { conversation in
@@ -34,7 +31,27 @@ struct MessageListView: View {
                                 }
                             }
                         }
-                        .padding(.bottom, 40)
+                        .padding(.bottom, 100) // Extra space for floating button
+                    }
+                }
+                
+                // Floating + button for creating new message/event
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            // TODO: Action to create new message or event
+                        }) {
+                            Image(systemName: "plus")
+                                .font(.system(size: 24, weight: .semibold))
+                                .foregroundColor(.white.opacity(0.9))
+                                .frame(width: 56, height: 56)
+                        }
+                        .floatingGlassButton()
+                        .buttonStyle(.plain)
+                        .padding(.trailing, 20)
+                        .padding(.bottom, 20)
                     }
                 }
             }
@@ -73,43 +90,7 @@ struct MessageListView: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.white.opacity(0.05))
-        )
-        .padding(.horizontal, 20)
-    }
-    
-    private var messagesSectionHeader: some View {
-        HStack {
-            Text("Messages")
-                .font(.custom("SF Pro Display", size: 17))
-                .fontWeight(.medium)
-                .foregroundColor(.white.opacity(0.9))
-            
-            Spacer()
-            
-            // + Button with liquid glass
-            Button(action: {
-                // Action pour créer un nouveau message
-            }) {
-                Image(systemName: "plus")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white.opacity(0.9))
-                    .frame(width: 32, height: 32)
-                    .background(
-                        Circle()
-                            .fill(.ultraThinMaterial)
-                    )
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.white.opacity(0.05))
-        )
+        .maximumGlassEffect()
         .padding(.horizontal, 20)
     }
 }

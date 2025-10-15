@@ -69,11 +69,8 @@ struct EventsListView: View {
                     .font(.system(size: 20, weight: .medium))
                     .foregroundColor(.white.opacity(0.9))
                     .frame(width: 44, height: 44)
-                    .background(
-                        Circle()
-                            .fill(Color.white.opacity(0.1))
-                    )
             }
+            .floatingGlassButton()
             .buttonStyle(.plain)
             
             // Center: Events pill
@@ -95,10 +92,7 @@ struct EventsListView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
-            .background(
-                Capsule()
-                    .fill(Color.white.opacity(0.1))
-            )
+            .maximumGlassEffect()
             
             Spacer()
             
@@ -108,11 +102,8 @@ struct EventsListView: View {
                     .font(.system(size: 20, weight: .medium))
                     .foregroundColor(.white.opacity(0.9))
                     .frame(width: 44, height: 44)
-                    .background(
-                        Circle()
-                            .fill(Color.white.opacity(0.1))
-                    )
             }
+            .floatingGlassButton()
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 20)

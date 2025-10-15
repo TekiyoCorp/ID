@@ -67,11 +67,8 @@ struct CreateEventView: View {
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.white.opacity(0.9))
                     .frame(width: 44, height: 44)
-                    .background(
-                        Circle()
-                            .fill(.ultraThinMaterial)
-                    )
             }
+            .floatingGlassButton()
             .buttonStyle(.plain)
             
             Spacer()
@@ -86,11 +83,8 @@ struct CreateEventView: View {
                     .foregroundColor(.white.opacity(0.9))
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .fill(.ultraThinMaterial)
-                    )
             }
+            .maximumGlassEffect()
             .buttonStyle(.plain)
         }
     }
@@ -109,7 +103,7 @@ struct CreateEventView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 } else {
                     Circle()
-                        .fill(.ultraThinMaterial)
+                        .fill(Color(hex: "1D1D1D"))
                         .frame(width: 80, height: 80)
                         .overlay(
                             Image(systemName: "photo")
@@ -130,11 +124,8 @@ struct CreateEventView: View {
                     .foregroundColor(.white.opacity(0.9))
                     .padding(.horizontal, 20)
                     .padding(.vertical, 10)
-                    .background(
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .fill(.ultraThinMaterial)
-                    )
             }
+            .maximumGlassEffect()
             .buttonStyle(.plain)
         }
     }
@@ -203,10 +194,7 @@ struct CreateEventView: View {
             .buttonStyle(.plain)
         }
         .padding(24)
-        .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color(hex: "1D1D1D"))
-        )
+        .glassCard()
     }
     
     private var organizerDescriptionCard: some View {
@@ -246,10 +234,7 @@ struct CreateEventView: View {
             }
         }
         .padding(24)
-        .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color(hex: "1D1D1D"))
-        )
+        .glassCard()
     }
     
     
@@ -349,10 +334,7 @@ struct CreateEventView: View {
             }
         }
         .padding(24)
-        .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color(hex: "1D1D1D"))
-        )
+        .glassCard()
     }
     
     private var publishButton: some View {
@@ -364,10 +346,7 @@ struct CreateEventView: View {
         .foregroundColor(.white)
         .frame(maxWidth: .infinity)
         .padding(.vertical, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(.ultraThinMaterial)
-        )
+        .maximumGlassEffect()
         .disabled(!viewModel.eventData.isValid)
         .opacity(viewModel.eventData.isValid ? 1 : 0.6)
     }
