@@ -20,15 +20,16 @@ struct ProfileView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Header (Top Bar)
+                // Header (Top Bar) - NO BACKGROUND
                 headerView
                     .padding(.horizontal, 20)
                     .padding(.top, 8)
                 
                 ScrollView {
-                    VStack(spacing: 32) {
+                    VStack(spacing: 40) {
                         // Location & Greeting
                         locationAndGreetingView
+                            .padding(.top, 20)
                         
                         // Grand CircularCodeView
                         circularCodeView
@@ -36,19 +37,14 @@ struct ProfileView: View {
                         // Score Indicator
                         scoreIndicatorView
                         
-                        // WalletWidget
-                        WalletWidget()
-                            .padding(.horizontal, 20)
-                        
                         // Links Section
                         linksSection
+                            .padding(.bottom, 20)
                     }
+                    .frame(maxWidth: .infinity)
                     .padding(.horizontal, 20)
-                    .padding(.bottom, 100) // Space for bottom nav
+                    .padding(.bottom, 100) // Space for TabBar
                 }
-                
-                // Bottom Navigation
-                BottomNavigationBar(selectedTab: $selectedTab)
             }
             
             // Activities Overlay
@@ -64,12 +60,65 @@ struct ProfileView: View {
         .onAppear {
             viewModel.requestLocation()
         }
+        .safeAreaInset(edge: .bottom) {
+            // Native TabBar
+            TabView(selection: $selectedTab) {
+                // Home Tab
+                Color.clear
+                    .tabItem {
+                        Image(systemName: "house")
+                        Text("Home")
+                    }
+                    .tag(BottomNavigationBar.TabItem.home)
+                
+                // Grid Tab (Active)
+                Color.clear
+                    .tabItem {
+                        Image(systemName: "square.grid.3x3")
+                        Text("Grid")
+                    }
+                    .tag(BottomNavigationBar.TabItem.grid)
+                
+                // Bell Tab
+                Color.clear
+                    .tabItem {
+                        Image(systemName: "bell")
+                        Text("Notifications")
+                    }
+                    .tag(BottomNavigationBar.TabItem.bell)
+                
+                // Wallet Tab
+                Color.clear
+                    .tabItem {
+                        Image(systemName: "wallet.pass")
+                        Text("Wallet")
+                    }
+                    .tag(BottomNavigationBar.TabItem.wallet)
+            }
+            .frame(height: 60)
+            .background(Color(.systemGray6))
+        }
         .debugRenders("ProfileView")
     }
     
     // MARK: - Header View
     private var headerView: some View {
         HStack {
+            // Back Button (left)
+            Button(action: {
+                // Handle back navigation
+            }) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.black)
+                    .frame(width: 32, height: 32)
+                    .background(Color.gray.opacity(0.1))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+            
+            Spacer()
+            
             // Profile Photo (43x43px)
             if let profileImage = profileImage {
                 Image(uiImage: profileImage)
@@ -99,10 +148,10 @@ struct ProfileView: View {
                 // Handle search
             }) {
                 Image(systemName: "magnifyingglass")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(.white)
-                    .frame(width: 43, height: 43)
-                    .background(.ultraThinMaterial)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.black)
+                    .frame(width: 32, height: 32)
+                    .background(Color.gray.opacity(0.1))
                     .clipShape(Circle())
             }
             .buttonStyle(.plain)
@@ -165,7 +214,7 @@ struct ProfileView: View {
             
             // Percentage
             Text("27%")
-                .font(.system(size: 18, weight: .medium))
+                .font(.system(size: 18, weight: .bold))
                 .foregroundColor(.primary)
             
             // Last verification
@@ -180,15 +229,16 @@ struct ProfileView: View {
             .font(.system(size: 12, weight: .regular))
             .foregroundColor(.blue)
         }
+        .frame(maxWidth: .infinity, alignment: .center)
     }
     
     // MARK: - Links Section
     private var linksSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .center, spacing: 16) {
             Text("Liens")
                 .font(.system(size: 18, weight: .medium))
                 .foregroundColor(.primary)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .center)
             
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 12) {
                 SocialCapsuleButton(platform: "Facebook", icon: "f.circle.fill", color: .blue)
@@ -205,6 +255,7 @@ struct ProfileView: View {
                 SocialCapsuleButton(platform: "YouTube", icon: "play.rectangle.fill", color: .red)
             }
         }
+        .frame(maxWidth: 280) // Max width comme dans l'image
     }
     
     // MARK: - Background Color
