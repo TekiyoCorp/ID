@@ -2,6 +2,7 @@ import Foundation
 import CallKit
 import UIKit
 import Combine
+import AVFoundation
 
 @MainActor
 final class CallKitManager: NSObject, ObservableObject {
@@ -38,9 +39,6 @@ final class CallKitManager: NSObject, ObservableObject {
         
         // Set ringtone
         providerConfiguration.ringtoneSound = "TekiyoRingtone.caf" // Custom ringtone
-        
-        // Set colors
-        providerConfiguration.tintColor = UIColor(hex: CallConfiguration.primaryColor)
         
         super.init()
         
@@ -107,7 +105,7 @@ final class CallKitManager: NSObject, ObservableObject {
         
         let callUUID = UUID()
         
-        provider?.reportCall(with: callUUID, updated: callUpdate) { error in
+        provider?.reportNewIncomingCall(with: callUUID, update: callUpdate) { error in
             DispatchQueue.main.async {
                 if let error = error {
                     completion(error)

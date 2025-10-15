@@ -33,6 +33,7 @@ final class CallManager: ObservableObject {
         webRTCManager.$callState
             .assign(to: &$callState)
         
+        #if !targetEnvironment(simulator)
         webRTCManager.$connectionState
             .map { state in
                 switch state {
@@ -48,6 +49,10 @@ final class CallManager: ObservableObject {
                 }
             }
             .assign(to: &$connectionState)
+        #else
+        webRTCManager.$connectionState
+            .assign(to: &$connectionState)
+        #endif
         
         // Bind CallKit state
         callKitManager.$activeCall
@@ -146,7 +151,11 @@ final class CallManager: ObservableObject {
         // Request microphone permission
         let micStatus = AVAudioSession.sharedInstance().recordPermission
         if micStatus == .undetermined {
-            let granted = await AVAudioSession.sharedInstance().requestRecordPermission()
+            let granted = await withCheckedContinuation { continuation in
+                AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                    continuation.resume(returning: granted)
+                }
+            }
             if !granted {
                 throw CallError.microphonePermissionDenied
             }
@@ -242,11 +251,11 @@ final class CallManager: ObservableObject {
     }
     
     // MARK: - Public Getters
-    var localVideoTrack: RTCVideoTrack? {
+    var localVideoTrack: Any? {
         webRTCManager.localVideoTrack
     }
     
-    var remoteVideoTrack: RTCVideoTrack? {
+    var remoteVideoTrack: Any? {
         webRTCManager.remoteVideoTrack
     }
     

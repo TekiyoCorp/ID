@@ -265,7 +265,7 @@ struct CallView: View {
     // MARK: - Actions
     private func startCall() {
         callManager.startCall(
-            to: conversation.user.id.uuidString,
+            to: conversation.user.id,
             callerName: conversation.user.name,
             type: callType
         )
@@ -403,11 +403,16 @@ struct RemoteVideoView: View {
 #Preview {
     CallView(
         conversation: Conversation(
-            user: .marie,
+            user: ConversationUser(
+                name: "Marie Dupont",
+                avatarImage: "person.fill",
+                avatarColor: .purple,
+                isOnline: true,
+                isVerified: false
+            ),
             lastMessage: "Salut !",
-            timeString: "Maintenant",
-            isUnread: false,
-            messages: []
+            timestamp: Date(),
+            isUnread: false
         ),
         callType: .video
     )

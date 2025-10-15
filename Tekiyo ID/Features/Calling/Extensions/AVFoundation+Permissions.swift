@@ -1,6 +1,7 @@
 import Foundation
 import AVFoundation
 import Combine
+import SwiftUI
 
 // MARK: - Permission Status
 enum PermissionStatus {
@@ -58,7 +59,11 @@ final class AVFoundationPermissionsManager: ObservableObject {
     
     // MARK: - Permission Requesting
     func requestMicrophonePermission() async -> PermissionStatus {
-        let granted = await AVAudioSession.sharedInstance().requestRecordPermission()
+        let granted = await withCheckedContinuation { continuation in
+            AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                continuation.resume(returning: granted)
+            }
+        }
         let status: PermissionStatus = granted ? .granted : .denied
         
         await MainActor.run {

@@ -252,7 +252,7 @@ struct MediaControlButton: View {
                 .frame(width: 50, height: 50)
                 .background(
                     Circle()
-                        .fill(isActive ? .ultraThinMaterial : .ultraThinMaterial.opacity(0.5))
+                        .fill(isActive ? .ultraThinMaterial : .thinMaterial)
                         .overlay(
                             Circle()
                                 .stroke(Color.white.opacity(0.3), lineWidth: 1)
