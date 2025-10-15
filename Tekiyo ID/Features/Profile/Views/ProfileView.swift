@@ -14,11 +14,12 @@ struct ProfileView: View {
     @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottom) {
             // Global Background - OLED Black
             Color(hex: "111111")
                 .ignoresSafeArea(.all)
             
+            // Content ScrollView
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 0) {
                     // Header (Top Bar) - FIXED, NO BACKGROUND
@@ -48,7 +49,7 @@ struct ProfileView: View {
                             .padding(.bottom, 20)
                     }
                     .padding(.horizontal, 24)
-                    .padding(.bottom, 120) // More space for floating TabBar
+                    .padding(.bottom, 120) // Space for floating TabBar
                 }
             }
             
@@ -62,52 +63,54 @@ struct ProfileView: View {
                 .zIndex(1)
             }
             
-            // Floating TabBar - Above everything
-            VStack {
-                Spacer()
-                
-                TabView(selection: $selectedTab) {
-                    // Home Tab
-                    Color.clear
-                        .tabItem {
-                            Image(systemName: "house")
-                            Text("Home")
-                        }
-                        .tag(BottomNavigationBar.TabItem.home)
-                    
-                    // Grid Tab (Active)
-                    Color.clear
-                        .tabItem {
-                            Image(systemName: "square.grid.3x3")
-                            Text("Grid")
-                        }
-                        .tag(BottomNavigationBar.TabItem.grid)
-                    
-                    // Bell Tab
-                    Color.clear
-                        .tabItem {
-                            Image(systemName: "bell")
-                            Text("Notifications")
-                        }
-                        .tag(BottomNavigationBar.TabItem.bell)
-                    
-                    // Wallet Tab
-                    Color.clear
-                        .tabItem {
-                            Image(systemName: "wallet.pass")
-                            Text("Wallet")
-                        }
-                        .tag(BottomNavigationBar.TabItem.wallet)
-                }
-                .frame(height: 60)
-                .background(Color.clear) // Completely transparent
-            }
-            .ignoresSafeArea(.keyboard, edges: .bottom)
+            // TabBar - Independent overlay
+            tabBarView
+                .background(Color.clear)
+                .ignoresSafeArea(edges: .bottom)
         }
         .onAppear {
             viewModel.requestLocation()
         }
         .debugRenders("ProfileView")
+    }
+    
+    // MARK: - TabBar View
+    private var tabBarView: some View {
+        TabView(selection: $selectedTab) {
+            // Home Tab
+            Color.clear
+                .tabItem {
+                    Image(systemName: "house")
+                    Text("Home")
+                }
+                .tag(BottomNavigationBar.TabItem.home)
+            
+            // Grid Tab (Active)
+            Color.clear
+                .tabItem {
+                    Image(systemName: "square.grid.3x3")
+                    Text("Grid")
+                }
+                .tag(BottomNavigationBar.TabItem.grid)
+            
+            // Bell Tab
+            Color.clear
+                .tabItem {
+                    Image(systemName: "bell")
+                    Text("Notifications")
+                }
+                .tag(BottomNavigationBar.TabItem.bell)
+            
+            // Wallet Tab
+            Color.clear
+                .tabItem {
+                    Image(systemName: "wallet.pass")
+                    Text("Wallet")
+                }
+                .tag(BottomNavigationBar.TabItem.wallet)
+        }
+        .frame(height: 60)
+        .background(Color.clear)
     }
     
     // MARK: - Header View
