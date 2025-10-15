@@ -48,7 +48,7 @@ struct ProfileView: View {
                             .padding(.bottom, 20)
                     }
                     .padding(.horizontal, 24)
-                    .padding(.bottom, 100) // Space for floating TabBar
+                    .padding(.bottom, 120) // More space for floating TabBar
                 }
             }
             
@@ -100,8 +100,8 @@ struct ProfileView: View {
                         .tag(BottomNavigationBar.TabItem.wallet)
                 }
                 .frame(height: 60)
-                .background(Color.clear) // Completely transparent
                 .background(.ultraThinMaterial) // Frosted glass effect for visibility
+                .background(Color.black.opacity(0.3)) // Dark overlay for better contrast
                 .clipShape(RoundedRectangle(cornerRadius: 0, style: .continuous))
             }
             .ignoresSafeArea(.keyboard, edges: .bottom)
