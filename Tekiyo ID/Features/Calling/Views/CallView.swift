@@ -1,6 +1,9 @@
 import SwiftUI
-import WebRTC
 import AVFoundation
+
+#if !targetEnvironment(simulator)
+import WebRTC
+#endif
 
 struct CallView: View {
     @StateObject private var callManager = CallManager()
@@ -327,6 +330,7 @@ struct CallControlButton: View {
 }
 
 // MARK: - Video Views
+#if !targetEnvironment(simulator)
 struct LocalVideoView: UIViewRepresentable {
     let videoTrack: RTCVideoTrack
     
@@ -354,11 +358,57 @@ struct RemoteVideoView: UIViewRepresentable {
         videoTrack.add(uiView)
     }
 }
+#else
+// MARK: - Simulator Video Views
+struct LocalVideoView: View {
+    let videoTrack: Any?
+    
+    var body: some View {
+        Rectangle()
+            .fill(Color.blue.opacity(0.3))
+            .overlay(
+                VStack {
+                    Image(systemName: "video.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(.white)
+                    Text("Local Video")
+                        .font(.caption)
+                        .foregroundColor(.white)
+                }
+            )
+    }
+}
+
+struct RemoteVideoView: View {
+    let videoTrack: Any?
+    
+    var body: some View {
+        Rectangle()
+            .fill(Color.black)
+            .overlay(
+                VStack {
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 60))
+                        .foregroundColor(.white.opacity(0.6))
+                    Text("Remote Video")
+                        .font(.headline)
+                        .foregroundColor(.white.opacity(0.8))
+                }
+            )
+    }
+}
+#endif
 
 // MARK: - Preview
 #Preview {
     CallView(
-        conversation: Conversation.mockConversations.first!,
+        conversation: Conversation(
+            user: .marie,
+            lastMessage: "Salut !",
+            timeString: "Maintenant",
+            isUnread: false,
+            messages: []
+        ),
         callType: .video
     )
 }

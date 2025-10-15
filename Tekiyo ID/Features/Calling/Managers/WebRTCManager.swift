@@ -1,7 +1,9 @@
 import Foundation
-import WebRTC
 import AVFoundation
 import Combine
+
+#if !targetEnvironment(simulator)
+import WebRTC
 
 @MainActor
 final class WebRTCManager: NSObject, ObservableObject {
@@ -268,26 +270,4 @@ extension WebRTCManager: RTCPeerConnectionDelegate {
     }
 }
 
-// MARK: - Call Errors
-enum CallError: LocalizedError {
-    case cameraPermissionDenied
-    case microphonePermissionDenied
-    case audioSessionSetupFailed
-    case peerConnectionFailed
-    case signalingFailed
-    
-    var errorDescription: String? {
-        switch self {
-        case .cameraPermissionDenied:
-            return "Camera permission is required for video calls"
-        case .microphonePermissionDenied:
-            return "Microphone permission is required for calls"
-        case .audioSessionSetupFailed:
-            return "Failed to setup audio session"
-        case .peerConnectionFailed:
-            return "Failed to establish peer connection"
-        case .signalingFailed:
-            return "Failed to establish signaling connection"
-        }
-    }
-}
+#endif

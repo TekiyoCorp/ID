@@ -141,8 +141,9 @@ final class WebRTCManager: NSObject, ObservableObject {
         closePeerConnection()
     }
 }
+#endif
 
-// MARK: - Mock Call Errors
+// MARK: - Call Errors (Shared)
 enum CallError: LocalizedError {
     case cameraPermissionDenied
     case microphonePermissionDenied
@@ -165,4 +166,3 @@ enum CallError: LocalizedError {
         }
     }
 }
-#endif
