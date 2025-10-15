@@ -13,6 +13,7 @@ struct Tekiyo_IDApp: App {
         WindowGroup {
             StartView()
                 .debugRenders("StartView Root")
+                .preferredColorScheme(.dark)
         }
     }
 }
