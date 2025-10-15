@@ -48,7 +48,7 @@ struct ProfileView: View {
                             .padding(.bottom, 20)
                     }
                     .padding(.horizontal, 24)
-                    .padding(.bottom, 96) // Space for floating TabBar
+                    .padding(.bottom, 100) // Space for floating TabBar
                 }
             }
             
@@ -61,47 +61,53 @@ struct ProfileView: View {
                 .transition(.move(edge: .trailing))
                 .zIndex(1)
             }
+            
+            // Floating TabBar - Above everything
+            VStack {
+                Spacer()
+                
+                TabView(selection: $selectedTab) {
+                    // Home Tab
+                    Color.clear
+                        .tabItem {
+                            Image(systemName: "house")
+                            Text("Home")
+                        }
+                        .tag(BottomNavigationBar.TabItem.home)
+                    
+                    // Grid Tab (Active)
+                    Color.clear
+                        .tabItem {
+                            Image(systemName: "square.grid.3x3")
+                            Text("Grid")
+                        }
+                        .tag(BottomNavigationBar.TabItem.grid)
+                    
+                    // Bell Tab
+                    Color.clear
+                        .tabItem {
+                            Image(systemName: "bell")
+                            Text("Notifications")
+                        }
+                        .tag(BottomNavigationBar.TabItem.bell)
+                    
+                    // Wallet Tab
+                    Color.clear
+                        .tabItem {
+                            Image(systemName: "wallet.pass")
+                            Text("Wallet")
+                        }
+                        .tag(BottomNavigationBar.TabItem.wallet)
+                }
+                .frame(height: 60)
+                .background(Color.clear) // Completely transparent
+                .background(.ultraThinMaterial) // Frosted glass effect for visibility
+                .clipShape(RoundedRectangle(cornerRadius: 0, style: .continuous))
+            }
+            .ignoresSafeArea(.keyboard, edges: .bottom)
         }
         .onAppear {
             viewModel.requestLocation()
-        }
-        .safeAreaInset(edge: .bottom) {
-            // Floating TabBar - NO BACKGROUND
-            TabView(selection: $selectedTab) {
-                // Home Tab
-                Color.clear
-                    .tabItem {
-                        Image(systemName: "house")
-                        Text("Home")
-                    }
-                    .tag(BottomNavigationBar.TabItem.home)
-                
-                // Grid Tab (Active)
-                Color.clear
-                    .tabItem {
-                        Image(systemName: "square.grid.3x3")
-                        Text("Grid")
-                    }
-                    .tag(BottomNavigationBar.TabItem.grid)
-                
-                // Bell Tab
-                Color.clear
-                    .tabItem {
-                        Image(systemName: "bell")
-                        Text("Notifications")
-                    }
-                    .tag(BottomNavigationBar.TabItem.bell)
-                
-                // Wallet Tab
-                Color.clear
-                    .tabItem {
-                        Image(systemName: "wallet.pass")
-                        Text("Wallet")
-                    }
-                    .tag(BottomNavigationBar.TabItem.wallet)
-            }
-            .frame(height: 60)
-            .background(Color.clear) // Completely transparent
         }
         .debugRenders("ProfileView")
     }
