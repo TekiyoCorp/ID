@@ -21,10 +21,10 @@ struct CategoryButton: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: 50, style: .continuous)
                     .fill(isSelected ? category.color.opacity(0.15) : Color(.systemGray6))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        RoundedRectangle(cornerRadius: 50, style: .continuous)
                             .stroke(isSelected ? category.color.opacity(0.4) : Color.clear, lineWidth: 1)
                     )
             )

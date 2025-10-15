@@ -92,7 +92,7 @@ struct OptimizedProfileView: View {
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 14)
                                     .background(Color(hex: "002FFF"))
-                                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                             }
                             .accessibilityLabel("Continuer vers le profil")
                             .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -289,7 +289,7 @@ struct VerificationSectionView: View {
                 // Score indicator - optimized with single HStack
                 HStack(spacing: 4) {
                     ForEach(0..<10, id: \.self) { index in
-                        RoundedRectangle(cornerRadius: 6)
+                        RoundedRectangle(cornerRadius: 20)
                             .fill(index < trustScore ? Color(hex: "002FFF") : Color.gray.opacity(0.3))
                             .frame(width: 12, height: 24)
                             .shadow(
@@ -473,10 +473,10 @@ struct ActivitiesOverlayView: View {
             }
             .padding(.vertical, 20)
             .background(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                RoundedRectangle(cornerRadius: 50, style: .continuous)
                     .fill(Color(.systemBackground).opacity(0.95))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        RoundedRectangle(cornerRadius: 50, style: .continuous)
                             .stroke(Color.white.opacity(0.08), lineWidth: 1)
                     )
                     .shadow(color: .black.opacity(0.12), radius: 20, x: 0, y: 10)
@@ -542,10 +542,10 @@ struct ActivitiesSearchBar: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: 50)
                 .fill(Color(.systemBackground).opacity(0.9))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 16)
+                    RoundedRectangle(cornerRadius: 50)
                         .stroke(
                             LinearGradient(
                                 colors: [

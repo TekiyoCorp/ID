@@ -96,7 +96,7 @@ struct FaceIDSetupView: View {
                     }
                     .padding(8)
                     .background(Color.black.opacity(0.8))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
                     .transition(.scale.combined(with: .opacity))
                 }
             }

@@ -31,7 +31,7 @@ struct WalletActionButtons: View {
             .frame(height: 48)
             .padding(.horizontal, isCompact ? 16 : 20)
             .background(
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                RoundedRectangle(cornerRadius: 50, style: .continuous)
                     .fill(Color.white.opacity(0.1))
             )
         }

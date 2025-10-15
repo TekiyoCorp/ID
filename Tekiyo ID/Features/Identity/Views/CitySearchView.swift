@@ -62,7 +62,7 @@ struct CitySearchView: View {
                                 }
                             }
                             .background(.ultraThinMaterial)
-                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: 50, style: .continuous))
                         }
                         .frame(maxHeight: 300)
                         .padding(.horizontal, 20)
@@ -92,7 +92,7 @@ struct CitySearchView: View {
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
                             .background(
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                RoundedRectangle(cornerRadius: 50, style: .continuous)
                                     .fill(Color.blue)
                             )
                             .padding(.horizontal, 20)
@@ -287,10 +287,10 @@ struct LiquidGlassSearchBar: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: 50, style: .continuous)
                 .fill(.ultraThinMaterial)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    RoundedRectangle(cornerRadius: 50, style: .continuous)
                         .stroke(
                             LinearGradient(
                                 colors: [.blue.opacity(0.3), .purple.opacity(0.2)],

@@ -5,10 +5,10 @@ extension View {
     /// Refraction 100, Depth 100, Dispersion 100, Frost 0
     func maximumGlassEffect() -> some View {
         self
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .background(.ultraThickMaterial.opacity(0.3), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 50, style: .continuous))
+            .background(.ultraThickMaterial.opacity(0.3), in: RoundedRectangle(cornerRadius: 50, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                RoundedRectangle(cornerRadius: 50, style: .continuous)
                     .stroke(
                         LinearGradient(
                             colors: [
@@ -51,10 +51,10 @@ extension View {
     /// Effet glass pour cartes
     func glassCard() -> some View {
         self
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .background(.ultraThickMaterial.opacity(0.25), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 50, style: .continuous))
+            .background(.ultraThickMaterial.opacity(0.25), in: RoundedRectangle(cornerRadius: 50, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                RoundedRectangle(cornerRadius: 50, style: .continuous)
                     .stroke(
                         LinearGradient(
                             colors: [

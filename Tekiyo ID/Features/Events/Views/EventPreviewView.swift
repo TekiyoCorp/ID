@@ -15,7 +15,7 @@ struct EventPreviewView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                             .frame(height: 200)
-                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                     }
                     
                     VStack(alignment: .leading, spacing: 16) {
@@ -131,7 +131,7 @@ struct EventPreviewView: View {
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
                     .background(
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        RoundedRectangle(cornerRadius: 50, style: .continuous)
                             .fill(Color.blue)
                     )
                 }

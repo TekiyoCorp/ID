@@ -114,7 +114,7 @@ struct PhotoCaptureView: View {
                             .padding(.horizontal, 20)
                             .padding(.vertical, 10)
                             .background(Color.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
                         } else if viewModel.cameraPermissionStatus == .notDetermined {
                             Button("Autoriser la caméra") {
                                 viewModel.requestCameraPermission()
@@ -124,7 +124,7 @@ struct PhotoCaptureView: View {
                             .padding(.horizontal, 20)
                             .padding(.vertical, 10)
                             .background(Color.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
                         }
                     }
                 }

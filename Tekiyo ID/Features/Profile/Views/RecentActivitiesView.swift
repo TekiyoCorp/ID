@@ -156,7 +156,7 @@ struct EnhancedActivityRow: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(Color.gray.opacity(0.1))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: 20))
     }
 }
 

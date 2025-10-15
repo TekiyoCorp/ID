@@ -36,7 +36,7 @@ struct LocationSearchView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
                 .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    RoundedRectangle(cornerRadius: 50, style: .continuous)
                         .fill(Color(hex: "1D1D1D"))
                 )
                 .padding(.horizontal, 20)
@@ -62,7 +62,7 @@ struct LocationSearchView: View {
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 12)
                                 .background(
-                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    RoundedRectangle(cornerRadius: 50, style: .continuous)
                                         .fill(Color(hex: "1D1D1D"))
                                 )
                             }

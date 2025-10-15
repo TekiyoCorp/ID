@@ -100,7 +100,7 @@ struct CreateEventView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .frame(height: 120)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                 } else {
                     Circle()
                         .fill(Color(hex: "1D1D1D"))

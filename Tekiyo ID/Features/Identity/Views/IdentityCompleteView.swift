@@ -104,7 +104,7 @@ struct IdentityCompleteView: View {
                 .frame(width: 254, height: 254)
                 .padding(24)
                 .background(Color(hex: "1D1D1D"))
-                .clipShape(RoundedRectangle(cornerRadius: 24))
+                .clipShape(RoundedRectangle(cornerRadius: 20))
                 .offset(y: Layout.cardOffset)
                 
                 // Activities preview
@@ -204,7 +204,7 @@ private struct ActivitiesPreview: View {
         .padding(.vertical, 28)
         .padding(.horizontal, 24)
         .background(
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
+            RoundedRectangle(cornerRadius: 50, style: .continuous)
                 .fill(Color(.systemBackground))
                 .shadow(color: Color.black.opacity(0.08), radius: 20, x: 0, y: 16)
         )
@@ -278,7 +278,7 @@ private struct ActivitiesOverlay: View {
             .padding(24)
             .frame(maxWidth: 360, maxHeight: 520)
             .background(
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                RoundedRectangle(cornerRadius: 50, style: .continuous)
                     .fill(.ultraThinMaterial)
             )
             .shadow(color: Color.black.opacity(0.2), radius: 24, x: 0, y: 18)
@@ -321,7 +321,7 @@ private struct ActivityDetailRow: View {
         }
         .padding(16)
         .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
+            RoundedRectangle(cornerRadius: 50, style: .continuous)
                 .fill(Color(.systemBackground))
                 .shadow(color: Color.black.opacity(0.05), radius: 12, x: 0, y: 8)
         )

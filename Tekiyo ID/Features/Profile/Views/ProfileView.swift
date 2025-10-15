@@ -147,7 +147,7 @@ struct ProfileView: View {
             // Score bars
             HStack(spacing: 4) {
                 ForEach(0..<10, id: \.self) { index in
-                    RoundedRectangle(cornerRadius: 6)
+                    RoundedRectangle(cornerRadius: 20)
                         .fill(index < trustScore ? Color.red : Color.gray.opacity(0.3))
                         .frame(width: 12, height: 24)
                         .shadow(

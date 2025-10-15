@@ -106,7 +106,7 @@ struct EventDetailModal: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 56)
                     .background(
-                        RoundedRectangle(cornerRadius: 28, style: .continuous)
+                        RoundedRectangle(cornerRadius: 50, style: .continuous)
                             .fill(Color.blue)
                     )
             }
@@ -115,7 +115,7 @@ struct EventDetailModal: View {
         .padding(24)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemBackground))
-        .cornerRadius(32, corners: [.topLeft, .topRight])
+        .cornerRadius(40, corners: [.topLeft, .topRight])
     }
 }
 

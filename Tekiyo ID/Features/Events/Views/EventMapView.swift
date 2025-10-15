@@ -20,7 +20,7 @@ struct EventMapView: View {
         }
         .mapStyle(.hybrid)
         .frame(height: 200)
-        .cornerRadius(16)
+        .cornerRadius(20)
         .onAppear {
             region = MKCoordinateRegion(
                 center: coordinate,

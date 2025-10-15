@@ -32,7 +32,7 @@ struct MessageBubble: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
                 .background(
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    RoundedRectangle(cornerRadius: 50, style: .continuous)
                         .fill(message.isFromCurrentUser ? Color.blue : Color(hex: "1D1D1D"))
                 )
             
