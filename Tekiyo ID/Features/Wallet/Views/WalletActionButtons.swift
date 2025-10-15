@@ -33,6 +33,7 @@ struct WalletActionButtons: View {
             .background(
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .fill(Color.white.opacity(0.1))
+                    .background(.ultraThinMaterial)
             )
         }
         .buttonStyle(.plain)

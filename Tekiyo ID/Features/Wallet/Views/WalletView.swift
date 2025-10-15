@@ -53,6 +53,12 @@ struct WalletView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, 20)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.white.opacity(0.05))
+                .background(.ultraThinMaterial)
+        )
+        .padding(.horizontal, 20)
     }
     
     private var historySection: some View {

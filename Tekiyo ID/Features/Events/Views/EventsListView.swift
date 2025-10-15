@@ -56,6 +56,7 @@ struct EventsListView: View {
                     .background(
                         Circle()
                             .fill(Color.white.opacity(0.1))
+                            .background(.ultraThinMaterial)
                     )
             }
             .buttonStyle(.plain)
@@ -82,6 +83,7 @@ struct EventsListView: View {
             .background(
                 Capsule()
                     .fill(Color.white.opacity(0.1))
+                    .background(.ultraThinMaterial)
             )
             
             Spacer()
@@ -95,6 +97,7 @@ struct EventsListView: View {
                     .background(
                         Circle()
                             .fill(Color.white.opacity(0.1))
+                            .background(.ultraThinMaterial)
                     )
             }
             .buttonStyle(.plain)

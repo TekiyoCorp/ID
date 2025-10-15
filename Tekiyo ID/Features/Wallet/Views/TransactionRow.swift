@@ -34,7 +34,11 @@ struct TransactionRow: View {
                 .foregroundColor(transaction.type == .credit ? Color.green : Color.primary)
         }
         .padding(.vertical, 8)
-        .background(Color(.systemBackground))
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.white.opacity(0.05))
+                .background(.ultraThinMaterial)
+        )
     }
 }
 

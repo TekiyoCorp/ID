@@ -119,6 +119,7 @@ struct EventCard: View {
             .background(
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .fill(Color(hex: "1D1D1D"))
+                    .background(.ultraThinMaterial)
             )
         }
         .buttonStyle(.plain)

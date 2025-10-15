@@ -96,6 +96,7 @@ struct ProfileView: View {
                     .foregroundColor(.white.opacity(0.9))
                     .frame(width: 32, height: 32)
                     .background(Color.gray.opacity(0.1))
+                    .background(.ultraThinMaterial)
                     .clipShape(Circle())
             }
             .buttonStyle(.plain)
@@ -244,6 +245,7 @@ struct SocialCapsuleButton: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(Color.gray.opacity(0.1))
+            .background(.ultraThinMaterial)
             .clipShape(Capsule())
         }
     }
