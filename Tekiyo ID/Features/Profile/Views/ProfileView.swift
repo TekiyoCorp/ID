@@ -6,205 +6,52 @@ struct ProfileView: View {
     let tekiyoID: String
     let username: String
     
+    @StateObject private var viewModel = ProfileViewModel()
+    @State private var selectedTab: BottomNavigationBar.TabItem = .grid
     @State private var trustScore: Int = 3 // Out of 10
     @State private var lastVerification: String = "il y a 2 jours"
     @State private var showActivitiesOverlay = false
-    
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         ZStack {
-            ScrollView {
-                VStack(spacing: 0) {
-                    // Header with profile info
-                    VStack(spacing: 16) {
-                    // Profile picture (agrandie de 25%)
-                    if let profileImage = profileImage {
-                        Image(uiImage: profileImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 125, height: 125)
-                            .clipShape(Circle())
-                            .overlay(
-                                Circle()
-                                    .stroke(Self.profileBorderGradient, lineWidth: 3)
-                            )
-                    } else {
-                        Circle()
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(width: 125, height: 125)
-                            .overlay(
-                                Image(systemName: "person.fill")
-                                    .font(.system(size: 50))
-                                    .foregroundColor(.gray)
-                            )
-                    }
-                    
-                    VStack(spacing: 6) {
-                        // Name
-                        Text("\(identityData.prenom) \(identityData.nom)")
-                            .font(.system(size: 22, weight: .medium))
-                            .kerning(-0.6)
-                            .foregroundColor(.primary)
-                            .multilineTextAlignment(.center)
-                        
-                        // Username
-                        Text(username)
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.primary)
-                            .multilineTextAlignment(.center)
-                    }
-                    
-                    // Métier + Localisation
-                    HStack(spacing: 8) {
-                        Text(identityData.metier)
-                            .font(.system(size: 14, weight: .regular))
-                            .foregroundColor(.primary)
-                        
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(width: 1, height: 12)
-                        
-                        HStack(spacing: 4) {
-                            Image(systemName: "location.fill")
-                                .font(.system(size: 12))
-                                .foregroundColor(.gray)
-                            
-                            Text(identityData.ville)
-                                .font(.system(size: 14, weight: .regular))
-                                .foregroundColor(.primary)
-                        }
-                    }
-                }
-                .padding(.top, 20)
-                .padding(.bottom, 12)
-                
-                // Verification section
-                VStack(spacing: 16) {
-                    // Verification button
-                    Button(action: {
-                        // Handle verification
-                    }) {
-                        HStack(spacing: 8) {
-                            Text("Obtenir le badge vérifié")
-                                .font(.system(size: 14, weight: .regular))
-                                .foregroundColor(.white)
-                            
-                            Image(systemName: "checkmark.fill")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.white)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(Color(hex: "002FFF"))
-                        .clipShape(Capsule())
-                    }
-                    .padding(.bottom, 34)
-                    
-                    // Trust score
-                    VStack(spacing: 8) {
-                        Text("Trust score")
-                            .font(.system(size: 22, weight: .medium))
-                            .kerning(-1.32)
-                            .foregroundColor(.primary)
-                        
-                        // Score indicator
-                        HStack(spacing: 4) {
-                            ForEach(0..<10, id: \.self) { index in
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(index < trustScore ? Color(hex: "002FFF") : Color.gray.opacity(0.3))
-                                    .frame(width: 12, height: 24)
-                                    .shadow(
-                                        color: index < trustScore ? Color(hex: "FF0000").opacity(0.25) : Color.clear,
-                                        radius: 6,
-                                        x: 0,
-                                        y: 0
-                                    )
-                            }
-                        }
-                        
-                        Text("Dernière vérification : \(lastVerification)")
-                            .font(.system(size: 12, weight: .regular))
-                            .foregroundColor(.primary)
-                        
-                        Button("Comment augmenter mon score ?") {
-                            // Handle score increase info
-                        }
-                        .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(.blue)
-                    }
-                }
-                .padding(.bottom, 32)
-                
-                // Share ID section
-                VStack(spacing: 16) {
-                    Text("Partager mon ID")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(.blue)
-                    
-                    OptimizedCircularCodeView(url: "https://tekiyo.fr/\(tekiyoID)")
-                        .frame(width: 120, height: 120)
-                        .debugRenders("QR Code - ProfileView")
-                    
-                    Text("Ce code QR prouve ton humanité.")
-                        .font(.system(size: 16, weight: .regular))
-                        .foregroundColor(.primary)
-                        .opacity(0.7)
-                        .multilineTextAlignment(.center)
-                }
-                .padding(.bottom, 32)
-                
-                // Recent activities
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Activités récentes")
-                        .font(.system(size: 17, weight: .medium))
-                        .foregroundColor(.primary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    ProfileActivityCirclesRow(activities: profileActivities)
-                        .padding(.leading, 24)
-                        .padding(.vertical, 4)
-                    
-                    Button("Voir plus") {
-                        withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) {
-                            showActivitiesOverlay = true
-                        }
-                    }
-                    .font(.system(size: 16, weight: .regular))
-                    .foregroundColor(.primary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 8)
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 32)
-                
-                // Links section
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Liens")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(.primary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 12) {
-                        SocialCapsuleButton(platform: "Facebook", icon: "f.circle.fill", color: .blue)
-                        SocialCapsuleButton(platform: "Twitter", icon: "bird.fill", color: .blue)
-                        SocialCapsuleButton(platform: "Instagram", icon: "camera.fill", color: .pink)
-                        SocialCapsuleButton(platform: "Snapchat", icon: "ghost.fill", color: .yellow)
-                        SocialCapsuleButton(platform: "LinkedIn", icon: "briefcase.fill", color: .blue)
-                        SocialCapsuleButton(platform: "GitHub", icon: "terminal.fill", color: .black)
-                        SocialCapsuleButton(platform: "TikTok", icon: "music.note", color: .black)
-                        SocialCapsuleButton(platform: "Discord", icon: "bubble.left.fill", color: .blue)
-                        SocialCapsuleButton(platform: "Telegram", icon: "paperplane.fill", color: .blue)
-                        SocialCapsuleButton(platform: "Gmail", icon: "envelope.fill", color: .red)
-                        SocialCapsuleButton(platform: "WhatsApp", icon: "bubble.left.and.bubble.right.fill", color: .green)
-                        SocialCapsuleButton(platform: "YouTube", icon: "play.rectangle.fill", color: .red)
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 40)
-            }
-            .blur(radius: showActivitiesOverlay ? 10 : 0, opaque: false)
-            .allowsHitTesting(!showActivitiesOverlay)
+            // Background
+            backgroundColor
+                .ignoresSafeArea()
             
+            VStack(spacing: 0) {
+                // Header (Top Bar)
+                headerView
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+                
+                ScrollView {
+                    VStack(spacing: 32) {
+                        // Location & Greeting
+                        locationAndGreetingView
+                        
+                        // Grand CircularCodeView
+                        circularCodeView
+                        
+                        // Score Indicator
+                        scoreIndicatorView
+                        
+                        // WalletWidget
+                        WalletWidget()
+                            .padding(.horizontal, 20)
+                        
+                        // Links Section
+                        linksSection
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 100) // Space for bottom nav
+                }
+                
+                // Bottom Navigation
+                BottomNavigationBar(selectedTab: $selectedTab)
+            }
+            
+            // Activities Overlay
             if showActivitiesOverlay {
                 ActivitiesOverlayContainer(
                     isPresented: $showActivitiesOverlay,
@@ -214,13 +61,166 @@ struct ProfileView: View {
                 .zIndex(1)
             }
         }
-        .background(Color(.systemBackground))
-        .toolbar(.hidden, for: .navigationBar)
+        .onAppear {
+            viewModel.requestLocation()
+        }
         .debugRenders("ProfileView")
+    }
+    
+    // MARK: - Header View
+    private var headerView: some View {
+        HStack {
+            // Profile Photo (43x43px)
+            if let profileImage = profileImage {
+                Image(uiImage: profileImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 43, height: 43)
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(Self.profileBorderGradient, lineWidth: 2)
+                    )
+            } else {
+                Circle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 43, height: 43)
+                    .overlay(
+                        Image(systemName: "person.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(.gray)
+                    )
+            }
+            
+            Spacer()
+            
+            // Search Button (43x43px, liquid glass)
+            Button(action: {
+                // Handle search
+            }) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(.white)
+                    .frame(width: 43, height: 43)
+                    .background(.ultraThinMaterial)
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+        }
+    }
+    
+    // MARK: - Location & Greeting
+    private var locationAndGreetingView: some View {
+        VStack(spacing: 8) {
+            // Sun icon + City
+            HStack(spacing: 6) {
+                Image(systemName: "sun.max")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.primary)
+                
+                Text(viewModel.getDisplayCity())
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.primary)
+                    .opacity(0.8)
+            }
+            
+            // Greeting
+            Text("Bonjour \(identityData.prenom)!")
+                .font(.system(size: 28, weight: .medium))
+                .foregroundColor(.primary)
+        }
+    }
+    
+    // MARK: - Circular Code View
+    private var circularCodeView: some View {
+        VStack(spacing: 16) {
+            LargeCircularCodeView(url: "https://tekiyo.fr/\(tekiyoID)")
+                .frame(width: 194, height: 194)
+            
+            Text("Ce code QR prouve ton humanité.")
+                .font(.system(size: 16, weight: .regular))
+                .foregroundColor(.primary)
+                .opacity(0.7)
+                .multilineTextAlignment(.center)
+        }
+    }
+    
+    // MARK: - Score Indicator
+    private var scoreIndicatorView: some View {
+        VStack(spacing: 16) {
+            // Score bars
+            HStack(spacing: 4) {
+                ForEach(0..<10, id: \.self) { index in
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(index < trustScore ? Color.red : Color.gray.opacity(0.3))
+                        .frame(width: 12, height: 24)
+                        .shadow(
+                            color: index < trustScore ? Color.red.opacity(0.25) : Color.clear,
+                            radius: 6,
+                            x: 0,
+                            y: 0
+                        )
+                }
+            }
+            
+            // Percentage
+            Text("27%")
+                .font(.system(size: 18, weight: .medium))
+                .foregroundColor(.primary)
+            
+            // Last verification
+            Text("Dernière vérification : \(lastVerification)")
+                .font(.system(size: 12, weight: .regular))
+                .foregroundColor(.primary)
+            
+            // Help link
+            Button("Comment augmenter mon score ?") {
+                // Handle score increase info
+            }
+            .font(.system(size: 12, weight: .regular))
+            .foregroundColor(.blue)
+        }
+    }
+    
+    // MARK: - Links Section
+    private var linksSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Liens")
+                .font(.system(size: 18, weight: .medium))
+                .foregroundColor(.primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 12) {
+                SocialCapsuleButton(platform: "Facebook", icon: "f.circle.fill", color: .blue)
+                SocialCapsuleButton(platform: "Twitter", icon: "bird.fill", color: .blue)
+                SocialCapsuleButton(platform: "Instagram", icon: "camera.fill", color: .pink)
+                SocialCapsuleButton(platform: "Snapchat", icon: "ghost.fill", color: .yellow)
+                SocialCapsuleButton(platform: "LinkedIn", icon: "briefcase.fill", color: .blue)
+                SocialCapsuleButton(platform: "GitHub", icon: "terminal.fill", color: .black)
+                SocialCapsuleButton(platform: "TikTok", icon: "music.note", color: .black)
+                SocialCapsuleButton(platform: "Discord", icon: "bubble.left.fill", color: .blue)
+                SocialCapsuleButton(platform: "Telegram", icon: "paperplane.fill", color: .blue)
+                SocialCapsuleButton(platform: "Gmail", icon: "envelope.fill", color: .red)
+                SocialCapsuleButton(platform: "WhatsApp", icon: "bubble.left.and.bubble.right.fill", color: .green)
+                SocialCapsuleButton(platform: "YouTube", icon: "play.rectangle.fill", color: .red)
+            }
+        }
+    }
+    
+    // MARK: - Background Color
+    private var backgroundColor: Color {
+        switch colorScheme {
+        case .light:
+            return .white
+        case .dark:
+            return Color(hex: "111111")
+        @unknown default:
+            return .white
+        }
     }
 }
 
-}
+// MARK: - Extensions
 private extension ProfileView {
     static let profileBorderGradient = LinearGradient(
         colors: [
@@ -256,7 +256,7 @@ private extension ProfileView {
             id: UUID(uuidString: "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC") ?? UUID(),
             contactName: "Julie F.",
             title: "Julie F. vous fait confiance.",
-            detail: "Julie a confirmé qu’elle vous reconnaît et vous fait confiance.",
+            detail: "Julie a confirmé qu'elle vous reconnaît et vous fait confiance.",
             iconName: "hand.thumbsup.fill",
             iconColor: Color(hex: "0061FF"),
             backgroundColor: Color(hex: "F9C7A0"),
@@ -296,49 +296,6 @@ private extension ProfileView {
                 .map { String($0).uppercased() }
                 .joined()
         }
-    }
-}
-
-// MARK: - Interactive Activity Circles
-private struct ProfileActivityCirclesRow: View {
-    let activities: [ProfileView.ProfileActivity]
-    
-    var body: some View {
-        HStack(spacing: -40) {
-            ForEach(Array(activities.enumerated()), id: \.element.id) { index, activity in
-                ActivityCircleView(activity: activity, opacity: opacity(for: index))
-                    .zIndex(Double(activities.count - index))
-            }
-        }
-        .padding(.trailing, CGFloat(max(activities.count - 1, 0)) * 40)
-    }
-    
-    private func opacity(for index: Int) -> Double {
-        let base: Double = 0.7
-        let step: Double = 0.15
-        return min(1.0, base + step * Double((activities.count - 1) - index))
-    }
-}
-
-private struct ActivityCircleView: View {
-    let activity: ProfileView.ProfileActivity
-    let opacity: Double
-    
-    var body: some View {
-        Circle()
-            .fill(activity.backgroundColor)
-            .frame(width: 82, height: 82)
-            .overlay(
-                Text(activity.initials)
-                    .font(.system(size: 26, weight: .semibold))
-                    .foregroundColor(.white)
-            )
-            .overlay(
-                Circle()
-                    .stroke(Color.white.opacity(0.4), lineWidth: 2)
-            )
-            .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 6)
-            .opacity(opacity)
     }
 }
 
@@ -466,74 +423,6 @@ private struct ActivityOverlayRow: View {
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .stroke(Color.white.opacity(0.06))
         )
-    }
-}
-// MARK: - Activity Row Component
-struct ActivityRow: View {
-    let profileImage: String
-    let title: String
-    let icon: String
-    let color: Color
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            Circle()
-                .fill(Color.gray.opacity(0.3))
-                .frame(width: 40, height: 40)
-                .overlay(
-                    Image(systemName: profileImage)
-                        .font(.system(size: 20))
-                        .foregroundColor(.gray)
-                )
-            
-            Text(title)
-                .font(.system(size: 16, weight: .regular))
-                .foregroundColor(.primary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            Image(systemName: icon)
-                .font(.system(size: 16))
-                .foregroundColor(color)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(Color.gray.opacity(0.1))
-        .clipShape(Capsule())
-    }
-}
-
-// MARK: - Enhanced Activity Row Component (for RecentActivitiesView)
-struct EnhancedActivityRow: View {
-    let profileImage: String
-    let profileColor: Color
-    let title: String
-    let icon: String
-    let color: Color
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            Circle()
-                .fill(profileColor)
-                .frame(width: 40, height: 40)
-                .overlay(
-                    Image(systemName: profileImage)
-                        .font(.system(size: 20))
-                        .foregroundColor(.white)
-                )
-            
-            Text(title)
-                .font(.system(size: 16, weight: .regular))
-                .foregroundColor(.primary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            Image(systemName: icon)
-                .font(.system(size: 16))
-                .foregroundColor(color)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(Color.gray.opacity(0.1))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
 
