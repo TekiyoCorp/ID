@@ -17,18 +17,18 @@ struct RecentActivitiesView: View {
                         VStack(spacing: 12) {
                             EnhancedActivityRow(
                                 profileImage: "person.circle.fill",
-                                profileColor: .orange,
+                                profileColor: Color.orange,
                                 title: "Connexion avec Damien R.",
                                 icon: "person.2.fill",
-                                color: .blue
+                                color: Color.blue
                             )
                             
                             EnhancedActivityRow(
                                 profileImage: "person.circle.fill",
-                                profileColor: .gray,
+                                profileColor: Color.gray,
                                 title: "Thomas S. vous a scanné.",
                                 icon: "square.dashed.inset.filled",
-                                color: .blue
+                                color: Color.blue
                             )
                             
                             EnhancedActivityRow(
@@ -36,7 +36,7 @@ struct RecentActivitiesView: View {
                                 profileColor: .pink.opacity(0.6),
                                 title: "Julie F. vous fait confiance.",
                                 icon: "hand.thumbsup.fill",
-                                color: .blue
+                                color: Color.blue
                             )
                         }
                     }
@@ -51,18 +51,18 @@ struct RecentActivitiesView: View {
                         VStack(spacing: 12) {
                             EnhancedActivityRow(
                                 profileImage: "person.circle.fill",
-                                profileColor: .orange,
+                                profileColor: Color.orange,
                                 title: "Connexion avec Damien R.",
                                 icon: "person.2.fill",
-                                color: .blue
+                                color: Color.blue
                             )
                             
                             EnhancedActivityRow(
                                 profileImage: "person.circle.fill",
-                                profileColor: .gray,
+                                profileColor: Color.gray,
                                 title: "Thomas S. vous a signalé.",
                                 icon: "exclamationmark.octagon.fill",
-                                color: .red
+                                color: Color.red
                             )
                             
                             EnhancedActivityRow(
@@ -70,31 +70,31 @@ struct RecentActivitiesView: View {
                                 profileColor: .pink.opacity(0.6),
                                 title: "Julie F. vous fait confiance.",
                                 icon: "hand.thumbsup.fill",
-                                color: .blue
+                                color: Color.blue
                             )
                             
                             EnhancedActivityRow(
                                 profileImage: "person.circle.fill",
-                                profileColor: .orange,
+                                profileColor: Color.orange,
                                 title: "Connexion avec Damien R.",
                                 icon: "person.2.fill",
-                                color: .blue
+                                color: Color.blue
                             )
                             
                             EnhancedActivityRow(
                                 profileImage: "person.circle.fill",
-                                profileColor: .orange,
+                                profileColor: Color.orange,
                                 title: "Connexion avec Damien R.",
                                 icon: "person.2.fill",
-                                color: .blue
+                                color: Color.blue
                             )
                             
                             EnhancedActivityRow(
                                 profileImage: "person.circle.fill",
-                                profileColor: .gray,
+                                profileColor: Color.gray,
                                 title: "Thomas S. vous a scanné.",
                                 icon: "square.dashed.inset.filled",
-                                color: .blue
+                                color: Color.blue
                             )
                         }
                     }
@@ -124,6 +124,41 @@ struct RecentActivitiesView: View {
     }
 }
 
+
+// MARK: - Enhanced Activity Row Component
+struct EnhancedActivityRow: View {
+    let profileImage: String
+    let profileColor: Color
+    let title: String
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Circle()
+                .fill(profileColor)
+                .frame(width: 40, height: 40)
+                .overlay(
+                    Image(systemName: profileImage)
+                        .font(.system(size: 20))
+                        .foregroundColor(.white)
+                )
+            
+            Text(title)
+                .font(.system(size: 16, weight: .regular))
+                .foregroundColor(.primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundColor(color)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color.gray.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
 
 // MARK: - Preview
 #Preview {
