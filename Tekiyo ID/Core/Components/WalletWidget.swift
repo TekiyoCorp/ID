@@ -45,16 +45,15 @@ struct WalletWidget: View {
                 walletButton(icon: "plus", label: "Ajouter", action: onAdd)
             }
         }
-        .frame(width: 326, height: 167)
-        .padding(.vertical, 28)
-        .padding(.horizontal, 32)
+        .frame(width: 342, height: 291)
+        .padding(8)
         .background(
-            RoundedRectangle(cornerRadius: 52, style: .continuous)
+            RoundedRectangle(cornerRadius: 60, style: .continuous)
                 .fill(Color.black.opacity(0.15))
                 .shadow(color: .white.opacity(0.05), radius: 12, x: 0, y: 8)
         )
         .background(.ultraThinMaterial) // Frosted glass effect
-        .clipShape(RoundedRectangle(cornerRadius: 52, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 60, style: .continuous))
     }
     
     private func walletButton(icon: String, label: String, action: @escaping () -> Void) -> some View {

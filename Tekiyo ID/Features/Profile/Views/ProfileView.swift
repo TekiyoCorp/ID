@@ -40,7 +40,7 @@ struct ProfileView: View {
                         
                         // WalletWidget - Centered with fixed width
                         WalletWidget()
-                            .frame(maxWidth: 326)
+                            .frame(maxWidth: 342)
                             .padding(.horizontal, 16)
                         
                         // Links Section
