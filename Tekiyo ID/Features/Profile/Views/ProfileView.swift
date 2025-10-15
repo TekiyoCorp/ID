@@ -19,7 +19,7 @@ struct ProfileView: View {
             Color(hex: "111111")
                 .ignoresSafeArea(.all)
             
-            // Content ScrollView
+            // Content ScrollView - Transparent and stops before TabBar
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 0) {
                     // Header (Top Bar) - FIXED, NO BACKGROUND
@@ -49,8 +49,13 @@ struct ProfileView: View {
                             .padding(.bottom, 20)
                     }
                     .padding(.horizontal, 24)
-                    .padding(.bottom, 120) // Space for floating TabBar
+                    .padding(.bottom, 96) // Space for floating TabBar
                 }
+            }
+            .scrollContentBackground(.hidden) // Hide ScrollView background
+            .background(Color.clear) // Transparent background
+            .safeAreaInset(edge: .bottom) {
+                Color.clear.frame(height: 80) // Stop ScrollView before TabBar
             }
             
             // Activities Overlay
