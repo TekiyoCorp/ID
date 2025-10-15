@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import CoreLocation
 
 @MainActor
 final class ProfileViewModel: ObservableObject {
@@ -10,11 +11,11 @@ final class ProfileViewModel: ObservableObject {
     private let locationManager: LocationManager
     private var cancellables = Set<AnyCancellable>()
     
-    init(locationManager: LocationManager = LocationManager()) {
-        self.locationManager = locationManager
+    init(locationManager: LocationManager? = nil) {
+        self.locationManager = locationManager ?? LocationManager()
         
         // Observer les changements de ville
-        locationManager.$currentCity
+        self.locationManager.$currentCity
             .receive(on: RunLoop.main)
             .sink { [weak self] city in
                 self?.currentCity = city
@@ -23,7 +24,7 @@ final class ProfileViewModel: ObservableObject {
             .store(in: &cancellables)
         
         // Observer les erreurs de localisation
-        locationManager.$errorMessage
+        self.locationManager.$errorMessage
             .receive(on: RunLoop.main)
             .sink { [weak self] error in
                 self?.locationError = error
@@ -32,7 +33,7 @@ final class ProfileViewModel: ObservableObject {
             .store(in: &cancellables)
         
         // Observer le statut d'autorisation
-        locationManager.$authorizationStatus
+        self.locationManager.$authorizationStatus
             .receive(on: RunLoop.main)
             .sink { [weak self] status in
                 switch status {
