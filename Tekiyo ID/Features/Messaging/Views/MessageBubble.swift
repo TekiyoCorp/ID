@@ -17,8 +17,8 @@ struct MessageBubble: View {
                             .foregroundColor(.white)
                     )
             } else if !message.isFromCurrentUser {
-                Circle()
-                    .fill(Color(.systemGray4))
+                        Circle()
+                            .fill(Color(hex: "1D1D1D"))
                     .frame(width: 32, height: 32)
             }
             
@@ -33,7 +33,7 @@ struct MessageBubble: View {
                 .padding(.vertical, 12)
                 .background(
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(message.isFromCurrentUser ? Color.blue : Color(.systemGray5))
+                        .fill(message.isFromCurrentUser ? Color.blue : Color(hex: "1D1D1D"))
                 )
             
             if !message.isFromCurrentUser {

@@ -93,7 +93,7 @@ struct EventCard: View {
                     // Button
                     if event.title.contains("Tennis") {
                         Circle()
-                            .fill(Color(.systemGray5))
+                            .fill(Color(hex: "1D1D1D"))
                             .frame(width: 44, height: 44)
                             .overlay(
                                 Image(systemName: "plus")
@@ -109,7 +109,7 @@ struct EventCard: View {
                             .padding(.vertical, 8)
                             .background(
                                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .fill(Color(.systemGray5))
+                                    .fill(Color(hex: "1D1D1D"))
                             )
                     }
                 }
@@ -118,7 +118,7 @@ struct EventCard: View {
             .frame(width: 342, height: 281)
             .background(
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(Color(.systemGray6))
+                    .fill(Color(hex: "1D1D1D"))
             )
         }
         .buttonStyle(.plain)

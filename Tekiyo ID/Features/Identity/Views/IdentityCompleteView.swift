@@ -53,11 +53,11 @@ struct IdentityCompleteView: View {
                             .clipShape(Circle())
                             .overlay(
                                 Circle()
-                                    .stroke(Color(.systemGray5), lineWidth: 1)
+                                    .stroke(Color(hex: "1D1D1D"), lineWidth: 1)
                             )
                     } else {
                         Circle()
-                            .fill(Color(.systemGray5))
+                            .fill(Color(hex: "1D1D1D"))
                             .frame(width: Layout.profileImageSize, height: Layout.profileImageSize)
                             .overlay(
                                 Image(systemName: "person.fill")
@@ -81,7 +81,7 @@ struct IdentityCompleteView: View {
                     
                     // Separator - 12px gap
                     Rectangle()
-                        .fill(Color(.systemGray5))
+                        .fill(Color(hex: "1D1D1D"))
                         .frame(height: 1)
                         .padding(.horizontal, 20)
                     
@@ -103,7 +103,7 @@ struct IdentityCompleteView: View {
                 }
                 .frame(width: 254, height: 254)
                 .padding(24)
-                .background(Color(.systemGray6))
+                .background(Color(hex: "1D1D1D"))
                 .clipShape(RoundedRectangle(cornerRadius: 24))
                 .offset(y: Layout.cardOffset)
                 

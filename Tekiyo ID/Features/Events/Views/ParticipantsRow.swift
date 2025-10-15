@@ -23,7 +23,7 @@ struct ParticipantsRow: View {
             
             // Plus button
             Circle()
-                .fill(Color(.systemGray5))
+                .fill(Color(hex: "1D1D1D"))
                 .frame(width: 36, height: 36)
                 .overlay(
                     Image(systemName: "plus")

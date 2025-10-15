@@ -121,7 +121,7 @@ struct ChatView: View {
             .padding(.vertical, 10)
             .background(
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(Color(.systemGray6))
+                    .fill(Color(hex: "1D1D1D"))
             )
         }
         .padding(.horizontal, 16)

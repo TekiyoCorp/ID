@@ -13,4 +13,12 @@ struct EventLocation: Identifiable, Equatable {
         self.city = city
         self.coordinates = coordinates
     }
+    
+    static func == (lhs: EventLocation, rhs: EventLocation) -> Bool {
+        lhs.id == rhs.id &&
+        lhs.address == rhs.address &&
+        lhs.city == rhs.city &&
+        lhs.coordinates.latitude == rhs.coordinates.latitude &&
+        lhs.coordinates.longitude == rhs.coordinates.longitude
+    }
 }

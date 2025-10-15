@@ -70,7 +70,7 @@ struct PhotoCaptureView: View {
                     
                     if !viewModel.isSessionRunning {
                         Rectangle()
-                            .fill(Color(.systemGray6))
+                            .fill(Color(hex: "1D1D1D"))
                             .frame(width: 253, height: 253)
                             .clipShape(Circle())
                             .overlay {
@@ -81,7 +81,7 @@ struct PhotoCaptureView: View {
                     }
                 } else {
                     Rectangle()
-                        .fill(Color(.systemGray6))
+                        .fill(Color(hex: "1D1D1D"))
                         .frame(width: 253, height: 253)
                         .clipShape(Circle())
                         .overlay {
