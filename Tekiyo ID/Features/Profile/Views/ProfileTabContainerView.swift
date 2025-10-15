@@ -36,7 +36,7 @@ struct ProfileTabContainerView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            PlaceholderTabView(title: "Accueil")
+            EventsListView()
                 .tabItem {
                     Image(systemName: Tab.home.icon)
                 }
